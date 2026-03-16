@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/screens/login/login_Screen.dart';
 
 class RegisterPageTwo extends StatefulWidget {
   final String fullName;
@@ -76,6 +77,7 @@ class _RegisterPageTwoState extends State<RegisterPageTwo> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final isRTL = Localizations.localeOf(context).languageCode == 'ar';
 
     return Scaffold(
       body: Container(
@@ -120,7 +122,7 @@ class _RegisterPageTwoState extends State<RegisterPageTwo> {
                           hint: loc.phone,
                           icon: Icons.phone,
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 16),
 
                         buildField(
                           controller: cardNameController,
@@ -157,49 +159,71 @@ class _RegisterPageTwoState extends State<RegisterPageTwo> {
                         ),
                         const SizedBox(height: 25),
 
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () => Navigator.pop(context),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey[800],
-                                  foregroundColor: Colors.white,
-                                  minimumSize: const Size(double.infinity, 55),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                ),
-                                child: Text(loc.back),
+                        // Finish Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: loading ? null : submit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF00D8A2),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            const SizedBox(width: 10),
-
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: loading ? null : submit,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.teal,
-                                  foregroundColor: Colors.white,
-                                  minimumSize: const Size(double.infinity, 55),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                            child: loading
+                                ? const CircularProgressIndicator(color: Colors.white)
+                                : Text(
+                                    loc.finish,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                                child: loading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text(loc.finish),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Back to Login Link - زي LoginScreen بالظبط
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Already have an account?",
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13,
                               ),
+                            ),
+                            const SizedBox(width: 4),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "Sign In",
+                                style: TextStyle(
+                                  color: Color(0xFF00D8A2),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              isRTL ? Icons.arrow_back : Icons.arrow_forward,
+                              size: 16,
+                              color: const Color(0xFF00D8A2),
                             ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ),

@@ -1,9 +1,11 @@
+// lib/screens/splash/splash_screen.dart
 import 'package:flutter/material.dart';
-import 'package:shadow_pay_app/home/home_screen.dart';
-import 'package:shadow_pay_app/main.dart';
-import 'Onboard/onboarding_screen.dart';
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Onboard/onboarding_screen.dart';
+import 'package:shadow_pay_app/services/shared_pref_service.dart';
+import 'package:shadow_pay_app/screens/Onboard/onboarding_screen.dart';
+import 'package:shadow_pay_app/screens/home/home_screen.dart';
+import 'package:shadow_pay_app/screens/login/login_Screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -19,19 +21,100 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _slideAnimation;
   late Animation<double> _scaleAnimation;
 
-  Future<void> checkOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    bool seen = prefs.getBool('seenOnboard') ?? false;
-    if (seen) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => HomeScreen()));
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => OnboardingScreen(),
-        ),
-      );
+  // دالة واحدة للتحقق من حالة المستخدم والتوجيه
+  Future<void> _checkUserStatusAndNavigate() async {
+    try {
+      // 1. هل المستخدم مسجل دخوله؟
+      final loggedIn = await SharedPrefService.isLoggedIn();
+      
+      if (loggedIn) {
+        // إذا كان مسجل دخول => اذهب للـ Home
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => 
+                  const HomeScreen(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                const begin = Offset(1.0, 0.0);
+                const end = Offset.zero;
+                const curve = Curves.easeInOutQuart;
+                var tween = Tween(begin: begin, end: end)
+                    .chain(CurveTween(curve: curve));
+                var offsetAnimation = animation.drive(tween);
+                return SlideTransition(
+                  position: offsetAnimation,
+                  child: child,
+                );
+              },
+            ),
+          );
+        }
+        return;
+      }
+
+      // 2. إذا لم يكن مسجل دخول، تحقق من Onboarding
+      final seenOnboarding = await SharedPrefService.hasSeenOnboarding();
+      
+      if (!seenOnboarding) {
+        // أول مرة يفتح التطبيق => Onboarding
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => 
+                  const OnboardingScreen(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                const begin = Offset(1.0, 0.0);
+                const end = Offset.zero;
+                const curve = Curves.easeInOutQuart;
+                var tween = Tween(begin: begin, end: end)
+                    .chain(CurveTween(curve: curve));
+                var offsetAnimation = animation.drive(tween);
+                return SlideTransition(
+                  position: offsetAnimation,
+                  child: child,
+                );
+              },
+            ),
+          );
+        }
+      } else {
+        // ليس أول مرة وغير مسجل دخول => Login
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            PageRouteBuilder(
+              pageBuilder: (context, animation, secondaryAnimation) => 
+                  const LoginScreen(),
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                const begin = Offset(1.0, 0.0);
+                const end = Offset.zero;
+                const curve = Curves.easeInOutQuart;
+                var tween = Tween(begin: begin, end: end)
+                    .chain(CurveTween(curve: curve));
+                var offsetAnimation = animation.drive(tween);
+                return SlideTransition(
+                  position: offsetAnimation,
+                  child: child,
+                );
+              },
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error in splash navigation: $e');
+      // في حالة الخطأ، نوجهه للـ Login كحل افتراضي
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
     }
   }
 
@@ -44,8 +127,9 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(seconds: 4),
     );
 
-    Future.delayed(Duration(seconds: 4), () {
-      checkOnboarding();
+    // تأخير التنقل لمدة 4 ثواني (بعد انتهاء الأنيميشن)
+    Future.delayed(const Duration(seconds: 4), () {
+      _checkUserStatusAndNavigate();
     });
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -71,30 +155,8 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    Future.delayed(const Duration(seconds: 4), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const OnboardingScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              const begin = Offset(1.0, 0.0);
-              const end = Offset.zero;
-              const curve = Curves.easeInOutQuart;
-              var tween =
-                  Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-              var offsetAnimation = animation.drive(tween);
-              return SlideTransition(
-                position: offsetAnimation,
-                child: child,
-              );
-            },
-          ),
-        );
-      }
-    });
+    // ❌ تم إزالة الكود المكرر للتنقل من هنا
+    // لأننا استخدمناه مرة واحدة بس فوق
   }
 
   @override
@@ -310,7 +372,6 @@ class _SplashScreenState extends State<SplashScreen>
                           color: textGray,
                         ),
                       ),
-                      //(security icon)
                       Icon(
                         Icons.security,
                         color: statusGreen,

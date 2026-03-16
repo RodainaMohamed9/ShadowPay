@@ -1,9 +1,13 @@
+// lib/screens/login/login_Screen.dart
 import 'package:flutter/material.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/widgets/language_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/providers/language_provider.dart';
-
+import 'package:shadow_pay_app/screens/Register/register_screen.dart';
+import '../../services/shared_pref_service.dart'; 
+import '../home/home_screen.dart';
+import '../ForgetPassword/forget_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -49,8 +53,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     if (email.isEmpty) return false;
     if (email.length < 5 || email.length > 50) return false;
     if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(email)) return false;
-    if (email.split('@').length != 2) return false; // multiple @
-    if (["mailinator.com", "tempmail.com"].contains(email.split('@')[1])) return false; // optional disposable
+    if (email.split('@').length != 2) return false; 
+    if (["mailinator.com", "tempmail.com"].contains(email.split('@')[1])) return false;
     return true;
   }
 
@@ -58,8 +62,53 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   bool isPasswordValid(String password) {
     if (password.isEmpty) return false;
     if (password.length < 6) return false;
-    // Optional: add stronger checks (uppercase, number, special char)
     return true;
+  }
+
+  // دالة تسجيل الدخول المعدلة
+  Future<void> _handleLogin() async {
+    final localizations = AppLocalizations.of(context)!;
+    
+    setState(() {
+      _emailValid = isEmailValid(_emailController.text);
+      _passwordValid = isPasswordValid(_passwordController.text);
+    });
+
+    if (_emailValid && _passwordValid) {
+      setState(() => _isLoading = true);
+
+      try {
+        await Future.delayed(const Duration(seconds: 2));
+        await SharedPrefService.setLoggedIn(true);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(localizations.loginSuccess),
+              backgroundColor: const Color(0xFF00D8A2),
+            ),
+          );
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('فشل تسجيل الدخول: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      }
+    }
   }
 
   @override
@@ -68,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     final isRTL = Localizations.localeOf(context).languageCode == 'ar';
     
     return Scaffold(
-      backgroundColor: const Color(0xFF0D111F), // Dark background
+      backgroundColor: const Color(0xFF0D111F),
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -100,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               ),
               const SizedBox(height: 24),
               
-              // Logo outside container with shadow and hover effect
+              // Logo with same design as RegisterScreen
               MouseRegion(
                 onEnter: (_) => _onHover(true),
                 onExit: (_) => _onHover(false),
@@ -111,39 +160,40 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       scale: _scaleAnimation.value,
                       child: Container(
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF00D8A2).withOpacity(0.4),
+                              color: Colors.teal.withOpacity(0.3),
                               blurRadius: 25,
-                              spreadRadius: 8,
-                              offset: const Offset(0, 8),
+                              spreadRadius: 2,
+                              offset: const Offset(0, 10),
+                            ),
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 15,
+                              spreadRadius: 1,
+                              offset: const Offset(0, 5),
                             ),
                           ],
                         ),
-                        child: Image.asset(
-                          "assets/icon/icon.png",
-                          width: 100,
-                          height: 100,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF1F2A44),
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF00D8A2).withOpacity(0.4),
-                                  blurRadius: 25,
-                                  spreadRadius: 8,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.payment, 
-                              size: 50, 
-                              color: Color(0xFF00D8A2),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.asset(
+                            "assets/icon/icon.png",
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              width: 80,
+                              height: 80,
+                              decoration: BoxDecoration(
+                                color: Colors.white10,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.payment,
+                                size: 40,
+                                color: Colors.white70,
+                              ),
                             ),
                           ),
                         ),
@@ -159,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 padding: const EdgeInsets.all(24),
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF141A2B), // Card background
+                  color: const Color(0xFF141A2B),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -452,10 +502,15 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         alignment: isRTL ? Alignment.centerLeft : Alignment.centerRight,
                         child: TextButton(
                           onPressed: () {
-                            // Navigate to forgot password
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ForgotPasswordScreen(),
+                              ),
+                            );
                           },
                           child: Text(
-                            localizations.forgotPassword,
+                            localizations.forgotPassword, 
                             style: const TextStyle(color: Color(0xFF00D8A2)),
                           ),
                         ),
@@ -488,7 +543,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ),
                       const SizedBox(height: 16),
 
-                      // Sign Up Link with hover and focus effects
+                      // Sign Up Link
                       MouseRegion(
                         onEnter: (_) => setState(() => _isSignUpHovered = true),
                         onExit: (_) => setState(() => _isSignUpHovered = false),
@@ -498,7 +553,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           },
                           child: TextButton(
                             onPressed: () {
-                              // Navigate to sign up
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const RegisterScreen(),
+                                ),
+                              );
                             },
                             style: TextButton.styleFrom(
                               foregroundColor: _isSignUpHovered 
@@ -529,7 +589,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  // Animated arrow with RTL support
                                   AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),
                                     curve: Curves.easeInOut,
@@ -550,7 +609,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                     localizations.noAccount,
+                                    localizations.noAccount,
                                     style: TextStyle(
                                       color: _isSignUpHovered 
                                           ? Colors.white 
@@ -559,7 +618,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                     ),
                                   ),
                                   Text(
-                                      localizations.signUp,
+                                    localizations.signUp,
                                     style: TextStyle(
                                       color: _isSignUpHovered 
                                           ? Colors.white 
@@ -600,32 +659,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       _animationController.forward();
     } else {
       _animationController.reverse();
-    }
-  }
-
-  void _handleLogin() {
-    final localizations = AppLocalizations.of(context)!;
-    
-    setState(() {
-      _emailValid = isEmailValid(_emailController.text);
-      _passwordValid = isPasswordValid(_passwordController.text);
-    });
-
-    // If both are valid, proceed with login
-    if (_emailValid && _passwordValid) {
-      setState(() => _isLoading = true);
-
-      // Simulate login process
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() => _isLoading = false);
-        // Navigate to home screen
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-             content: Text(localizations.loginSuccess),
-            backgroundColor: const Color(0xFF00D8A2),
-          ),
-        );
-      });
     }
   }
 

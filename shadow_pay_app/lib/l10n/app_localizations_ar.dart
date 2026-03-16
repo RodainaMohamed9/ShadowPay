@@ -9,11 +9,13 @@ class AppLocalizationsAr extends AppLocalizations {
   AppLocalizationsAr([String locale = 'ar']) : super(locale);
 
   @override
+  String get appTitle => 'Shadow Pay';
+
+  @override
   String get login => 'تسجيل الدخول';
 
   @override
   String get register => 'إنشاء حساب';
-  String get register => 'تسجيل';
 
   @override
   String get email => 'البريد الإلكتروني';
@@ -23,16 +25,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get home => 'الرئيسية';
-  String get full_name => 'الاسم الكامل';
-
-  @override
-  String get confirm_password => 'تأكيد كلمة المرور';
-
-  @override
-  String get next => 'التالي';
-
-  @override
-  String get step => 'الخطوة 1 من 2';
 
   @override
   String get freeze_card => 'تجميد البطاقة';
@@ -48,9 +40,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get passwordLabel => 'كلمة المرور';
-
-  @override
-  String get forgotPassword => 'نسيت كلمة المرور؟';
 
   @override
   String get loginButton => 'تسجيل الدخول';
@@ -87,6 +76,20 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get loginSuccess => 'تم تسجيل الدخول بنجاح';
+
+  @override
+  String get full_name => 'الاسم الكامل';
+
+  @override
+  String get confirm_password => 'تأكيد كلمة المرور';
+
+  @override
+  String get next => 'التالي';
+
+  @override
+  String get step => 'الخطوة 1 من 2';
+
+  @override
   String get requiredField => 'هذا الحقل مطلوب';
 
   @override
@@ -117,7 +120,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirmPassword => 'تأكيد كلمة المرور';
 
   @override
-  String get phone => ' رقم الهاتف المسجل به البطاقة';
+  String get phone => 'رقم الهاتف المسجل به البطاقة';
 
   @override
   String get cardHolder => 'اسم حامل البطاقة';
@@ -153,7 +156,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get pleaseEnterExactlyTwoNames => 'الرجاء إدخال اسمين فقط (الاسم الأول والاسم الثاني)';
 
   @override
-  String get backToLogin => 'العودة إلى تسجيل الدخول';
+  String get backToLogin => 'تسجيل الدخول';
 
   @override
   String get alreadyHaveAccount => 'لديك حساب بالفعل؟';
@@ -172,4 +175,40 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get phoneInvalidLength => 'رقم الهاتف غير صحيح (طول غير مناسب)';
+
+  @override
+  String get forgotPassword => 'نسيت كلمة المرور';
+
+  @override
+  String get enterEmailResetCode => 'أدخل بريدك الإلكتروني لاستلام رمز إعادة التعيين';
+
+  @override
+  String get emailHint => 'البريد الإلكتروني';
+
+  @override
+  String get sendCode => 'إرسال الرمز';
+
+  @override
+  String get verifyCode => 'تحقق من الرمز';
+
+  @override
+  String get enter6DigitCode => 'أدخل الرمز المكون من 6 أرقام المرسل إلى بريدك';
+
+  @override
+  String get enterCompleteCode => 'الرجاء إدخال الرمز المكون من 6 أرقام كاملاً';
+
+  @override
+  String get verify => 'تحقق';
+
+  @override
+  String get resetPassword => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get passwordResetSuccess => 'تم إعادة تعيين كلمة المرور بنجاح';
+
+  @override
+  String get resetPasswordButton => 'إعادة تعيين كلمة المرور';
 }
