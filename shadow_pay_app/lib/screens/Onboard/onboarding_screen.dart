@@ -1,10 +1,10 @@
-import 'package:shadow_pay_app/main.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// lib/screens/Onboard/onboarding_screen.dart
 import 'package:flutter/material.dart';
 import 'first_screen.dart';
 import 'second_screen.dart';
 import 'third_screen.dart';
-import 'package:shadow_pay_app/home/home_screen.dart';
+import '../../services/shared_pref_service.dart';
+import '../login/login_Screen.dart'; // مهم: نوجه للـ Login مش للـ Home
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -17,6 +17,37 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int currentPage = 0;
 
+  Future<void> _finishOnboarding() async {
+    // حفظ أن المستخدم شاهد Onboarding
+    await SharedPrefService.setOnboardingSeen();
+    
+    if (mounted) {
+      // التوجه لصفحة Login (مش Home)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    }
+  }
+
+  void _nextPage() {
+    if (currentPage < 2) {
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      _finishOnboarding();
+    }
+  }
+
+  void _skipToEnd() {
+    _controller.jumpToPage(2);
+    setState(() {
+      currentPage = 2;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,6 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // App Bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: currentPage == 0
@@ -55,15 +87,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ],
                         ),
                         TextButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HomeScreen(),
-                              ),
-                            );
-                          },
-                          child: const Text('Skip'),
+                          onPressed: _finishOnboarding, // Skip = إنهاء Onboarding
+                          child: const Text(
+                            'Skip',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ],
                     )
@@ -76,8 +104,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               curve: Curves.easeInOut,
                             );
                           },
-                          icon:
-                              const Icon(Icons.arrow_back, color: Colors.white),
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
                         ),
                         const Spacer(),
                         const Text(
@@ -90,9 +117,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                         const Spacer(),
                         TextButton(
-                          onPressed: () {
-                            _controller.jumpToPage(2);
-                          },
+                          onPressed: _skipToEnd, // Skip للصفحة الأخيرة
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.grey,
                           ),
@@ -101,6 +126,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ],
                     ),
             ),
+
+            // Pages
             Expanded(
               child: PageView(
                 controller: _controller,
@@ -116,6 +143,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ],
               ),
             ),
+
+            // Page Indicators
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
@@ -134,7 +163,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
               ),
             ),
+
             const SizedBox(height: 24),
+
+            // Next/Get Started Button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: SizedBox(
@@ -145,43 +177,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0xFF00BBA7).withOpacity(0.6), 
+                        color: const Color(0xFF00BBA7).withOpacity(0.6),
                         spreadRadius: 2,
                         blurRadius: 10,
-                        offset: const Offset(0, 5), 
+                        offset: const Offset(0, 5),
                       ),
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () async {
-                      if (currentPage < 2) {
-                        _controller.nextPage(
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.easeInOut,
-                        );
-                      } 
-                      else {
-                            final prefs = await SharedPreferences.getInstance();
-                            await prefs.setBool('seenOnboard', true);
-
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HomeScreen(),
-                              ),
-                            );
-
-                      }
-
-                    },
+                    onPressed: _nextPage,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00BBA7), 
+                      backgroundColor: const Color(0xFF00BBA7),
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 0,
-
                     ),
                     child: Text(
                       currentPage == 2 ? 'Get Started' : 'Next',
@@ -200,4 +211,4 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
     );
   }
-
+}

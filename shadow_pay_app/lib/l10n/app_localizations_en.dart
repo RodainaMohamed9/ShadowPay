@@ -9,6 +9,9 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get appTitle => 'Shadow Pay';
+
+  @override
   String get login => 'Login';
 
   @override
@@ -22,16 +25,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get home => 'Home';
-  String get full_name => 'Full Name';
-
-  @override
-  String get confirm_password => 'Confirm Password';
-
-  @override
-  String get next => 'Next';
-
-  @override
-  String get step => 'Step 1 of 2';
 
   @override
   String get freeze_card => 'Freeze Card';
@@ -47,9 +40,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordLabel => 'Password';
-
-  @override
-  String get forgotPassword => 'Forgot Password?';
 
   @override
   String get loginButton => 'Login';
@@ -86,7 +76,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginSuccess => 'Login Successfully';
-=======
+
+  @override
+  String get full_name => 'Full Name';
+
+  @override
+  String get confirm_password => 'Confirm Password';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get step => 'Step 1 of 2';
+
+  @override
   String get requiredField => 'This field is required';
 
   @override
@@ -117,7 +120,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmPassword => 'Confirm password';
 
   @override
-  String get phone => 'Phone number linked whith your card';
+  String get phone => 'Phone number linked with your card';
 
   @override
   String get cardHolder => 'Card holder name';
@@ -153,13 +156,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseEnterExactlyTwoNames => 'Please enter exactly two names (first name and last name)';
 
   @override
-  String get backToLogin => 'Back to Login';
+  String get backToLogin => 'Sign In';
 
   @override
   String get alreadyHaveAccount => 'Already have an account?';
 
   @override
-  String get cardExpired => 'your card has been expired';
+  String get cardExpired => 'Your card has been expired';
 
   @override
   String get cardNameTooShort => 'Card holder name must be at least 3 characters';
@@ -172,4 +175,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get phoneInvalidLength => 'Invalid phone number (incorrect length)';
+
+  @override
+  String get forgotPassword => 'Forgot Password';
+
+  @override
+  String get enterEmailResetCode => 'Enter your email to receive a reset code';
+
+  @override
+  String get emailHint => 'Email Address';
+
+  @override
+  String get sendCode => 'Send Code';
+
+  @override
+  String get verifyCode => 'Verify Code';
+
+  @override
+  String get enter6DigitCode => 'Enter the 6 digit code sent to your email';
+
+  @override
+  String get enterCompleteCode => 'Please enter the complete 6-digit code';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get resetPassword => 'Reset Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get passwordResetSuccess => 'Password Reset Successfully';
+
+  @override
+  String get resetPasswordButton => 'Reset Password';
 }

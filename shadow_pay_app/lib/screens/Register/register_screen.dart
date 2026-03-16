@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/screens/login/login_Screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -9,7 +11,8 @@ class RegisterScreen extends StatefulWidget {
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProviderStateMixin {
+class _RegisterScreenState extends State<RegisterScreen>
+    with SingleTickerProviderStateMixin {
   final formKey = GlobalKey<FormState>();
 
   // بيانات الصفحتين
@@ -51,12 +54,12 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    
+
     _fadeAnimation = CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
     );
-    
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0.1, 0),
       end: Offset.zero,
@@ -64,7 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       parent: _animationController,
       curve: Curves.easeOutCubic,
     ));
-    
+
     _animationController.forward();
   }
 
@@ -83,25 +86,35 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   }
 
   // في بداية الكود مع المتغيرات
-  final List<String> stepOneFields = ['fullName', 'email', 'password', 'confirm'];
-  final List<String> stepTwoFields = ['phone', 'cardName', 'cardNumber', 'expiry'];
+  final List<String> stepOneFields = [
+    'fullName',
+    'email',
+    'password',
+    'confirm'
+  ];
+  final List<String> stepTwoFields = [
+    'phone',
+    'cardName',
+    'cardNumber',
+    'expiry'
+  ];
 
   void _changeStep(int newStep) {
     if (newStep == currentStep) return;
-    
+
     setState(() {
       // تحديد الحقول اللي هنخفيها حسب الخطوة الحالية
       final fieldsToHide = currentStep == 1 ? stepOneFields : stepTwoFields;
-      
+
       // إخفاء أخطاء الحقول دي
       for (var field in fieldsToHide) {
         fieldErrors[field] = false;
       }
-      
+
       // تغيير الخطوة
       currentStep = newStep;
     });
-    
+
     // تشغيل الأنيميشن
     _animationController
       ..reset()
@@ -112,44 +125,44 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   String? _validateFullName(String? value) {
     // لو مش في الصفحة الأولى، ميعملش validation
     if (currentStep != 1) return null;
-    
+
     final loc = AppLocalizations.of(context)!;
-    
+
     if (value == null || value.isEmpty) {
-     fieldErrors['fullName'] = true;
+      fieldErrors['fullName'] = true;
       return loc.requiredField;
     }
-    
+
     // تقسيم النص باستخدام المسافة
     List<String> nameParts = value.trim().split(' ');
-    
+
     // إزالة العناصر الفارغة (في حالة وجود مسافات متعددة)
     nameParts = nameParts.where((part) => part.isNotEmpty).toList();
-    
+
     // التحقق من وجود جزأين على الأقل
     if (nameParts.length < 2) {
       fieldErrors['fullName'] = true;
       return loc.enterFirstAndLastName;
     }
-    
+
     // التحقق من طول كل جزء
     for (String part in nameParts) {
       if (part.length < 3) {
-       fieldErrors['fullName'] = true;
+        fieldErrors['fullName'] = true;
         return loc.eachNamePartMustBeAtLeast3Chars;
       }
     }
-    
-     fieldErrors['fullName'] = false;
+
+    fieldErrors['fullName'] = false;
     return null;
   }
 
   String? _validateEmail(String? value) {
     // لو مش في الصفحة الأولى، ميعملش validation
     if (currentStep != 1) return null;
-    
+
     final loc = AppLocalizations.of(context)!;
-    
+
     if (value == null || value.isEmpty) {
       fieldErrors['email'] = true;
       return loc.requiredField;
@@ -158,163 +171,164 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       fieldErrors['email'] = true;
       return loc.invalidEmail;
     }
-    
-   fieldErrors['email'] = false;
+
+    fieldErrors['email'] = false;
     return null;
   }
 
   String? _validatePassword(String? value) {
     // لو مش في الصفحة الأولى، ميعملش validation
     if (currentStep != 1) return null;
-    
+
     final loc = AppLocalizations.of(context)!;
-    
+
     if (value == null || value.isEmpty) {
-     fieldErrors['password'] = true;
+      fieldErrors['password'] = true;
       return loc.requiredField;
     }
-    if (value.length < 😎 {
-       fieldErrors['password'] = true;
+    if (value.length < 8) {
+      fieldErrors['password'] = true;
       return loc.passwordShort;
     }
-    
-   fieldErrors['password'] = false;
+
+    fieldErrors['password'] = false;
     return null;
   }
 
   String? _validateConfirm(String? value) {
     // لو مش في الصفحة الأولى، ميعملش validation
     if (currentStep != 1) return null;
-    
+
     final loc = AppLocalizations.of(context)!;
-    
+
     if (value == null || value.isEmpty) {
-       fieldErrors['confirm'] = true;
+      fieldErrors['confirm'] = true;
       return loc.requiredField;
     }
     if (value != passwordController.text) {
       fieldErrors['confirm'] = true;
       return loc.passwordMismatch;
     }
-    
-     fieldErrors['confirm'] = false;
+
+    fieldErrors['confirm'] = false;
     return null;
   }
 
- String? _validatePhone(String? value) {
-  // لو مش في الصفحة الثانية، ميعملش validation
-  if (currentStep != 2) return null;
-  
-  final loc = AppLocalizations.of(context)!;
-  
-  if (value == null || value.trim().isEmpty) {
-    setState(() => fieldErrors['phone'] = true);
-    return loc.requiredField;
-  }
+  String? _validatePhone(String? value) {
+    // لو مش في الصفحة الثانية، ميعملش validation
+    if (currentStep != 2) return null;
 
-  // تنظيف الرقم
-  String cleanNumber = value.trim().replaceAll(RegExp(r'[\s\-\(\)\+]'), '');
-  
-  // التحقق من أن الرقم يحتوي على أرقام فقط بعد التنظيف
-  if (!RegExp(r'^\d+$').hasMatch(cleanNumber)) {
-    setState(() => fieldErrors['phone'] = true);
-    return loc.phoneDigitsOnly;
-  }
+    final loc = AppLocalizations.of(context)!;
 
-  // التحقق من طول الرقم (يدعم الأرقام المصرية والعالمية)
-  if (cleanNumber.length < 9 || cleanNumber.length > 15) {
-    setState(() => fieldErrors['phone'] = true);
-    return loc.phoneInvalidLength;
-  }
+    if (value == null || value.trim().isEmpty) {
+      setState(() => fieldErrors['phone'] = true);
+      return loc.requiredField;
+    }
 
-  // صيغ محددة للأرقام المصرية
-  bool isValidEgyptianNumber = false;
-  
-  // لو الرقم مصري (بيبدأ بـ 01 أو 00201 أو +201)
-  if (cleanNumber.startsWith('01') && cleanNumber.length == 11) {
-    String secondDigit = cleanNumber[1];
-    if (['0', '1', '2', '5'].contains(secondDigit)) {
+    // تنظيف الرقم
+    String cleanNumber = value.trim().replaceAll(RegExp(r'[\s\-\(\)\+]'), '');
+
+    // التحقق من أن الرقم يحتوي على أرقام فقط بعد التنظيف
+    if (!RegExp(r'^\d+$').hasMatch(cleanNumber)) {
+      setState(() => fieldErrors['phone'] = true);
+      return loc.phoneDigitsOnly;
+    }
+
+    // التحقق من طول الرقم (يدعم الأرقام المصرية والعالمية)
+    if (cleanNumber.length < 9 || cleanNumber.length > 15) {
+      setState(() => fieldErrors['phone'] = true);
+      return loc.phoneInvalidLength;
+    }
+
+    // صيغ محددة للأرقام المصرية
+    bool isValidEgyptianNumber = false;
+
+    // لو الرقم مصري (بيبدأ بـ 01 أو 00201 أو +201)
+    if (cleanNumber.startsWith('01') && cleanNumber.length == 11) {
+      String secondDigit = cleanNumber[1];
+      if (['0', '1', '2', '5'].contains(secondDigit)) {
+        isValidEgyptianNumber = true;
+      }
+    }
+    // لو الرقم مصري بمفتاح دولي
+    else if (cleanNumber.startsWith('201') && cleanNumber.length == 12) {
+      String thirdDigit = cleanNumber[2];
+      if (['0', '1', '2', '5'].contains(thirdDigit)) {
+        isValidEgyptianNumber = true;
+      }
+    }
+    // لو الرقم مصري بكود 0020
+    else if (cleanNumber.startsWith('00201') && cleanNumber.length == 14) {
+      String fifthDigit = cleanNumber[4];
+      if (['0', '1', '2', '5'].contains(fifthDigit)) {
+        isValidEgyptianNumber = true;
+      }
+    }
+    // أرقام عالمية (أي رقم طوله مناسب)
+    else if (cleanNumber.length >= 10 && cleanNumber.length <= 15) {
       isValidEgyptianNumber = true;
     }
-  }
-  // لو الرقم مصري بمفتاح دولي
-  else if (cleanNumber.startsWith('201') && cleanNumber.length == 12) {
-    String thirdDigit = cleanNumber[2];
-    if (['0', '1', '2', '5'].contains(thirdDigit)) {
-      isValidEgyptianNumber = true;
+
+    if (!isValidEgyptianNumber) {
+      setState(() => fieldErrors['phone'] = true);
+      return loc.invalidPhone;
     }
-  }
-  // لو الرقم مصري بكود 0020
-  else if (cleanNumber.startsWith('00201') && cleanNumber.length == 14) {
-    String fifthDigit = cleanNumber[4];
-    if (['0', '1', '2', '5'].contains(fifthDigit)) {
-      isValidEgyptianNumber = true;
-    }
-  }
-  // أرقام عالمية (أي رقم طوله مناسب)
-  else if (cleanNumber.length >= 10 && cleanNumber.length <= 15) {
-    isValidEgyptianNumber = true;
+
+    setState(() => fieldErrors['phone'] = false);
+    return null;
   }
 
-  if (!isValidEgyptianNumber) {
-    setState(() => fieldErrors['phone'] = true);
-    return loc.invalidPhone;
-  }
-
-  setState(() => fieldErrors['phone'] = false);
-  return null;
-}
   String? _validateCardName(String? value) {
     // لو مش في الصفحة الثانية، ميعملش validation
     if (currentStep != 2) return null;
-    
+
     final loc = AppLocalizations.of(context)!;
-    
+
     if (value == null || value.isEmpty) {
       fieldErrors['cardName'] = true;
       return loc.requiredField;
     }
-    
+
     // تقسيم النص باستخدام المسافة
     List<String> nameParts = value.trim().split(' ');
-    
+
     // إزالة العناصر الفارغة (في حالة وجود مسافات متعددة)
     nameParts = nameParts.where((part) => part.isNotEmpty).toList();
-    
+
     // التحقق من وجود جزأين على الأقل
     if (nameParts.length < 2) {
-    fieldErrors['cardName'] = true;
+      fieldErrors['cardName'] = true;
       return loc.enterFirstAndLastName;
     }
-    
+
     // التحقق من طول كل جزء
     for (String part in nameParts) {
       if (part.length < 3) {
-       fieldErrors['cardName'] = true;
+        fieldErrors['cardName'] = true;
         return loc.eachNamePartMustBeAtLeast3Chars;
       }
     }
-    
-     fieldErrors['cardName'] = false;
+
+    fieldErrors['cardName'] = false;
     return null;
   }
-  
+
   String? _validateCardNumber(String? value) {
     // لو مش في الصفحة الثانية، ميعملش validation
     if (currentStep != 2) return null;
-    
+
     final loc = AppLocalizations.of(context)!;
-    
+
     if (value == null || value.isEmpty) {
-     fieldErrors['cardNumber'] = true;
+      fieldErrors['cardNumber'] = true;
       return loc.requiredField;
     }
     final cleanNumber = value.replaceAll(' ', '');
     if (!RegExp(r'^\d{16}$').hasMatch(cleanNumber)) {
-     fieldErrors['cardNumber'] = true;
+      fieldErrors['cardNumber'] = true;
       return loc.invalidCard;
     }
-    
+
     fieldErrors['cardNumber'] = false;
     return null;
   }
@@ -322,37 +336,37 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   String? _validateExpiry(String? value) {
     // لو مش في الصفحة الثانية، ميعملش validation
     if (currentStep != 2) return null;
-    
+
     final loc = AppLocalizations.of(context)!;
-    
+
     if (value == null || value.isEmpty) {
-     fieldErrors['expiry'] = true;
+      fieldErrors['expiry'] = true;
       return loc.requiredField;
     }
     if (!RegExp(r'^\d{2}/\d{2}$').hasMatch(value)) {
-     fieldErrors['expiry'] = true;
+      fieldErrors['expiry'] = true;
       return loc.invalidExpiry;
     }
-    
+
     final parts = value.split('/');
     final month = int.tryParse(parts[0]) ?? 0;
     final year = int.tryParse(parts[1]) ?? 0;
-    
+
     final now = DateTime.now();
     final currentYear = now.year % 100;
     final currentMonth = now.month;
 
     if (month < 1 || month > 12) {
-     fieldErrors['expiry'] = true;
+      fieldErrors['expiry'] = true;
       return loc.invalidMonth;
     }
-    
+
     if (year < currentYear || (year == currentYear && month < currentMonth)) {
-     fieldErrors['expiry'] = true;
+      fieldErrors['expiry'] = true;
       return loc.cardExpired;
     }
-    
-   fieldErrors['expiry'] = false;
+
+    fieldErrors['expiry'] = false;
     return null;
   }
 
@@ -368,48 +382,48 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   }
 
   void nextStep() {
-  final isValid = formKey.currentState!.validate();
-  
-  setState(() {}); // تحديث الواجهة بعد ما validators تخلص
-  
-  if (isValid) {
-    if (currentStep == 1) {
-      _changeStep(2);
-    } else {
-      submit();
+    final isValid = formKey.currentState!.validate();
+
+    setState(() {}); // تحديث الواجهة بعد ما validators تخلص
+
+    if (isValid) {
+      if (currentStep == 1) {
+        _changeStep(2);
+      } else {
+        submit();
+      }
     }
   }
- 
-}
-void prevStep() {
-  if (currentStep == 2) {
 
-    formKey.currentState?.reset(); // يمسح errors فقط
+  void prevStep() {
+    if (currentStep == 2) {
+      formKey.currentState?.reset(); // يمسح errors فقط
 
-    setState(() {
-      for (var field in stepTwoFields) {
-        fieldErrors[field] = false;
-      }
+      setState(() {
+        for (var field in stepTwoFields) {
+          fieldErrors[field] = false;
+        }
 
-      currentStep = 1;
-    });
+        currentStep = 1;
+      });
 
-    _animationController
-      ..reset()
-      ..forward();
+      _animationController
+        ..reset()
+        ..forward();
+    }
   }
-}
+
   void submit() async {
     final loc = AppLocalizations.of(context)!;
-    
+
     setState(() => loading = true);
-    
+
     // محاكاة طلب API
     await Future.delayed(const Duration(seconds: 2));
-    
+
     if (mounted) {
       setState(() => loading = false);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(loc.accountCreated),
@@ -420,7 +434,7 @@ void prevStep() {
           ),
         ),
       );
-      
+
       // طباعة البيانات للتأكد
       print('===== بيانات التسجيل =====');
       print('${loc.fullName}: ${fullNameController.text}');
@@ -432,7 +446,12 @@ void prevStep() {
   }
 
   void navigateToLogin() {
-    Navigator.pushReplacementNamed(context, '/login');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
+    );
   }
 
   // دالة لتحديد لون النص والايقونة
@@ -443,7 +462,7 @@ void prevStep() {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -481,7 +500,7 @@ void prevStep() {
                   child: const LogoWidget(),
                 ),
                 const SizedBox(height: 30),
-                
+
                 // Step Progress with animation
                 TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.0, end: 1.0),
@@ -495,13 +514,14 @@ void prevStep() {
                   },
                   child: StepProgress(currentStep: currentStep),
                 ),
-                
+
                 const SizedBox(height: 10),
-                
+
                 // Step text with fade animation
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
                     return FadeTransition(
                       opacity: animation,
                       child: SlideTransition(
@@ -522,14 +542,15 @@ void prevStep() {
                     style: const TextStyle(color: Colors.white70, fontSize: 16),
                   ),
                 ),
-                
+
                 const SizedBox(height: 30),
 
                 // Credit Card Preview with animation and enhanced shadow
                 if (currentStep == 2)
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 500),
-                    transitionBuilder: (Widget child, Animation<double> animation) {
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
                       return FadeTransition(
                         opacity: animation,
                         child: ScaleTransition(
@@ -555,11 +576,10 @@ void prevStep() {
                             offset: const Offset(0, 15),
                           ),
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
-                            blurRadius: 20,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 😎,
-                          ),
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 20,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 8)),
                         ],
                       ),
                       child: CreditCardPreview(
@@ -567,9 +587,9 @@ void prevStep() {
                         cardNumberController: cardNumberController,
                         expiryController: expiryController,
                         loc: loc,
-                        hasError: fieldErrors['cardNumber'] == true || 
-                                 fieldErrors['expiry'] == true || 
-                                 fieldErrors['cardName'] == true,
+                        hasError: fieldErrors['cardNumber'] == true ||
+                            fieldErrors['expiry'] == true ||
+                            fieldErrors['cardName'] == true,
                       ),
                     ),
                   ),
@@ -603,7 +623,8 @@ void prevStep() {
                           // عنوان حسب الخطوة مع animation
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 300),
-                            transitionBuilder: (Widget child, Animation<double> animation) {
+                            transitionBuilder:
+                                (Widget child, Animation<double> animation) {
                               return FadeTransition(
                                 opacity: animation,
                                 child: SlideTransition(
@@ -620,7 +641,8 @@ void prevStep() {
                             },
                             child: Text(
                               currentStep == 1 ? loc.register : loc.paymentInfo,
-                              key: ValueKey<String>(currentStep == 1 ? 'register' : 'payment'),
+                              key: ValueKey<String>(
+                                  currentStep == 1 ? 'register' : 'payment'),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 26,
@@ -641,7 +663,9 @@ void prevStep() {
                                     // حقل الاسم الكامل
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: fieldErrors['fullName'] == true ? Colors.red.withOpacity(0.1) : Colors.transparent,
+                                        color: fieldErrors['fullName'] == true
+                                            ? Colors.red.withOpacity(0.1)
+                                            : Colors.transparent,
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: buildField(
@@ -653,11 +677,13 @@ void prevStep() {
                                       ),
                                     ),
                                     const SizedBox(height: 15),
-                                    
+
                                     // حقل البريد الإلكتروني
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: fieldErrors['email'] == true ? Colors.red.withOpacity(0.1) : Colors.transparent,
+                                        color: fieldErrors['email'] == true
+                                            ? Colors.red.withOpacity(0.1)
+                                            : Colors.transparent,
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: buildField(
@@ -665,16 +691,19 @@ void prevStep() {
                                         hint: loc.email,
                                         icon: Icons.email,
                                         validator: _validateEmail,
-                                        keyboardType: TextInputType.emailAddress,
+                                        keyboardType:
+                                            TextInputType.emailAddress,
                                         labelColor: _getLabelColor('email'),
                                       ),
                                     ),
                                     const SizedBox(height: 15),
-                                    
+
                                     // حقل كلمة المرور
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: fieldErrors['password'] == true ? Colors.red.withOpacity(0.1) : Colors.transparent,
+                                        color: fieldErrors['password'] == true
+                                            ? Colors.red.withOpacity(0.1)
+                                            : Colors.transparent,
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: buildField(
@@ -689,20 +718,24 @@ void prevStep() {
                                             showPassword
                                                 ? Icons.visibility_off
                                                 : Icons.visibility,
-                                            color: fieldErrors['password'] == true 
-                                                ? Colors.red 
-                                                : Colors.white70,
+                                            color:
+                                                fieldErrors['password'] == true
+                                                    ? Colors.red
+                                                    : Colors.white70,
                                           ),
-                                          onPressed: () => setState(() => showPassword = !showPassword),
+                                          onPressed: () => setState(() =>
+                                              showPassword = !showPassword),
                                         ),
                                       ),
                                     ),
                                     const SizedBox(height: 15),
-                                    
+
                                     // حقل تأكيد كلمة المرور
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: fieldErrors['confirm'] == true ? Colors.red.withOpacity(0.1) : Colors.transparent,
+                                        color: fieldErrors['confirm'] == true
+                                            ? Colors.red.withOpacity(0.1)
+                                            : Colors.transparent,
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: buildField(
@@ -717,21 +750,24 @@ void prevStep() {
                                             showConfirm
                                                 ? Icons.visibility_off
                                                 : Icons.visibility,
-                                            color: fieldErrors['confirm'] == true 
-                                                ? Colors.red 
-                                                : Colors.white70,
+                                            color:
+                                                fieldErrors['confirm'] == true
+                                                    ? Colors.red
+                                                    : Colors.white70,
                                           ),
-                                          onPressed: () => setState(() => showConfirm = !showConfirm),
+                                          onPressed: () => setState(
+                                              () => showConfirm = !showConfirm),
                                         ),
                                       ),
                                     ),
                                   ],
-
                                   if (currentStep == 2) ...[
                                     // حقل الهاتف
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: fieldErrors['phone'] == true ? Colors.red.withOpacity(0.1) : Colors.transparent,
+                                        color: fieldErrors['phone'] == true
+                                            ? Colors.red.withOpacity(0.1)
+                                            : Colors.transparent,
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: buildField(
@@ -744,11 +780,13 @@ void prevStep() {
                                       ),
                                     ),
                                     const SizedBox(height: 15),
-                                    
+
                                     // حقل اسم حامل البطاقة
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: fieldErrors['cardName'] == true ? Colors.red.withOpacity(0.1) : Colors.transparent,
+                                        color: fieldErrors['cardName'] == true
+                                            ? Colors.red.withOpacity(0.1)
+                                            : Colors.transparent,
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: buildField(
@@ -761,11 +799,13 @@ void prevStep() {
                                       ),
                                     ),
                                     const SizedBox(height: 15),
-                                    
-                                    // حقل رقم البطاقة
+
+                                    // حقل رقم البطاقة مع فورماتينج تلقائي
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: fieldErrors['cardNumber'] == true ? Colors.red.withOpacity(0.1) : Colors.transparent,
+                                        color: fieldErrors['cardNumber'] == true
+                                            ? Colors.red.withOpacity(0.1)
+                                            : Colors.transparent,
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: buildField(
@@ -774,8 +814,10 @@ void prevStep() {
                                         icon: Icons.credit_card,
                                         validator: _validateCardNumber,
                                         onChanged: (value) {
-                                          final formatted = formatCardNumber(value);
-                                          cardNumberController.value = TextEditingValue(
+                                          final formatted =
+                                              formatCardNumber(value);
+                                          cardNumberController.value =
+                                              TextEditingValue(
                                             text: formatted,
                                             selection: TextSelection.collapsed(
                                               offset: formatted.length,
@@ -785,15 +827,18 @@ void prevStep() {
                                         },
                                         keyboardType: TextInputType.number,
                                         maxLength: 19,
-                                        labelColor: _getLabelColor('cardNumber'),
+                                        labelColor:
+                                            _getLabelColor('cardNumber'),
                                       ),
                                     ),
                                     const SizedBox(height: 15),
-                                    
-                                    // حقل تاريخ الانتهاء
+
+                                    // حقل تاريخ الانتهاء مع فورماتينج تلقائي (معدل)
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: fieldErrors['expiry'] == true ? Colors.red.withOpacity(0.1) : Colors.transparent,
+                                        color: fieldErrors['expiry'] == true
+                                            ? Colors.red.withOpacity(0.1)
+                                            : Colors.transparent,
                                         borderRadius: BorderRadius.circular(16),
                                       ),
                                       child: buildField(
@@ -801,8 +846,14 @@ void prevStep() {
                                         hint: "MM/YY",
                                         icon: Icons.calendar_month,
                                         validator: _validateExpiry,
-                                        onChanged: (_) => setState(() {}),
-                                        keyboardType: TextInputType.datetime,
+                                        onChanged: (value) {
+                                          setState(() {});
+                                        },
+                                        keyboardType: TextInputType.number,
+                                        maxLength: 5,
+                                        inputFormatters: [
+                                          _ExpiryDateFormatter(), // الفورماتينج المخصص
+                                        ],
                                         labelColor: _getLabelColor('expiry'),
                                       ),
                                     ),
@@ -817,11 +868,13 @@ void prevStep() {
                           // الأزرار حسب الخطوة مع animation
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 400),
-                            transitionBuilder: (Widget child, Animation<double> animation) {
+                            transitionBuilder:
+                                (Widget child, Animation<double> animation) {
                               return FadeTransition(
                                 opacity: animation,
                                 child: ScaleTransition(
-                                  scale: Tween<double>(begin: 0.9, end: 1.0).animate(
+                                  scale: Tween<double>(begin: 0.9, end: 1.0)
+                                      .animate(
                                     CurvedAnimation(
                                       parent: animation,
                                       curve: Curves.easeOut,
@@ -842,10 +895,12 @@ void prevStep() {
                                         backgroundColor: Colors.teal,
                                         foregroundColor: Colors.white,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(16),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                         ),
                                         elevation: 8,
-                                        shadowColor: Colors.teal.withOpacity(0.5),
+                                        shadowColor:
+                                            Colors.teal.withOpacity(0.5),
                                       ),
                                       child: Text(
                                         loc.next,
@@ -854,7 +909,8 @@ void prevStep() {
                                     ),
                                   )
                                 : Row(
-                                    key: const ValueKey<String>('finish_buttons'),
+                                    key: const ValueKey<String>(
+                                        'finish_buttons'),
                                     children: [
                                       Expanded(
                                         child: ElevatedButton(
@@ -862,16 +918,20 @@ void prevStep() {
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.grey[800],
                                             foregroundColor: Colors.white,
-                                            minimumSize: const Size(double.infinity, 55),
+                                            minimumSize:
+                                                const Size(double.infinity, 55),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(16),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
                                             ),
                                             elevation: 5,
-                                            shadowColor: Colors.black.withOpacity(0.5),
+                                            shadowColor:
+                                                Colors.black.withOpacity(0.5),
                                           ),
                                           child: Text(
                                             loc.back,
-                                            style: const TextStyle(fontSize: 16),
+                                            style:
+                                                const TextStyle(fontSize: 16),
                                           ),
                                         ),
                                       ),
@@ -882,85 +942,87 @@ void prevStep() {
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.teal,
                                             foregroundColor: Colors.white,
-                                            minimumSize: const Size(double.infinity, 55),
+                                            minimumSize:
+                                                const Size(double.infinity, 55),
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(16),
+                                              borderRadius:
+                                                  BorderRadius.circular(16),
                                             ),
                                             elevation: 8,
-                                            shadowColor: Colors.teal.withOpacity(0.5),
+                                            shadowColor:
+                                                Colors.teal.withOpacity(0.5),
                                           ),
                                           child: loading
                                               ? const SizedBox(
                                                   height: 20,
                                                   width: 20,
-                                                  child: CircularProgressIndicator(
+                                                  child:
+                                                      CircularProgressIndicator(
                                                     color: Colors.white,
                                                     strokeWidth: 2,
                                                   ),
                                                 )
                                               : Text(
                                                   loc.finish,
-                                                  style: const TextStyle(fontSize: 16),
+                                                  style: const TextStyle(
+                                                      fontSize: 16),
                                                 ),
                                         ),
                                       )
                                     ],
                                   ),
                           ),
-                          
+
                           const SizedBox(height: 20),
-                          
-                          // Back to Login button (داخل الكونتينر)
-                          InkWell(
-                            onTap: navigateToLogin,
-                            borderRadius: BorderRadius.circular(30),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(30),
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.white.withOpacity(0.1),
-                                    Colors.white.withOpacity(0.05),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.2),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    loc.alreadyHaveAccount,
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.7),
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    loc.backToLogin,
-                                    style: const TextStyle(
-                                      color: Colors.teal,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  const Icon(
-                                    Icons.arrow_forward,
-                                    color: Colors.teal,
-                                    size: 16,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+
+// Back to Login button (داخل الكونتينر)
+InkWell(
+  onTap: navigateToLogin,
+  borderRadius: BorderRadius.circular(30),
+  child: Container(
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(30),
+      gradient: LinearGradient(
+        colors: [
+          Colors.white.withOpacity(0.1),
+          Colors.white.withOpacity(0.05),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      border: Border.all(
+        color: Colors.white.withOpacity(0.2),
+        width: 1,
+      ),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // النص العادي: Already have an account?
+        Text(
+          loc.alreadyHaveAccount, // مثلاً: "Already have an account? "
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.7),
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(width: 5), // مسافة بسيطة بين النصين
+        // النص القابل للضغط: Login
+        Text(
+          loc.backToLogin, // هنا المفروض loc.backToLogin يبقى قيمته "Login" أو "Sign In"
+          style: const TextStyle(
+            color: Colors.teal, // نفس اللون اللي كان موجود
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        // شيلنا الـ SizedBox(width: 5) والـ Icon اللي كانوا موجودين
+      ],
+    ),
+  ),
+),
                         ],
                       ),
                     ),
@@ -985,6 +1047,7 @@ void prevStep() {
     TextInputType? keyboardType,
     int? maxLength,
     Color labelColor = Colors.white70,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -1005,6 +1068,7 @@ void prevStep() {
         onChanged: onChanged,
         keyboardType: keyboardType,
         maxLength: maxLength,
+        inputFormatters: inputFormatters,
         style: const TextStyle(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
           hintText: hint,
@@ -1033,6 +1097,38 @@ void prevStep() {
           contentPadding: const EdgeInsets.symmetric(vertical: 16),
         ),
       ),
+    );
+  }
+}
+
+// الفورماتينج المخصص لحقل expiry
+class _ExpiryDateFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // لو بيمسح، نسمح
+    if (newValue.text.length < oldValue.text.length) {
+      return newValue;
+    }
+
+    // ننظف النص من أي حروف مش أرقام
+    String digits = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+
+    // لو وصل 4 أرقام، نحط صيغة MM/YY
+    if (digits.length >= 4) {
+      String formatted = '${digits.substring(0, 2)}/${digits.substring(2, 4)}';
+      return TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+
+    // لو أقل من 4 أرقام، نرجعها زي ماهي
+    return TextEditingValue(
+      text: digits,
+      selection: TextSelection.collapsed(offset: digits.length),
     );
   }
 }
@@ -1178,7 +1274,7 @@ class CreditCardPreview extends StatelessWidget {
               ),
         boxShadow: [
           BoxShadow(
-            color: hasError 
+            color: hasError
                 ? Colors.red.withOpacity(0.4)
                 : Colors.teal.withOpacity(0.4),
             blurRadius: 20,
@@ -1225,7 +1321,7 @@ class CreditCardPreview extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "CARD HOLDER",
+                    "Card HolderName",
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 12,
@@ -1256,7 +1352,9 @@ class CreditCardPreview extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    expiryController.text.isEmpty ? "MM/YY" : expiryController.text,
+                    expiryController.text.isEmpty
+                        ? "MM/YY"
+                        : expiryController.text,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,

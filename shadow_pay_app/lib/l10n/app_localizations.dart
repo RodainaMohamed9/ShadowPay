@@ -95,6 +95,12 @@ abstract class AppLocalizations {
     Locale('en')
   ];
 
+  /// No description provided for @appTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shadow Pay'**
+  String get appTitle;
+
   /// No description provided for @login.
   ///
   /// In en, this message translates to:
@@ -124,35 +130,13 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Home'**
   String get home;
-  /// No description provided for @full_name.
-  ///
-  /// In en, this message translates to:
-  /// **'Full Name'**
-  String get full_name;
-
-  /// No description provided for @confirm_password.
-  ///
-  /// In en, this message translates to:
-  /// **'Confirm Password'**
-  String get confirm_password;
-
-  /// No description provided for @next.
-  ///
-  /// In en, this message translates to:
-  /// **'Next'**
-  String get next;
-
-  /// No description provided for @step.
-  ///
-  /// In en, this message translates to:
-  /// **'Step 1 of 2'**
-  String get step;
 
   /// No description provided for @freeze_card.
   ///
   /// In en, this message translates to:
   /// **'Freeze Card'**
   String get freeze_card;
+
   /// No description provided for @loginTitle.
   ///
   /// In en, this message translates to:
@@ -176,12 +160,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password'**
   String get passwordLabel;
-
-  /// No description provided for @forgotPassword.
-  ///
-  /// In en, this message translates to:
-  /// **'Forgot Password?'**
-  String get forgotPassword;
 
   /// No description provided for @loginButton.
   ///
@@ -254,6 +232,31 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Login Successfully'**
   String get loginSuccess;
+
+  /// No description provided for @full_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get full_name;
+
+  /// No description provided for @confirm_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirm_password;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @step.
+  ///
+  /// In en, this message translates to:
+  /// **'Step 1 of 2'**
+  String get step;
+
   /// No description provided for @requiredField.
   ///
   /// In en, this message translates to:
@@ -317,7 +320,7 @@ abstract class AppLocalizations {
   /// No description provided for @phone.
   ///
   /// In en, this message translates to:
-  /// **'Phone number linked whith your card'**
+  /// **'Phone number linked with your card'**
   String get phone;
 
   /// No description provided for @cardHolder.
@@ -389,7 +392,7 @@ abstract class AppLocalizations {
   /// No description provided for @backToLogin.
   ///
   /// In en, this message translates to:
-  /// **'Back to Login'**
+  /// **'Sign In'**
   String get backToLogin;
 
   /// No description provided for @alreadyHaveAccount.
@@ -401,7 +404,7 @@ abstract class AppLocalizations {
   /// No description provided for @cardExpired.
   ///
   /// In en, this message translates to:
-  /// **'your card has been expired'**
+  /// **'Your card has been expired'**
   String get cardExpired;
 
   /// No description provided for @cardNameTooShort.
@@ -427,6 +430,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid phone number (incorrect length)'**
   String get phoneInvalidLength;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password'**
+  String get forgotPassword;
+
+  /// No description provided for @enterEmailResetCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email to receive a reset code'**
+  String get enterEmailResetCode;
+
+  /// No description provided for @emailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get emailHint;
+
+  /// No description provided for @sendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Code'**
+  String get sendCode;
+
+  /// No description provided for @verifyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Code'**
+  String get verifyCode;
+
+  /// No description provided for @enter6DigitCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6 digit code sent to your email'**
+  String get enter6DigitCode;
+
+  /// No description provided for @enterCompleteCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the complete 6-digit code'**
+  String get enterCompleteCode;
+
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verify;
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @passwordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password Reset Successfully'**
+  String get passwordResetSuccess;
+
+  /// No description provided for @resetPasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get resetPasswordButton;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
