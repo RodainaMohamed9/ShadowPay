@@ -1,0 +1,18 @@
+# Visual Studio temporary files
+.vs/
+*.user
+*.suo
+*.cache
+
+# Build outputs
+bin/
+obj/
+
+# Rider/IDE files
+.idea/
+
+# Logs
+*.log
+
+# Secrets (لو عندك أي ملفات فيها API Keys)
+appsettings.json
