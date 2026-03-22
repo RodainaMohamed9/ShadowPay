@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using shadowpay_api.Models;
 
 namespace shadowpay_api.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) :base (options) {}
 
@@ -15,10 +16,10 @@ namespace shadowpay_api.Data
             base.OnModelCreating(builder);
 
             builder.Entity<Transaction>()
-                   .HasOne<ApplicationUser>()
-                   .WithMany(u => u.Transactions)  // Navigation Property
-                   .HasForeignKey(t => t.UserId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(t => t.User)
+                .WithMany(u => u.Transactions)
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
