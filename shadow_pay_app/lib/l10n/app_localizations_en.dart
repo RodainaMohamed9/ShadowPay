@@ -211,4 +211,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetPasswordButton => 'Reset Password';
+
+  @override
+  String get loginError => 'Invalid email or password. Please try again.';
+  
 }

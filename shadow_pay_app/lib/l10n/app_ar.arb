@@ -69,5 +69,8 @@
   "resetPassword": "إعادة تعيين كلمة المرور",
   "newPassword": "كلمة المرور الجديدة",
   "passwordResetSuccess": "تم إعادة تعيين كلمة المرور بنجاح",
-  "resetPasswordButton": "إعادة تعيين كلمة المرور"
+  "resetPasswordButton": "إعادة تعيين كلمة المرور",
+  "loginSuccess": "تم تسجيل الدخول بنجاح! مرحباً بعودتك.",
+  "loginError": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+
 }
