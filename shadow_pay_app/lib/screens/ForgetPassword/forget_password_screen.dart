@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shadow_pay_app/constants/colors.dart';
 import 'package:shadow_pay_app/screens/ForgetPassword/otp_screen.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/services/auth_service.dart'; // ✅ استخدم ApiService
 import 'dart:ui';
 import 'package:shadow_pay_app/screens/login/login_Screen.dart';
 
@@ -15,6 +16,7 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
+  bool isLoading = false;
 
   String? validateEmail(String? value) {
     final loc = AppLocalizations.of(context)!;
@@ -36,14 +38,55 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
-  void sendCode() {
-    if (formKey.currentState!.validate()) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const OtpScreen(),
+  // ======= API =======
+  Future<void> sendCode() async {
+    if (!formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+
+    try {
+      final result = await ApiService.sendOtp(
+        email: emailController.text.trim(),
+        purpose: "forgot",
+      );
+
+      if (!mounted) return;
+
+      if (result['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? "OTP sent to your email"),
+            backgroundColor: Colors.teal,
+          ),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OtpScreen(
+              email: emailController.text.trim(),
+              purpose: "forgot",
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? "Email not found"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print("Send OTP error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Network error: $e"),
+          backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -112,18 +155,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
-                            onPressed: sendCode,
+                            onPressed: isLoading ? null : sendCode,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryTeal,
-                              foregroundColor: Colors.white, // 👈 النص أبيض
+                              foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
-                            child: Text(
-                              loc.sendCode,
-                              style: const TextStyle(fontSize: 18),
-                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    loc.sendCode,
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
                           ),
                         ),
                         const SizedBox(height: 15),

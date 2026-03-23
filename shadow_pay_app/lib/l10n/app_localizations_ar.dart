@@ -211,4 +211,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resetPasswordButton => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get loginError => 'البريد الألكتروني أو كلمة المرور خطأ. حاول مرة آخرى';
+  
 }

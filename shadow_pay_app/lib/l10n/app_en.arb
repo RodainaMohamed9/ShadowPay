@@ -69,5 +69,7 @@
   "resetPassword": "Reset Password",
   "newPassword": "New Password",
   "passwordResetSuccess": "Password Reset Successfully",
-  "resetPasswordButton": "Reset Password"
+  "resetPasswordButton": "Reset Password",
+  "loginSuccess": "Login successful! Welcome back.",
+  "loginError": "Invalid email or password",
 }

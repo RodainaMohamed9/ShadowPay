@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/screens/login/login_Screen.dart';
+import 'package:shadow_pay_app/services/auth_service.dart';
+import 'package:shadow_pay_app/screens/ForgetPassword/otp_screen.dart';
+
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -314,7 +317,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   String? _validateCardNumber(String? value) {
-    // لو مش في الصفحة الثانية، ميعملش validation
+
     if (currentStep != 2) return null;
 
     final loc = AppLocalizations.of(context)!;
@@ -334,7 +337,7 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   String? _validateExpiry(String? value) {
-    // لو مش في الصفحة الثانية، ميعملش validation
+
     if (currentStep != 2) return null;
 
     final loc = AppLocalizations.of(context)!;
@@ -384,8 +387,8 @@ class _RegisterScreenState extends State<RegisterScreen>
   void nextStep() {
     final isValid = formKey.currentState!.validate();
 
-    setState(() {}); // تحديث الواجهة بعد ما validators تخلص
-
+    setState(() {}); 
+    
     if (isValid) {
       if (currentStep == 1) {
         _changeStep(2);
@@ -413,48 +416,78 @@ class _RegisterScreenState extends State<RegisterScreen>
     }
   }
 
-  void submit() async {
-    final loc = AppLocalizations.of(context)!;
 
-    setState(() => loading = true);
+    void submit() async {
+      final loc = AppLocalizations.of(context)!;
+      
+      if (!formKey.currentState!.validate()) {
+        return;
+      }
 
-    // محاكاة طلب API
-    await Future.delayed(const Duration(seconds: 2));
+      setState(() => loading = true);
 
-    if (mounted) {
-      setState(() => loading = false);
+      try {
+        final parts = expiryController.text.split('/');
+        final expiryDate = DateTime(
+          2000 + int.parse(parts[1]),
+          int.parse(parts[0]),
+        );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loc.accountCreated),
-          backgroundColor: Colors.teal,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
+        // ✅ استخدم ApiService.registerUser الموجود عندك
+        bool success = await ApiService.registerUser(
+          context: context,
+          fullName: fullNameController.text.trim(),
+          email: emailController.text.trim(),
+          password: passwordController.text,
+          confirmPassword: confirmController.text,
+          phoneNumber: phoneController.text.trim(),
+          cardNumberHash: cardNumberController.text.replaceAll(" ", ""),
+          cardHolderName: cardNameController.text.trim().toUpperCase(),
+          exprDate: expiryDate,
+        );
 
-      // طباعة البيانات للتأكد
-      print('===== بيانات التسجيل =====');
-      print('${loc.fullName}: ${fullNameController.text}');
-      print('${loc.email}: ${emailController.text}');
-      print('${loc.phone}: ${phoneController.text}');
-      print('${loc.cardNumber}: ${cardNumberController.text}');
-      print('=========================');
+        if (!mounted) return;
+
+        if (success) {
+          // ✅ بعد نجاح إرسال البيانات و OTP، نروح لشاشة OTP
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtpScreen(
+                email: emailController.text.trim(),
+                purpose: 'register',
+              ),
+            ),
+          );
+        }
+        // لو success = false، الـ ApiService already showed error dialog
+        
+      } catch (e) {
+        print("ERROR in submit: $e");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("An unexpected error occurred: ${e.toString()}"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => loading = false);
+        }
+      }
     }
-  }
 
-  void navigateToLogin() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
-    );
-  }
+    void navigateToLogin() {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false, 
+      );
+    }
 
-  // دالة لتحديد لون النص والايقونة
+
   Color _getLabelColor(String fieldName) {
     return fieldErrors[fieldName] == true ? Colors.red : Colors.white70;
   }

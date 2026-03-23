@@ -3,10 +3,14 @@ import 'package:shadow_pay_app/constants/colors.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/screens/ForgetPassword/reset_password_screen.dart';
 import 'package:shadow_pay_app/screens/login/login_Screen.dart';
+import 'package:shadow_pay_app/services/auth_service.dart';
 import 'dart:ui';
 
 class OtpScreen extends StatefulWidget {
-  const OtpScreen({super.key});
+  final String email;
+  final String purpose; // "register" or "forgot"
+
+  OtpScreen({super.key, required this.email, required this.purpose});
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
@@ -46,21 +50,51 @@ class _OtpScreenState extends State<OtpScreen> {
     }
     return true;
   }
-  
-  void verifyCode() {
+
+  //======= API =======
+  void verifyCode() async {
     final loc = AppLocalizations.of(context)!;
-    
-    if (isOtpComplete) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ResetPasswordScreen(),
-        ),
-      );
-    } else {
+
+    if (!isOtpComplete) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(loc.enterCompleteCode),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    String otp = controllers.map((c) => c.text).join();
+
+    final response = await ApiService.verifyOtp(
+      email: widget.email, 
+      otp: otp, 
+      purpose: widget.purpose
+    );
+
+    if (response.success) {
+      if (widget.purpose == "register") {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      } else if (widget.purpose == "forgot") {
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ResetPasswordScreen(
+              email: widget.email,
+              otp: otp, 
+            ),
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response.message),
           backgroundColor: Colors.red,
         ),
       );
