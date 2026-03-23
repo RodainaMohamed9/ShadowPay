@@ -11,6 +11,7 @@ using shadowpay_api.ModelVM.AccountVM;
 
 namespace shadowpay_api.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
@@ -37,40 +38,71 @@ namespace shadowpay_api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterVM model)
+        public async Task<IActionResult> Register([FromBody] RegisterVM model)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (model.Password != model.ConfirmPassword)
-                return BadRequest("Passwords do not match"); 
-
-            var user = new ApplicationUser
+            try
             {
-                UserName = model.Email,
-                Email = model.Email,
-                FullName = model.FullName,
-                PhoneNumber = model.PhoneNumber,
-                CardNumberHash = model.CardNumberHash,
-                CardHolderName = model.CardHolderName,
-                ExprDate = model.ExprDate
-            };
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
 
-            var result = await userManager.CreateAsync(user, model.Password);
+                    return BadRequest(new
+                    {
+                        success = false,
+                        errors = errors
+                    });
+                }
 
-            if (result.Succeeded)
-            {
+                var existingUser = await userManager.FindByEmailAsync(model.Email);
+                if (existingUser != null)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        errors = new[] { "Email already exists. Please use a different email." }
+                    });
+                }
+
+                var tempUserData = new OtpRequestVM
+                {
+                    Email = model.Email,
+                    FullName = model.FullName,
+                    PhoneNumber = model.PhoneNumber,
+                    Password = model.Password,
+                    CardNumberHash = model.CardNumberHash,
+                    CardHolderName = model.CardHolderName,
+                    ExprDate = model.ExprDate,
+                    Purpose = "register"
+                };
+
+                memoryCache.Set($"REGISTER_{model.Email}", tempUserData, TimeSpan.FromMinutes(10));
+
+                var otp = GenerateOTP();
+                memoryCache.Set($"OTP_{model.Email}", otp, TimeSpan.FromMinutes(5));
+
+                await emailService.SendOTP(model.Email, otp);
+
                 return Ok(new
                 {
-                    message = "User Created Successfully"
+                    success = true,
+                    message = "OTP sent to your email. Please verify to complete registration.",
+                    requireOtp = true
                 });
             }
-
-            return BadRequest(new
+            catch (Exception ex)
             {
-                errors = result.Errors.Select(e => e.Description)
-            });
+                Console.WriteLine($"Registration error: {ex.Message}");
+                return StatusCode(500, new
+                {
+                    success = false,
+                    errors = new[] { "An internal error occurred. Please try again later." }
+                });
+            }
         }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginVM model)
         {
@@ -110,34 +142,74 @@ namespace shadowpay_api.Controllers
                 expiration = token.ValidTo
             });
         }
-
         [HttpPost("send-otp")]
-        public async Task<IActionResult> SendOTP([FromQuery] string email)
+        public async Task<IActionResult> SendOTP([FromBody] OtpRequestVM model)
         {
-            var user = await userManager.FindByEmailAsync(email);
+            if (model.Purpose == "register")
+            {
+                var existingUser = await userManager.FindByEmailAsync(model.Email);
+                if (existingUser != null)
+                    return BadRequest(new { success = false, message = "Email already exists." });
 
-            if (user == null)
-                return BadRequest("User not found");
+                memoryCache.Set($"REGISTER_{model.Email}", model, TimeSpan.FromMinutes(10));
+            }
+            else if (model.Purpose == "forgot")
+            {
+                var existingUser = await userManager.FindByEmailAsync(model.Email);
+                if (existingUser == null)
+                    return BadRequest(new { success = false, message = "Email not found." });
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = "Invalid purpose." });
+            }
 
             var otp = GenerateOTP();
+            memoryCache.Set($"OTP_{model.Email}", otp, TimeSpan.FromMinutes(5));
 
-            memoryCache.Set($"OTP_{email}", otp, TimeSpan.FromMinutes(5));
+            await emailService.SendOTP(model.Email, otp);
 
-            await emailService.SendOTP(user.Email, otp);
-
-            return Ok("OTP sent to your email");
+            return Ok(new { success = true, message = "OTP sent." });
         }
 
         [HttpPost("verify-otp")]
-        public IActionResult VerifyOTP(string email, string otp)
+        public async Task<IActionResult> VerifyOTP([FromBody] OtpVerifyVM model)
         {
-            if (memoryCache.TryGetValue($"OTP_{email}", out string? cachedOtp) && cachedOtp == otp)
+            if (!memoryCache.TryGetValue($"OTP_{model.Email}", out string? cachedOtp) || cachedOtp != model.OTP)
+                return BadRequest(new { success = false, message = "Invalid or expired OTP" });
+
+            if (model.Purpose == "register")
             {
-                memoryCache.Remove($"OTP_{email}");
-                return Ok("OTP Verified Successfully");
+                memoryCache.Remove($"OTP_{model.Email}");
+
+                if (!memoryCache.TryGetValue($"REGISTER_{model.Email}", out OtpRequestVM? tempUserData))
+                    return BadRequest(new { success = false, message = "Registration data expired. Please try again." });
+
+                var user = new ApplicationUser
+                {
+                    UserName = tempUserData.Email,
+                    Email = tempUserData.Email,
+                    FullName = tempUserData.FullName,
+                    PhoneNumber = tempUserData.PhoneNumber,
+                    CardNumberHash = tempUserData.CardNumberHash,
+                    CardHolderName = tempUserData.CardHolderName,
+                    ExprDate = tempUserData.ExprDate ?? DateTime.Now
+                };
+
+                var result = await userManager.CreateAsync(user, tempUserData.Password);
+                memoryCache.Remove($"REGISTER_{model.Email}");
+
+                if (!result.Succeeded)
+                    return BadRequest(new { success = false, errors = result.Errors.Select(e => e.Description) });
+
+                return Ok(new { success = true, message = "Registration completed!" });
+            }
+            else if (model.Purpose == "forgot")
+            {
+                return Ok(new { success = true, message = "OTP verified! You can reset your password now." });
             }
 
-            return BadRequest("Invalid or expired OTP");
+            return BadRequest(new { success = false, message = "Invalid purpose." });
         }
 
         private string GenerateOTP()
@@ -146,31 +218,32 @@ namespace shadowpay_api.Controllers
             return random.Next(100000, 999999).ToString();
         }
 
+
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordVM model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
 
             if (model.NewPassword != model.ConfirmPassword)
-                return BadRequest("Passwords do not match");
+                return BadRequest(new { success = false, message = "Passwords do not match" });
 
             if (!memoryCache.TryGetValue($"OTP_{model.Email}", out string? cachedOtp) || cachedOtp != model.OTP)
-                return BadRequest("Invalid or expired OTP");
+                return BadRequest(new { success = false, message = "Invalid or expired OTP" });
 
             var user = await userManager.FindByEmailAsync(model.Email);
             if (user == null)
-                return BadRequest("User not found");
+                return BadRequest(new { success = false, message = "User not found" });
 
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
             var result = await userManager.ResetPasswordAsync(user, token, model.NewPassword);
 
             if (!result.Succeeded)
-                return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+                return BadRequest(new { success = false, errors = result.Errors.Select(e => e.Description) });
 
             memoryCache.Remove($"OTP_{model.Email}");
 
-            return Ok("Password has been reset successfully");
+            return Ok(new { success = true, message = "Password has been reset successfully" });
         }
     }
 }

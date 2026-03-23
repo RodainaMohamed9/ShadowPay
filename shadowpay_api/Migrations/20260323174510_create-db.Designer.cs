@@ -12,7 +12,7 @@ using shadowpay_api.Data;
 namespace shadowpay_api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260322135933_create-db")]
+    [Migration("20260323174510_create-db")]
     partial class createdb
     {
         /// <inheritdoc />
