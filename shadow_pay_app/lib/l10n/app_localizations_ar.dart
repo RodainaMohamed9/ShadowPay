@@ -211,4 +211,107 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resetPasswordButton => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get welcomeBack => 'مرحباً بعودتك';
+
+  @override
+  String get aiWatchdogActive => 'الحارس الذكي نشط';
+
+  @override
+  String get system => 'النظام';
+
+  @override
+  String get liveProtection => 'حماية فورية لفحص كل معاملة بطاقة';
+
+  @override
+  String get expiry => 'تاريخ الانتهاء';
+
+  @override
+  String get quickActions => 'إجراءات سريعة';
+
+  @override
+  String get add => 'إضافة';
+
+  @override
+  String get details => 'تفاصيل';
+
+  @override
+  String get freeze => 'تجميد';
+
+  @override
+  String get recentActivity => 'النشاط الأخير';
+
+  @override
+  String get safe => 'آمن';
+
+  @override
+  String get risk => 'خطر';
+
+  @override
+  String get blocked => 'محظور';
+
+// ========== Quick Actions Screens ==========
+  @override
+  String get addTransaction => 'إضافة معاملة';
+
+  @override
+  String get addTransactionDesc => 'أضف معاملة جديدة للتحليل';
+
+  @override
+  String get detailsDesc => 'تفاصيل المعاملة والتحليل';
+
+  @override
+  String get freezeCard => 'تجميد البطاقة';
+
+@override
+String get freezeCardDesc => 'حظر البطاقة مؤقتاً';
+
+@override
+String get report => 'إبلاغ';
+
+
+@override
+String get balance => 'الرصيد';
+
+
+
+@override
+String get whatWouldYouLikeToReport => 'ماذا تريد الإبلاغ عنه؟';
+@override
+String get suspiciousTransaction => 'معاملة مشبوهة';
+@override
+String get suspiciousTransactionDesc => 'الإبلاغ عن معاملة لا تعرفها';
+@override
+String get cardLostStolen => 'البطاقة مفقودة/مسروقة';
+@override
+String get cardLostStolenDesc => 'الإبلاغ عن فقدان أو سرقة البطاقة';
+@override
+String get unauthorizedCharge => 'عملية غير مصرح بها';
+@override
+String get unauthorizedChargeDesc => 'الإبلاغ عن عملية لم تقم بها';
+@override
+String get other => 'أخرى';
+@override
+String get otherDesc => 'الإبلاغ عن مشكلة أخرى';
+@override
+String get selectReason => 'الرجاء اختيار سبب';
+@override
+String get describeIssue => 'الرجاء وصف المشكلة';
+@override
+String get describeIssueHint => 'صف مشكلتك بالتفصيل...';
+@override
+String get submitReport => 'إرسال البلاغ';
+@override
+String get reportSubmitted => 'تم إرسال البلاغ بنجاح';
+
+@override
+String get frozen => 'مجمدة';
+
+@override
+String get analytics => 'التحليلات';
+@override
+String get cards => 'البطاقات';
+@override
+String get profile => 'الملف الشخصي';
 }
