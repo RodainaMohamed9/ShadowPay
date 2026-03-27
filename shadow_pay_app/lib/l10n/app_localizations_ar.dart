@@ -33,7 +33,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginTitle => 'تسجيل الدخول';
 
   @override
-  String get welcomeMessage => 'اهلا ,مرحبا بك';
+  String get welcomeMessage => 'اهلاً, مرحبا بك';
 
   @override
   String get emailLabel => 'البريد الإلكتروني';
@@ -75,7 +75,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancel => 'إلغاء';
 
   @override
-  String get loginSuccess => 'تم تسجيل الدخول بنجاح';
+  String get loginSuccess => 'تم تسجيل الدخول بنجاح! مرحباً بعودتك.';
 
   @override
   String get full_name => 'الاسم الكامل';
@@ -120,7 +120,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirmPassword => 'تأكيد كلمة المرور';
 
   @override
-  String get phone => 'رقم الهاتف المسجل به البطاقة';
+  String get phone => 'رقم الهاتف';
 
   @override
   String get cardHolder => 'اسم حامل البطاقة';
@@ -213,6 +213,78 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resetPasswordButton => 'إعادة تعيين كلمة المرور';
 
   @override
+
+  String get loginError => 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+
+  @override
+  String get add_transaction => 'إضافة معاملة';
+
+  @override
+  String get enter_transaction_details => 'أدخل تفاصيل المعاملة:';
+
+  @override
+  String get transaction_amount => 'قيمة المعاملة ';
+
+  @override
+  String get amount_hint => '٠.٠٠';
+
+  @override
+  String get transaction_hour => 'ساعة المعاملة (٠–٢٣)';
+
+  @override
+  String get transaction_category => 'فئة المعاملة';
+
+  @override
+  String get category_hint => 'اختر الفئة';
+
+  @override
+  String get zip_code => 'الرمز البريدى';
+
+  @override
+  String get zip_code_hint => 'أدخل الرمز البريدي';
+
+  @override
+  String get analyze_transaction => 'تحليل المعاملة';
+
+  @override
+  String get transaction_added_success => 'تمت إضافة المعاملة بنجاح!';
+
+  @override
+  String get error_category => 'الرجاء اختيار فئة';
+
+  @override
+  String get error_amount_empty => 'الرجاء إدخال المبلغ';
+
+  @override
+  String get error_amount_invalid => 'أدخل رقماً صحيحاً';
+
+  @override
+  String get error_zip_invalid => 'الرمز البريدي يجب أن يحتوي على أرقام فقط';
+
+  @override
+  String get error_amount_zero => 'المبلغ لا يمكن أن يكون صفر';
+
+  @override
+  String get profile => 'الملف الشخصي';
+
+  @override
+  String get premium_member => 'عضو مميز';
+
+  @override
+  String get settings => 'الإعدادات';
+
+  @override
+  String get logout => 'تسجيل الخروج';
+
+  @override
+  String get logout_confirmation => 'هل أنت متأكد من تسجيل الخروج؟';
+
+  @override
+  String get personal_info => 'معلومات شخصية';
+
+  @override
+  String get copied_to_clipboard => 'تم النسخ إلى الحافظة';
+
 
   String get welcomeBack => 'مرحباً بعودتك';
 

@@ -146,7 +146,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeMessage.
   ///
   /// In en, this message translates to:
-  /// **'Hello,Welcome!'**
+  /// **'Hello, Welcome!'**
   String get welcomeMessage;
 
   /// No description provided for @emailLabel.
@@ -230,7 +230,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Login Successfully'**
+  /// **'Login successful! Welcome back.'**
   String get loginSuccess;
 
   /// No description provided for @full_name.
@@ -320,7 +320,7 @@ abstract class AppLocalizations {
   /// No description provided for @phone.
   ///
   /// In en, this message translates to:
-  /// **'Phone number linked with your card'**
+  /// **'Phone'**
   String get phone;
 
   /// No description provided for @cardHolder.
@@ -503,6 +503,151 @@ abstract class AppLocalizations {
   /// **'Reset Password'**
   String get resetPasswordButton;
 
+
+  /// No description provided for @loginError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email or password'**
+  String get loginError;
+
+  /// No description provided for @add_transaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Transaction'**
+  String get add_transaction;
+
+  /// No description provided for @enter_transaction_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Transaction Details:'**
+  String get enter_transaction_details;
+
+  /// No description provided for @transaction_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Amount'**
+  String get transaction_amount;
+
+  /// No description provided for @amount_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'0.00'**
+  String get amount_hint;
+
+  /// No description provided for @transaction_hour.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Hour (0–23)'**
+  String get transaction_hour;
+
+  /// No description provided for @transaction_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Category'**
+  String get transaction_category;
+
+  /// No description provided for @category_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select category'**
+  String get category_hint;
+
+  /// No description provided for @zip_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Zip Code '**
+  String get zip_code;
+
+  /// No description provided for @zip_code_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter zip code'**
+  String get zip_code_hint;
+
+  /// No description provided for @analyze_transaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze Transaction'**
+  String get analyze_transaction;
+
+  /// No description provided for @transaction_added_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction added successfully!'**
+  String get transaction_added_success;
+
+  /// No description provided for @error_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a category'**
+  String get error_category;
+
+  /// No description provided for @error_amount_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an amount'**
+  String get error_amount_empty;
+
+  /// No description provided for @error_amount_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number'**
+  String get error_amount_invalid;
+
+  /// No description provided for @error_zip_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP code must contain only numbers'**
+  String get error_zip_invalid;
+
+  /// No description provided for @error_amount_zero.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount cannot be zero'**
+  String get error_amount_zero;
+
+  /// No description provided for @profile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profile;
+
+  /// No description provided for @premium_member.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Member'**
+  String get premium_member;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// No description provided for @logout_confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get logout_confirmation;
+
+  /// No description provided for @personal_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personal_info;
+
+  /// No description provided for @copied_to_clipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copied_to_clipboard;
+
   String get welcomeBack;
 String get aiWatchdogActive;
 String get system;
@@ -553,6 +698,7 @@ String get profile;
 
 // Quick Actions
 String get frozen;
+
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
