@@ -126,7 +126,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardHolder => 'Card holder name';
 
   @override
-  String get cardNumber => 'Card number';
+  String get cardNumber => 'Card Number';
 
   @override
   String get back => 'Back';
@@ -385,4 +385,205 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get liveProtection => 'Live protection monitoring all transactions';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsSubtitle => 'Manage your preferences and account';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get pushNotifications => 'Push Notifications';
+
+  @override
+  String get pushNotificationsDesc => 'Receive instant alerts about transactions';
+
+  @override
+  String get emailNotifications => 'Email Notifications';
+
+  @override
+  String get emailNotificationsDesc => 'Receive reports and updates via email';
+
+  @override
+  String get sms => 'SMS';
+
+  @override
+  String get smsDesc => 'Critical transaction alerts';
+
+  @override
+  String get sound => 'Sound';
+
+  @override
+  String get soundDesc => 'Play notification sound';
+
+  @override
+  String get vibration => 'Vibration';
+
+  @override
+  String get vibrationDesc => 'Vibrate device on notifications';
+
+  @override
+  String get securityPrivacy => 'Security & Privacy';
+
+  @override
+  String get biometric => 'Biometric Authentication';
+
+  @override
+  String get biometricDesc => 'Fingerprint or face recognition';
+
+  @override
+  String get twoFA => 'Two-Factor Authentication (2FA)';
+
+  @override
+  String get twoFADesc => 'Extra protection for your account';
+
+  @override
+  String get autoLock => 'Auto Lock';
+
+  @override
+  String get autoLockDesc => 'Lock app when not in use';
+
+  @override
+  String get hideBalance => 'Hide Balance';
+
+  @override
+  String get hideBalanceDesc => 'Hide balances on home screen';
+
+  @override
+  String get preferences => 'Preferences';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get dark => 'Dark';
+
+  @override
+  String get currency => 'Currency';
+
+  @override
+  String get supportInfo => 'Support & Info';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get helpCenter => 'Help Center';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get termsOfService => 'Terms of Service';
+
+  @override
+  String get deleteAccount => 'Delete Account';
+
+  @override
+  String get verified => 'Verified';
+
+  @override
+  String get securedByAI => 'AI Protected';
+
+  @override
+  String get version => 'Version 1.0.0';
+
+  @override
+  String get logoutDialogTitle => 'Logout';
+
+  @override
+  String get logoutDialogMessage => 'Are you sure you want to logout?';
+
+  @override
+  String get deleteDialogTitle => 'Delete Account';
+
+  @override
+  String get deleteDialogMessage => 'Are you sure? This action cannot be undone';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get cardManagement => 'Card Management';
+
+  @override
+  String get cardManagementSubtitle => 'Control your cards and security';
+
+  @override
+  String get cardFrozen => 'Card Frozen';
+
+  @override
+  String get cardActive => 'Card Active';
+
+  @override
+  String get cardFrozenDesc => 'All transactions are temporarily suspended';
+
+  @override
+  String get cardActiveDesc => 'You can perform transactions normally';
+
+  @override
+  String get availableBalance => 'Available Balance';
+
+  @override
+  String get cardNumberMasked => '****  ****  ****  4829';
+
+  @override
+  String get cardHolderName => 'Card Holder';
+
+  @override
+  String get cardHolderValue => 'Ahmed Al-Sayed';
+
+  @override
+  String get expiryDate => 'Expiry Date';
+
+  @override
+  String get expiryDateValue => '12/28';
+
+  @override
+  String get cardDetails => 'Card Details';
+
+  @override
+  String get cardType => 'Card Type';
+
+  @override
+  String get cardTypeValue => 'Visa Platinum';
+
+  @override
+  String get issueDate => 'Issue Date';
+
+  @override
+  String get issueDateValue => '12/2023';
+
+  @override
+  String get freezeCard => 'Freeze Card';
+
+  @override
+  String get unfreezeCard => 'Unfreeze Card';
+
+  @override
+  String get aboutFreeze => 'About Freezing Card';
+
+  @override
+  String get freezeInfo1 => 'Freezing the card immediately blocks all transactions';
+
+  @override
+  String get freezeInfo2 => 'You can unfreeze at any time to restore normal usage';
+
+  @override
+  String get freezeInfo3 => 'AI automatically freezes high-risk transactions';
+
+  @override
+  String get cardFrozenSnackbar => '❄️ Card Frozen';
+
+  @override
+  String get cardUnfrozenSnackbar => '✅ Card Unfrozen';
 }

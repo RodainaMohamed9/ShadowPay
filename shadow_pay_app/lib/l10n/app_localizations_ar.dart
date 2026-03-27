@@ -385,4 +385,205 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get liveProtection => 'حماية فورية تراقب جميع المعاملات';
+
+  @override
+  String get settingsTitle => 'الإعدادات';
+
+  @override
+  String get settingsSubtitle => 'إدارة تفضيلاتك وحسابك';
+
+  @override
+  String get notifications => 'الإشعارات';
+
+  @override
+  String get pushNotifications => 'إشعارات الدفع';
+
+  @override
+  String get pushNotificationsDesc => 'تلقي تنبيهات فورية عن المعاملات';
+
+  @override
+  String get emailNotifications => 'إشعارات البريد الإلكتروني';
+
+  @override
+  String get emailNotificationsDesc => 'تلقي التقارير والتحديثات عبر البريد';
+
+  @override
+  String get sms => 'الرسائل النصية (SMS)';
+
+  @override
+  String get smsDesc => 'تنبيهات المعاملات الحرجة';
+
+  @override
+  String get sound => 'الصوت';
+
+  @override
+  String get soundDesc => 'تشغيل نغمة الإشعارات';
+
+  @override
+  String get vibration => 'الاهتزاز';
+
+  @override
+  String get vibrationDesc => 'اهتزاز الجهاز عند الإشعارات';
+
+  @override
+  String get securityPrivacy => 'الأمان والخصوصية';
+
+  @override
+  String get biometric => 'المصادقة البيومترية';
+
+  @override
+  String get biometricDesc => 'بصمة الإصبع أو التعرف على الوجه';
+
+  @override
+  String get twoFA => 'المصادقة الثنائية (2FA)';
+
+  @override
+  String get twoFADesc => 'حماية إضافية لحسابك';
+
+  @override
+  String get autoLock => 'القفل التلقائي';
+
+  @override
+  String get autoLockDesc => 'قفل التطبيق عند عدم الاستخدام';
+
+  @override
+  String get hideBalance => 'إخفاء الرصيد';
+
+  @override
+  String get hideBalanceDesc => 'إخفاء الأرصدة في الشاشة الرئيسية';
+
+  @override
+  String get preferences => 'التفضيلات';
+
+  @override
+  String get language => 'اللغة';
+
+  @override
+  String get theme => 'المظهر';
+
+  @override
+  String get dark => 'داكن';
+
+  @override
+  String get currency => 'العملة الافتراضية';
+
+  @override
+  String get supportInfo => 'معلومات ودعم';
+
+  @override
+  String get about => 'عن التطبيق';
+
+  @override
+  String get helpCenter => 'مركز المساعدة';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get termsOfService => 'شروط الخدمة';
+
+  @override
+  String get deleteAccount => 'حذف الحساب نهائيًا';
+
+  @override
+  String get verified => 'موثّق';
+
+  @override
+  String get securedByAI => 'محمي بالذكاء الاصطناعي';
+
+  @override
+  String get version => 'الإصدار 1.0.0';
+
+  @override
+  String get logoutDialogTitle => 'تسجيل الخروج';
+
+  @override
+  String get logoutDialogMessage => 'هل أنت متأكد من رغبتك في تسجيل الخروج؟';
+
+  @override
+  String get deleteDialogTitle => 'حذف الحساب';
+
+  @override
+  String get deleteDialogMessage => 'هل أنت متأكد؟ هذا الإجراء لا يمكن التراجع عنه';
+
+  @override
+  String get confirm => 'تأكيد';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get cardManagement => 'إدارة البطاقات';
+
+  @override
+  String get cardManagementSubtitle => 'تحكم في بطاقاتك وأمانها';
+
+  @override
+  String get cardFrozen => 'البطاقة مجمدة';
+
+  @override
+  String get cardActive => 'البطاقة نشطة';
+
+  @override
+  String get cardFrozenDesc => 'جميع المعاملات موقوفة مؤقتاً';
+
+  @override
+  String get cardActiveDesc => 'يمكنك إجراء المعاملات بشكل طبيعي';
+
+  @override
+  String get availableBalance => 'الرصيد المتاح';
+
+  @override
+  String get cardNumberMasked => '****  ****  ****  4829';
+
+  @override
+  String get cardHolderName => 'الاسم';
+
+  @override
+  String get cardHolderValue => 'أحمد السيد';
+
+  @override
+  String get expiryDate => 'الصلاحية';
+
+  @override
+  String get expiryDateValue => '12/28';
+
+  @override
+  String get cardDetails => 'تفاصيل البطاقة';
+
+  @override
+  String get cardType => 'نوع البطاقة';
+
+  @override
+  String get cardTypeValue => 'فيزا بلاتينيوم';
+
+  @override
+  String get issueDate => 'تاريخ الإصدار';
+
+  @override
+  String get issueDateValue => '12/2023';
+
+  @override
+  String get freezeCard => 'تجميد البطاقة';
+
+  @override
+  String get unfreezeCard => 'إلغاء تجميد البطاقة';
+
+  @override
+  String get aboutFreeze => 'حول تجميد البطاقة';
+
+  @override
+  String get freezeInfo1 => 'تجميد البطاقة يمنع جميع المعاملات فوراً';
+
+  @override
+  String get freezeInfo2 => 'يمكنك إلغاء التجميد في أي وقت لاستعادة الاستخدام الطبيعي';
+
+  @override
+  String get freezeInfo3 => 'الذكاء الاصطناعي يجمد المعاملات عالية المخاطر تلقائياً';
+
+  @override
+  String get cardFrozenSnackbar => '❄️ تم تجميد البطاقة';
+
+  @override
+  String get cardUnfrozenSnackbar => '✅ تم إلغاء تجميد البطاقة';
 }

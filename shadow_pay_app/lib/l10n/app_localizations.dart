@@ -332,7 +332,7 @@ abstract class AppLocalizations {
   /// No description provided for @cardNumber.
   ///
   /// In en, this message translates to:
-  /// **'Card number'**
+  /// **'Card Number'**
   String get cardNumber;
 
   /// No description provided for @back.
@@ -850,6 +850,408 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Live protection monitoring all transactions'**
   String get liveProtection;
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your preferences and account'**
+  String get settingsSubtitle;
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @pushNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Push Notifications'**
+  String get pushNotifications;
+
+  /// No description provided for @pushNotificationsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive instant alerts about transactions'**
+  String get pushNotificationsDesc;
+
+  /// No description provided for @emailNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Notifications'**
+  String get emailNotifications;
+
+  /// No description provided for @emailNotificationsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive reports and updates via email'**
+  String get emailNotificationsDesc;
+
+  /// No description provided for @sms.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS'**
+  String get sms;
+
+  /// No description provided for @smsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical transaction alerts'**
+  String get smsDesc;
+
+  /// No description provided for @sound.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound'**
+  String get sound;
+
+  /// No description provided for @soundDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Play notification sound'**
+  String get soundDesc;
+
+  /// No description provided for @vibration.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibration'**
+  String get vibration;
+
+  /// No description provided for @vibrationDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibrate device on notifications'**
+  String get vibrationDesc;
+
+  /// No description provided for @securityPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Security & Privacy'**
+  String get securityPrivacy;
+
+  /// No description provided for @biometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric Authentication'**
+  String get biometric;
+
+  /// No description provided for @biometricDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fingerprint or face recognition'**
+  String get biometricDesc;
+
+  /// No description provided for @twoFA.
+  ///
+  /// In en, this message translates to:
+  /// **'Two-Factor Authentication (2FA)'**
+  String get twoFA;
+
+  /// No description provided for @twoFADesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra protection for your account'**
+  String get twoFADesc;
+
+  /// No description provided for @autoLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Lock'**
+  String get autoLock;
+
+  /// No description provided for @autoLockDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock app when not in use'**
+  String get autoLockDesc;
+
+  /// No description provided for @hideBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide Balance'**
+  String get hideBalance;
+
+  /// No description provided for @hideBalanceDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide balances on home screen'**
+  String get hideBalanceDesc;
+
+  /// No description provided for @preferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get preferences;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// No description provided for @dark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get dark;
+
+  /// No description provided for @currency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get currency;
+
+  /// No description provided for @supportInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Support & Info'**
+  String get supportInfo;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @helpCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Help Center'**
+  String get helpCenter;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get termsOfService;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteAccount;
+
+  /// No description provided for @verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verified;
+
+  /// No description provided for @securedByAI.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Protected'**
+  String get securedByAI;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version 1.0.0'**
+  String get version;
+
+  /// No description provided for @logoutDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logoutDialogTitle;
+
+  /// No description provided for @logoutDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get logoutDialogMessage;
+
+  /// No description provided for @deleteDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Account'**
+  String get deleteDialogTitle;
+
+  /// No description provided for @deleteDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure? This action cannot be undone'**
+  String get deleteDialogMessage;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @cardManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Management'**
+  String get cardManagement;
+
+  /// No description provided for @cardManagementSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Control your cards and security'**
+  String get cardManagementSubtitle;
+
+  /// No description provided for @cardFrozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Frozen'**
+  String get cardFrozen;
+
+  /// No description provided for @cardActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Active'**
+  String get cardActive;
+
+  /// No description provided for @cardFrozenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'All transactions are temporarily suspended'**
+  String get cardFrozenDesc;
+
+  /// No description provided for @cardActiveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'You can perform transactions normally'**
+  String get cardActiveDesc;
+
+  /// No description provided for @availableBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Balance'**
+  String get availableBalance;
+
+  /// No description provided for @cardNumberMasked.
+  ///
+  /// In en, this message translates to:
+  /// **'****  ****  ****  4829'**
+  String get cardNumberMasked;
+
+  /// No description provided for @cardHolderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Holder'**
+  String get cardHolderName;
+
+  /// No description provided for @cardHolderValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Ahmed Al-Sayed'**
+  String get cardHolderValue;
+
+  /// No description provided for @expiryDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Date'**
+  String get expiryDate;
+
+  /// No description provided for @expiryDateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'12/28'**
+  String get expiryDateValue;
+
+  /// No description provided for @cardDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Details'**
+  String get cardDetails;
+
+  /// No description provided for @cardType.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Type'**
+  String get cardType;
+
+  /// No description provided for @cardTypeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Visa Platinum'**
+  String get cardTypeValue;
+
+  /// No description provided for @issueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Date'**
+  String get issueDate;
+
+  /// No description provided for @issueDateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'12/2023'**
+  String get issueDateValue;
+
+  /// No description provided for @freezeCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze Card'**
+  String get freezeCard;
+
+  /// No description provided for @unfreezeCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfreeze Card'**
+  String get unfreezeCard;
+
+  /// No description provided for @aboutFreeze.
+  ///
+  /// In en, this message translates to:
+  /// **'About Freezing Card'**
+  String get aboutFreeze;
+
+  /// No description provided for @freezeInfo1.
+  ///
+  /// In en, this message translates to:
+  /// **'Freezing the card immediately blocks all transactions'**
+  String get freezeInfo1;
+
+  /// No description provided for @freezeInfo2.
+  ///
+  /// In en, this message translates to:
+  /// **'You can unfreeze at any time to restore normal usage'**
+  String get freezeInfo2;
+
+  /// No description provided for @freezeInfo3.
+  ///
+  /// In en, this message translates to:
+  /// **'AI automatically freezes high-risk transactions'**
+  String get freezeInfo3;
+
+  /// No description provided for @cardFrozenSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'❄️ Card Frozen'**
+  String get cardFrozenSnackbar;
+
+  /// No description provided for @cardUnfrozenSnackbar.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Card Unfrozen'**
+  String get cardUnfrozenSnackbar;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
