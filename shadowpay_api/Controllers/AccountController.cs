@@ -109,12 +109,12 @@ namespace shadowpay_api.Controllers
             var user = await userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
-                return Unauthorized(new { message = "Invalid Email or Password" });
+                return Unauthorized(new { message = "This email is not Exist" });
 
             var result = await signInManager.CheckPasswordSignInAsync(user, model.Password, false);
 
             if (!result.Succeeded)
-                return Unauthorized(new { message = "Invalid Email or Password" });
+                return Unauthorized(new { message = "Password is Invalid" });
 
             var authClaims = new List<Claim>
             {
@@ -142,6 +142,7 @@ namespace shadowpay_api.Controllers
                 expiration = token.ValidTo
             });
         }
+
         [HttpPost("send-otp")]
         public async Task<IActionResult> SendOTP([FromBody] OtpRequestVM model)
         {

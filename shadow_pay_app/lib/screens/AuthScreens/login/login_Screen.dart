@@ -4,9 +4,9 @@ import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/widgets/language_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/providers/language_provider.dart';
-import 'package:shadow_pay_app/screens/Register/register_screen.dart';
-import '../../services/shared_pref_service.dart'; 
-import '../home/home_screen.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/Register/register_screen.dart';
+import '../../../services/shared_pref_service.dart'; 
+import '../../home/home_screen.dart';
 import '../ForgetPassword/forget_password_screen.dart';
 import 'package:shadow_pay_app/services/auth_service.dart';
 

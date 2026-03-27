@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:shadow_pay_app/constants/colors.dart';
-import 'package:shadow_pay_app/screens/ForgetPassword/otp_screen.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/ForgetPassword/otp_screen.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/services/auth_service.dart'; // ✅ استخدم ApiService
 import 'dart:ui';
-import 'package:shadow_pay_app/screens/login/login_Screen.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});

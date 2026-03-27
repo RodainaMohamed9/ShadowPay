@@ -369,9 +369,6 @@ String get profile => 'Profile';
   String get error_amount_zero => 'Amount cannot be zero';
 
   @override
-  String get profile => 'Profile';
-
-  @override
   String get premium_member => 'Premium Member';
 
   @override
@@ -388,4 +385,9 @@ String get profile => 'Profile';
 
   @override
   String get copied_to_clipboard => 'Copied to clipboard';
+
+  @override
+    String get allTransactions => 'All Transactions';
+
+  
 }
