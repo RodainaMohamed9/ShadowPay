@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
-import 'package:shadow_pay_app/screens/login/login_Screen.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
 
 class RegisterPageTwo extends StatefulWidget {
   final String fullName;

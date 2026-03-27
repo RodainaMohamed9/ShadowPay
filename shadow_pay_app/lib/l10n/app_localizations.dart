@@ -62,7 +62,8 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,7 +84,8 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -503,7 +506,6 @@ abstract class AppLocalizations {
   /// **'Reset Password'**
   String get resetPasswordButton;
 
-
   /// No description provided for @loginError.
   ///
   /// In en, this message translates to:
@@ -649,59 +651,58 @@ abstract class AppLocalizations {
   String get copied_to_clipboard;
 
   String get welcomeBack;
-String get aiWatchdogActive;
-String get system;
-String get liveProtection;
-String get expiry;
-String get quickActions;
-String get add;
-String get details;
-String get freeze;
-String get recentActivity;
-String get safe;
-String get risk;
-String get blocked;
+  String get aiWatchdogActive;
+  String get system;
+  String get liveProtection;
+  String get expiry;
+  String get quickActions;
+  String get add;
+  String get details;
+  String get freeze;
+  String get recentActivity;
+  String get safe;
+  String get risk;
+  String get blocked;
 
-String get balance;
-
-
+  String get balance;
 
 // ========== Quick Actions Screens ==========
-String get addTransaction;
-String get addTransactionDesc;
-String get detailsDesc;
-String get freezeCard;
-String get freezeCardDesc;
-String get report;
-
+  String get addTransaction;
+  String get addTransactionDesc;
+  String get detailsDesc;
+  String get freezeCard;
+  String get freezeCardDesc;
+  String get report;
 
 // Report Screen
-String get whatWouldYouLikeToReport;
-String get suspiciousTransaction;
-String get suspiciousTransactionDesc;
-String get cardLostStolen;
-String get cardLostStolenDesc;
-String get unauthorizedCharge;
-String get unauthorizedChargeDesc;
-String get other;
-String get otherDesc;
-String get selectReason;
-String get describeIssue;
-String get describeIssueHint;
-String get submitReport;
-String get reportSubmitted;
+  String get whatWouldYouLikeToReport;
+  String get suspiciousTransaction;
+  String get suspiciousTransactionDesc;
+  String get cardLostStolen;
+  String get cardLostStolenDesc;
+  String get unauthorizedCharge;
+  String get unauthorizedChargeDesc;
+  String get other;
+  String get otherDesc;
+  String get selectReason;
+  String get describeIssue;
+  String get describeIssueHint;
+  String get submitReport;
+  String get reportSubmitted;
 
 // Bottom Navigation Bar
-String get analytics;
-String get cards;
-String get profile;
+  String get analytics;
+  String get cards;
 
 // Quick Actions
 String get frozen;
 
+String get allTransactions;
+
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -710,25 +711,25 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar': return AppLocalizationsAr();
-    case 'en': return AppLocalizationsEn();
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'en':
+      return AppLocalizationsEn();
   }
 
   throw FlutterError(
-    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+      'an issue with the localizations generation tool. Please file an issue '
+      'on GitHub with a reproducible sample app and the gen-l10n configuration '
+      'that was used.');
 }

@@ -4,7 +4,7 @@ import 'first_screen.dart';
 import 'second_screen.dart';
 import 'third_screen.dart';
 import '../../services/shared_pref_service.dart';
-import '../login/login_Screen.dart'; // مهم: نوجه للـ Login مش للـ Home
+import '../AuthScreens/login/login_Screen.dart'; // مهم: نوجه للـ Login مش للـ Home
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});

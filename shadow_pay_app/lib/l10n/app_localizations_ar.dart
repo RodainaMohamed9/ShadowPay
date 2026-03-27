@@ -386,8 +386,7 @@ String get analytics => 'التحليلات';
 @override
 String get cards => 'البطاقات';
 @override
-String get profile => 'الملف الشخصي';
+  String get allTransactions => 'كل المعاملات';
 
-  String get loginError => 'البريد الألكتروني أو كلمة المرور خطأ. حاول مرة آخرى';
- 
+  
 }
