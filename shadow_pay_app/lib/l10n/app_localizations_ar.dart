@@ -213,6 +213,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resetPasswordButton => 'إعادة تعيين كلمة المرور';
 
   @override
+
   String get welcomeBack => 'مرحباً بعودتك';
 
   @override
@@ -314,4 +315,7 @@ String get analytics => 'التحليلات';
 String get cards => 'البطاقات';
 @override
 String get profile => 'الملف الشخصي';
+
+  String get loginError => 'البريد الألكتروني أو كلمة المرور خطأ. حاول مرة آخرى';
+ 
 }

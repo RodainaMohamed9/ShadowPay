@@ -211,6 +211,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetPasswordButton => 'Reset Password';
+
 @override
 String get welcomeBack => 'Welcome back';
 
@@ -314,4 +315,9 @@ String get analytics => 'Analytics';
 String get cards => 'Cards';
 @override
 String get profile => 'Profile';
+
+
+  @override
+  String get loginError => 'Invalid email or password. Please try again.';
+  
 }

@@ -8,6 +8,7 @@ import 'package:shadow_pay_app/screens/Register/register_screen.dart';
 import '../../services/shared_pref_service.dart'; 
 import '../home/home_screen.dart';
 import '../ForgetPassword/forget_password_screen.dart';
+import 'package:shadow_pay_app/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -65,51 +66,70 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     return true;
   }
 
-  // دالة تسجيل الدخول المعدلة
-  Future<void> _handleLogin() async {
-    final localizations = AppLocalizations.of(context)!;
-    
-    setState(() {
-      _emailValid = isEmailValid(_emailController.text);
-      _passwordValid = isPasswordValid(_passwordController.text);
-    });
+    // دالة تسجيل الدخول المعدلة
+    Future<void> _handleLogin() async {
+      setState(() {
+        _emailValid = isEmailValid(_emailController.text);
+        _passwordValid = isPasswordValid(_passwordController.text);
+      });
 
-    if (_emailValid && _passwordValid) {
-      setState(() => _isLoading = true);
+      if (_emailValid && _passwordValid) {
+        setState(() => _isLoading = true);
 
-      try {
-        await Future.delayed(const Duration(seconds: 2));
-        await SharedPrefService.setLoggedIn(true);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(localizations.loginSuccess),
-              backgroundColor: const Color(0xFF00D8A2),
-            ),
+        try {
+          // ✅ استخدم ApiService.login
+          final result = await ApiService.login(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
           );
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('فشل تسجيل الدخول: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      } finally {
-        if (mounted) {
-          setState(() => _isLoading = false);
+          if (!mounted) return;
+
+          if (result['success'] == true) {
+            // ✅ حفظ التوكن
+            final token = result['token'];
+            await SharedPrefService.saveToken(token);
+            await SharedPrefService.setLoggedIn(true);
+            
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Login successful! Welcome back."),
+                  backgroundColor: Color(0xFF00D8A2),
+                ),
+              );
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeScreen()),
+              );
+            }
+          } else {
+            // ❌ فشل تسجيل الدخول
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['message'] ?? "Invalid email or password"),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        } catch (e) {
+          print("Login error: $e");
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Login failed: $e"),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        } finally {
+          if (mounted) {
+            setState(() => _isLoading = false);
+          }
         }
       }
     }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +169,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               ),
               const SizedBox(height: 24),
               
-              // Logo with same design as RegisterScreen
               MouseRegion(
                 onEnter: (_) => _onHover(true),
                 onExit: (_) => _onHover(false),

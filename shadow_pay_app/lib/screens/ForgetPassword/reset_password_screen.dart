@@ -5,10 +5,14 @@ import 'package:shadow_pay_app/constants/colors.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/screens/login/login_Screen.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
+import 'package:shadow_pay_app/services/auth_service.dart'; // ✅ تأكد من هذا الـ import
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  final String email;
+  final String? otp; 
 
+  const ResetPasswordScreen({super.key, required this.email, this.otp}); 
+  
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
 }
@@ -16,9 +20,9 @@ class ResetPasswordScreen extends StatefulWidget {
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final passwordController = TextEditingController();
   final confirmController = TextEditingController();
-
   bool showPassword = false;
   bool showConfirm = false;
+  bool isLoading = false;
 
   Future<void> resetPassword() async {
     final loc = AppLocalizations.of(context)!;
@@ -44,21 +48,51 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(loc.passwordResetSuccess),
-        backgroundColor: Colors.teal,
-      ),
-    );
+    setState(() => isLoading = true);
 
-    await SharedPrefService.setLoggedIn(true);
-
-    if (mounted) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-        (route) => false,
+    try {
+      final result = await ApiService.resetPassword(
+        email: widget.email,
+        otp: widget.otp ?? '',
+        newPassword: passwordController.text,
+        confirmPassword: confirmController.text,
       );
+
+      if (!mounted) return;
+
+      if (result['success'] == true) {
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? loc.passwordResetSuccess),
+            backgroundColor: Colors.teal,
+          ),
+        );
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false,
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message'] ?? 'Failed to reset password'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } 
+    catch (e) {
+      print("Reset password error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("An unexpected error occurred: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -166,7 +200,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         width: double.infinity,
                         height: 55,
                         child: ElevatedButton(
-                          onPressed: resetPassword,
+                          onPressed: isLoading ? null : resetPassword,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryTeal,
                             foregroundColor: Colors.white, 
@@ -174,10 +208,19 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                           ),
-                          child: Text(
-                            loc.resetPasswordButton,
-                            style: const TextStyle(fontSize: 18),
-                          ),
+                          child: isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(
+                                  loc.resetPasswordButton,
+                                  style: const TextStyle(fontSize: 18),
+                                ),
                         ),
                       ),
                       
