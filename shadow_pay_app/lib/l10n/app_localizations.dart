@@ -62,8 +62,7 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,8 +82,7 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -233,7 +230,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Login successful! Welcome back.'**
+  /// **'Login Successfully'**
   String get loginSuccess;
 
   /// No description provided for @full_name.
@@ -323,7 +320,7 @@ abstract class AppLocalizations {
   /// No description provided for @phone.
   ///
   /// In en, this message translates to:
-  /// **'Phone'**
+  /// **'Phone number linked with your card'**
   String get phone;
 
   /// No description provided for @cardHolder.
@@ -650,59 +647,212 @@ abstract class AppLocalizations {
   /// **'Copied to clipboard'**
   String get copied_to_clipboard;
 
-  String get welcomeBack;
-  String get aiWatchdogActive;
-  String get system;
-  String get liveProtection;
-  String get expiry;
-  String get quickActions;
-  String get add;
-  String get details;
-  String get freeze;
-  String get recentActivity;
-  String get safe;
-  String get risk;
-  String get blocked;
+  /// No description provided for @allTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'All Transactions'**
+  String get allTransactions;
 
-  String get balance;
-
-// ========== Quick Actions Screens ==========
-  String get addTransaction;
-  String get addTransactionDesc;
-  String get detailsDesc;
-  String get freezeCard;
-  String get freezeCardDesc;
+  /// No description provided for @report.
+  ///
+  /// In en, this message translates to:
+  /// **'Report'**
   String get report;
 
-// Report Screen
+  /// No description provided for @whatWouldYouLikeToReport.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to report?'**
   String get whatWouldYouLikeToReport;
-  String get suspiciousTransaction;
-  String get suspiciousTransactionDesc;
-  String get cardLostStolen;
-  String get cardLostStolenDesc;
-  String get unauthorizedCharge;
-  String get unauthorizedChargeDesc;
-  String get other;
-  String get otherDesc;
+
+  /// No description provided for @selectReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a reason'**
   String get selectReason;
+
+  /// No description provided for @describeIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe the issue'**
   String get describeIssue;
+
+  /// No description provided for @describeIssueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe your issue in detail...'**
   String get describeIssueHint;
+
+  /// No description provided for @submitReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Report'**
   String get submitReport;
+
+  /// No description provided for @reportSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Report submitted successfully!'**
   String get reportSubmitted;
 
-// Bottom Navigation Bar
+  /// No description provided for @suspiciousTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspicious Transaction'**
+  String get suspiciousTransaction;
+
+  /// No description provided for @suspiciousTransactionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A transaction you don\'t recognize or seems unusual'**
+  String get suspiciousTransactionDesc;
+
+  /// No description provided for @cardLostStolen.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Lost or Stolen'**
+  String get cardLostStolen;
+
+  /// No description provided for @cardLostStolenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'My card has been lost, stolen, or I suspect it\'s compromised'**
+  String get cardLostStolenDesc;
+
+  /// No description provided for @unauthorizedCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Unauthorized Charge'**
+  String get unauthorizedCharge;
+
+  /// No description provided for @unauthorizedChargeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A charge I did not authorize or approve'**
+  String get unauthorizedChargeDesc;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get other;
+
+  /// No description provided for @otherDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Other issue not listed above'**
+  String get otherDesc;
+
+  /// No description provided for @analytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
   String get analytics;
+
+  /// No description provided for @cards.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
   String get cards;
 
-// Quick Actions
-String get frozen;
+  /// No description provided for @quickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Actions'**
+  String get quickActions;
 
-String get allTransactions;
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
 
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @freeze.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeze'**
+  String get freeze;
+
+  /// No description provided for @frozen.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen'**
+  String get frozen;
+
+  /// No description provided for @manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage;
+
+  /// No description provided for @recentActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Activity'**
+  String get recentActivity;
+
+  /// No description provided for @safe.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe'**
+  String get safe;
+
+  /// No description provided for @risk.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk'**
+  String get risk;
+
+  /// No description provided for @blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked'**
+  String get blocked;
+
+  /// No description provided for @expiry.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry'**
+  String get expiry;
+
+  /// No description provided for @balance.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance'**
+  String get balance;
+
+  /// No description provided for @welcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back,'**
+  String get welcomeBack;
+
+  /// No description provided for @aiWatchdogActive.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Watchdog Active'**
+  String get aiWatchdogActive;
+
+  /// No description provided for @system.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get system;
+
+  /// No description provided for @liveProtection.
+  ///
+  /// In en, this message translates to:
+  /// **'Live protection monitoring all transactions'**
+  String get liveProtection;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -711,25 +861,25 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar':
-      return AppLocalizationsAr();
-    case 'en':
-      return AppLocalizationsEn();
+    case 'ar': return AppLocalizationsAr();
+    case 'en': return AppLocalizationsEn();
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }

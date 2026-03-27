@@ -102,7 +102,7 @@ static Future<void> unfreezeCard() async {
     return prefs.getString(_keyUserEmail);
   }
 
-  // رقم الهاتف
+  
   static Future<void> setUserPhone(String phone) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyUserPhone, phone);
@@ -113,7 +113,7 @@ static Future<void> unfreezeCard() async {
     return prefs.getString(_keyUserPhone);
   }
 
-  // رقم البطاقة
+ 
   static Future<void> setUserCardNumber(String cardNumber) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyUserCardNumber, cardNumber);
@@ -146,7 +146,7 @@ static Future<void> unfreezeCard() async {
     return prefs.getString(_keyUserCardExpiry);
   }
 
-  // ========== ✅ دوال لجلب كل بيانات المستخدم مرة واحدة ==========
+ 
   static Future<Map<String, String?>> getAllUserData() async {
     final prefs = await SharedPreferences.getInstance();
     return {
@@ -158,8 +158,9 @@ static Future<void> unfreezeCard() async {
       'cardExpiry': prefs.getString(_keyUserCardExpiry),
     };
 
-  //Tokens
-  static const String _tokenKey = 'auth_token';
+ } 
+ //Tokens
+   static const String _tokenKey = 'auth_token';
 
   static Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
