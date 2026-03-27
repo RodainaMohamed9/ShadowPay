@@ -212,6 +212,111 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get resetPasswordButton => 'Reset Password';
 
+@override
+String get welcomeBack => 'Welcome back';
+
+
+@override
+String get aiWatchdogActive => 'AI Watchdog Active';
+
+@override
+String get system => 'System';
+
+@override
+String get liveProtection => 'Live protection scanning every card event';
+
+@override
+String get expiry => 'Expiry';
+
+@override
+String get quickActions => 'Quick actions';
+
+@override
+String get add => 'Add';
+
+@override
+String get details => 'Details';
+
+@override
+String get freeze => 'Freeze';
+
+@override
+String get recentActivity => 'Recent activity';
+
+@override
+String get safe => 'SAFE';
+
+@override
+String get risk => 'RISK';
+
+@override
+String get blocked => 'BLOCKED';
+
+
+
+// ========== Quick Actions Screens ==========
+@override
+String get addTransaction => 'Add Transaction';
+
+@override
+String get addTransactionDesc => 'Add a new transaction for analysis';
+
+@override
+String get detailsDesc => 'Transaction details and analysis';
+
+@override
+String get freezeCard => 'Freeze Card';
+
+@override
+String get freezeCardDesc => 'Temporarily block your card';
+
+
+@override
+String get report => 'Report';
+
+@override
+String get balance => 'Balance';
+
+@override
+String get whatWouldYouLikeToReport => 'What would you like to report?';
+@override
+String get suspiciousTransaction => 'Suspicious Transaction';
+@override
+String get suspiciousTransactionDesc => 'Report a transaction you don\'t recognize';
+@override
+String get cardLostStolen => 'Card Lost/Stolen';
+@override
+String get cardLostStolenDesc => 'Report your card as lost or stolen';
+@override
+String get unauthorizedCharge => 'Unauthorized Charge';
+@override
+String get unauthorizedChargeDesc => 'Report a charge you didn\'t authorize';
+@override
+String get other => 'Other';
+@override
+String get otherDesc => 'Report another type of issue';
+@override
+String get selectReason => 'Please select a reason';
+@override
+String get describeIssue => 'Please describe your issue';
+@override
+String get describeIssueHint => 'Describe your issue in details...';
+@override
+String get submitReport => 'Submit Report';
+@override
+String get reportSubmitted => 'Report submitted successfully';
+
+@override
+String get frozen => 'Frozen';
+
+@override
+String get analytics => 'Analytics';
+@override
+String get cards => 'Cards';
+@override
+String get profile => 'Profile';
+
+
   @override
   String get loginError => 'Invalid email or password';
 

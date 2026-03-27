@@ -503,6 +503,7 @@ abstract class AppLocalizations {
   /// **'Reset Password'**
   String get resetPasswordButton;
 
+
   /// No description provided for @loginError.
   ///
   /// In en, this message translates to:
@@ -646,6 +647,58 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copied to clipboard'**
   String get copied_to_clipboard;
+
+  String get welcomeBack;
+String get aiWatchdogActive;
+String get system;
+String get liveProtection;
+String get expiry;
+String get quickActions;
+String get add;
+String get details;
+String get freeze;
+String get recentActivity;
+String get safe;
+String get risk;
+String get blocked;
+
+String get balance;
+
+
+
+// ========== Quick Actions Screens ==========
+String get addTransaction;
+String get addTransactionDesc;
+String get detailsDesc;
+String get freezeCard;
+String get freezeCardDesc;
+String get report;
+
+
+// Report Screen
+String get whatWouldYouLikeToReport;
+String get suspiciousTransaction;
+String get suspiciousTransactionDesc;
+String get cardLostStolen;
+String get cardLostStolenDesc;
+String get unauthorizedCharge;
+String get unauthorizedChargeDesc;
+String get other;
+String get otherDesc;
+String get selectReason;
+String get describeIssue;
+String get describeIssueHint;
+String get submitReport;
+String get reportSubmitted;
+
+// Bottom Navigation Bar
+String get analytics;
+String get cards;
+String get profile;
+
+// Quick Actions
+String get frozen;
+
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
