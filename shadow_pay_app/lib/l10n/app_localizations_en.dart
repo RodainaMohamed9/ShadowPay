@@ -33,7 +33,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginTitle => 'Login';
 
   @override
-  String get welcomeMessage => 'Hello,Welcome!';
+  String get welcomeMessage => 'Hello, Welcome!';
 
   @override
   String get emailLabel => 'Email';
@@ -75,7 +75,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
-  String get loginSuccess => 'Login Successfully';
+  String get loginSuccess => 'Login successful! Welcome back.';
 
   @override
   String get full_name => 'Full Name';
@@ -120,7 +120,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmPassword => 'Confirm password';
 
   @override
-  String get phone => 'Phone number linked with your card';
+  String get phone => 'Phone';
 
   @override
   String get cardHolder => 'Card holder name';
@@ -213,6 +213,74 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resetPasswordButton => 'Reset Password';
 
   @override
-  String get loginError => 'Invalid email or password. Please try again.';
-  
+  String get loginError => 'Invalid email or password';
+
+  @override
+  String get add_transaction => 'Add Transaction';
+
+  @override
+  String get enter_transaction_details => 'Enter Transaction Details:';
+
+  @override
+  String get transaction_amount => 'Transaction Amount';
+
+  @override
+  String get amount_hint => '0.00';
+
+  @override
+  String get transaction_hour => 'Transaction Hour (0–23)';
+
+  @override
+  String get transaction_category => 'Transaction Category';
+
+  @override
+  String get category_hint => 'Select category';
+
+  @override
+  String get zip_code => 'Zip Code ';
+
+  @override
+  String get zip_code_hint => 'Enter zip code';
+
+  @override
+  String get analyze_transaction => 'Analyze Transaction';
+
+  @override
+  String get transaction_added_success => 'Transaction added successfully!';
+
+  @override
+  String get error_category => 'Please select a category';
+
+  @override
+  String get error_amount_empty => 'Please enter an amount';
+
+  @override
+  String get error_amount_invalid => 'Enter a valid number';
+
+  @override
+  String get error_zip_invalid => 'ZIP code must contain only numbers';
+
+  @override
+  String get error_amount_zero => 'Amount cannot be zero';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get premium_member => 'Premium Member';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get logout => 'Logout';
+
+  @override
+  String get logout_confirmation => 'Are you sure you want to logout?';
+
+  @override
+  String get personal_info => 'Personal Information';
+
+  @override
+  String get copied_to_clipboard => 'Copied to clipboard';
 }
