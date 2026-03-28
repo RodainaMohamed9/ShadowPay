@@ -33,7 +33,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginTitle => 'تسجيل الدخول';
 
   @override
-  String get welcomeMessage => 'اهلا ,مرحبا بك';
+  String get welcomeMessage => 'اهلاً, مرحبا بك';
 
   @override
   String get emailLabel => 'البريد الإلكتروني';
@@ -75,7 +75,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancel => 'إلغاء';
 
   @override
-  String get loginSuccess => 'تم تسجيل الدخول بنجاح';
+  String get loginSuccess => 'تم تسجيل الدخول بنجاح! مرحباً بعودتك.';
 
   @override
   String get full_name => 'الاسم الكامل';
@@ -120,7 +120,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get confirmPassword => 'تأكيد كلمة المرور';
 
   @override
-  String get phone => 'رقم الهاتف المسجل به البطاقة';
+  String get phone => 'رقم الهاتف';
 
   @override
   String get cardHolder => 'اسم حامل البطاقة';
@@ -213,6 +213,431 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resetPasswordButton => 'إعادة تعيين كلمة المرور';
 
   @override
-  String get loginError => 'البريد الألكتروني أو كلمة المرور خطأ. حاول مرة آخرى';
-  
+  String get loginError => 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+
+  @override
+  String get add_transaction => 'إضافة معاملة';
+
+  @override
+  String get enter_transaction_details => 'أدخل تفاصيل المعاملة:';
+
+  @override
+  String get transaction_amount => 'قيمة المعاملة ';
+
+  @override
+  String get amount_hint => '0.0';
+
+  @override
+  String get transaction_hour => 'ساعة المعاملة (٠–٢٣)';
+
+  @override
+  String get transaction_category => 'فئة المعاملة';
+
+  @override
+  String get category_hint => 'اختر الفئة';
+
+  @override
+  String get zip_code => 'الرمز البريدى';
+
+  @override
+  String get zip_code_hint => 'أدخل الرمز البريدي';
+
+  @override
+  String get analyze_transaction => 'تحليل المعاملة';
+
+  @override
+  String get transaction_added_success => 'تمت إضافة المعاملة بنجاح!';
+
+  @override
+  String get error_category => 'الرجاء اختيار فئة';
+
+  @override
+  String get error_amount_empty => 'الرجاء إدخال المبلغ';
+
+  @override
+  String get error_amount_invalid => 'أدخل رقماً صحيحاً';
+
+  @override
+  String get error_zip_invalid => 'الرمز البريدي يجب أن يحتوي على أرقام فقط';
+
+  @override
+  String get error_amount_zero => 'المبلغ لا يمكن أن يكون صفر';
+
+  @override
+  String get profile => 'الملف الشخصي';
+
+  @override
+  String get premium_member => 'عضو مميز';
+
+  @override
+  String get settings => 'الإعدادات';
+
+  @override
+  String get logout => 'تسجيل الخروج';
+
+  @override
+  String get logout_confirmation => 'هل أنت متأكد من تسجيل الخروج؟';
+
+  @override
+  String get personal_info => 'معلومات شخصية';
+
+  @override
+  String get copied_to_clipboard => 'تم النسخ إلى الحافظة';
+
+  @override
+  String get allTransactions => 'كل المعاملات';
+
+  @override
+  String get report => 'إبلاغ';
+
+  @override
+  String get whatWouldYouLikeToReport => 'ماذا تريد الإبلاغ عنه؟';
+
+  @override
+  String get selectReason => 'الرجاء اختيار سبب';
+
+  @override
+  String get describeIssue => 'الرجاء وصف المشكلة';
+
+  @override
+  String get describeIssueHint => 'الرجاء وصف مشكلتك بالتفصيل...';
+
+  @override
+  String get submitReport => 'إرسال البلاغ';
+
+  @override
+  String get reportSubmitted => 'تم إرسال البلاغ بنجاح!';
+
+  @override
+  String get suspiciousTransaction => 'معاملة مشبوهة';
+
+  @override
+  String get suspiciousTransactionDesc => 'معاملة لا تعرفها أو تبدو غير طبيعية';
+
+  @override
+  String get cardLostStolen => 'البطاقة مفقودة أو مسروقة';
+
+  @override
+  String get cardLostStolenDesc => 'بطاقتي مفقودة أو مسروقة أو أعتقد أنها مخترقة';
+
+  @override
+  String get unauthorizedCharge => 'رسوم غير مصرح بها';
+
+  @override
+  String get unauthorizedChargeDesc => 'رسوم لم أصرح بها أو أوافق عليها';
+
+  @override
+  String get other => 'أخرى';
+
+  @override
+  String get otherDesc => 'مشكلة أخرى غير مذكورة أعلاه';
+
+  @override
+  String get analytics => 'التحليلات';
+
+  @override
+  String get cards => 'البطاقات';
+
+  @override
+  String get quickActions => 'إجراءات سريعة';
+
+  @override
+  String get add => 'إضافة';
+
+  @override
+  String get details => 'التفاصيل';
+
+  @override
+  String get freeze => 'تجميد';
+
+  @override
+  String get frozen => 'مجمد';
+
+  @override
+  String get manage => 'إدارة';
+
+  @override
+  String get recentActivity => 'النشاط الأخير';
+
+  @override
+  String get safe => 'Safe';
+
+  @override
+  String get risk => 'خطر';
+
+  @override
+  String get blocked => 'محظور';
+
+  @override
+  String get expiry => 'تاريخ الانتهاء';
+
+  @override
+  String get balance => 'الرصيد';
+
+  @override
+  String get welcomeBack => 'مرحباً بعودتك،';
+
+  @override
+  String get aiWatchdogActive => 'AI Watchdog Active';
+
+  @override
+  String get system => 'النظام';
+
+  @override
+  String get liveProtection => 'حماية فورية تراقب جميع المعاملات';
+
+  @override
+  String get settingsTitle => 'الإعدادات';
+
+  @override
+  String get settingsSubtitle => 'إدارة تفضيلاتك وحسابك';
+
+  @override
+  String get notifications => 'الإشعارات';
+
+  @override
+  String get pushNotifications => 'إشعارات الدفع';
+
+  @override
+  String get pushNotificationsDesc => 'تلقي تنبيهات فورية عن المعاملات';
+
+  @override
+  String get emailNotifications => 'إشعارات البريد الإلكتروني';
+
+  @override
+  String get emailNotificationsDesc => 'تلقي التقارير والتحديثات عبر البريد';
+
+  @override
+  String get sms => 'الرسائل النصية (SMS)';
+
+  @override
+  String get smsDesc => 'تنبيهات المعاملات الحرجة';
+
+  @override
+  String get sound => 'الصوت';
+
+  @override
+  String get soundDesc => 'تشغيل نغمة الإشعارات';
+
+  @override
+  String get vibration => 'الاهتزاز';
+
+  @override
+  String get vibrationDesc => 'اهتزاز الجهاز عند الإشعارات';
+
+  @override
+  String get securityPrivacy => 'الأمان والخصوصية';
+
+  @override
+  String get biometric => 'المصادقة البيومترية';
+
+  @override
+  String get biometricDesc => 'بصمة الإصبع أو التعرف على الوجه';
+
+  @override
+  String get twoFA => 'المصادقة الثنائية (2FA)';
+
+  @override
+  String get twoFADesc => 'حماية إضافية لحسابك';
+
+  @override
+  String get autoLock => 'القفل التلقائي';
+
+  @override
+  String get autoLockDesc => 'قفل التطبيق عند عدم الاستخدام';
+
+  @override
+  String get hideBalance => 'إخفاء الرصيد';
+
+  @override
+  String get hideBalanceDesc => 'إخفاء الأرصدة في الشاشة الرئيسية';
+
+  @override
+  String get preferences => 'التفضيلات';
+
+  @override
+  String get language => 'اللغة';
+
+  @override
+  String get theme => 'المظهر';
+
+  @override
+  String get dark => 'داكن';
+
+  @override
+  String get currency => 'العملة الافتراضية';
+
+  @override
+  String get supportInfo => 'معلومات ودعم';
+
+  @override
+  String get about => 'عن التطبيق';
+
+  @override
+  String get helpCenter => 'مركز المساعدة';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get termsOfService => 'شروط الخدمة';
+
+  @override
+  String get deleteAccount => 'حذف الحساب نهائيًا';
+
+  @override
+  String get verified => 'موثّق';
+
+  @override
+  String get securedByAI => 'محمي بالذكاء الاصطناعي';
+
+  @override
+  String get version => 'الإصدار 1.0.0';
+
+  @override
+  String get logoutDialogTitle => 'تسجيل الخروج';
+
+  @override
+  String get logoutDialogMessage => 'هل أنت متأكد من رغبتك في تسجيل الخروج؟';
+
+  @override
+  String get deleteDialogTitle => 'حذف الحساب';
+
+  @override
+  String get deleteDialogMessage => 'هل أنت متأكد؟ هذا الإجراء لا يمكن التراجع عنه';
+
+  @override
+  String get confirm => 'تأكيد';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get cardManagement => 'إدارة البطاقات';
+
+  @override
+  String get cardManagementSubtitle => 'تحكم في بطاقاتك وأمانها';
+
+  @override
+  String get cardFrozen => 'البطاقة مجمدة';
+
+  @override
+  String get cardActive => 'البطاقة نشطة';
+
+  @override
+  String get cardFrozenDesc => 'جميع المعاملات موقوفة مؤقتاً';
+
+  @override
+  String get cardActiveDesc => 'يمكنك إجراء المعاملات بشكل طبيعي';
+
+  @override
+  String get availableBalance => 'الرصيد المتاح';
+
+  @override
+  String get cardNumberMasked => '****  ****  ****  4829';
+
+  @override
+  String get cardHolderName => 'الاسم';
+
+  @override
+  String get cardHolderValue => 'أحمد السيد';
+
+  @override
+  String get expiryDate => 'الصلاحية';
+
+  @override
+  String get expiryDateValue => '12/28';
+
+  @override
+  String get cardDetails => 'تفاصيل البطاقة';
+
+  @override
+  String get cardType => 'نوع البطاقة';
+
+  @override
+  String get cardTypeValue => 'فيزا بلاتينيوم';
+
+  @override
+  String get issueDate => 'تاريخ الإصدار';
+
+  @override
+  String get issueDateValue => '12/2023';
+
+  @override
+  String get freezeCard => 'تجميد البطاقة';
+
+  @override
+  String get unfreezeCard => 'إلغاء تجميد البطاقة';
+
+  @override
+  String get aboutFreeze => 'حول تجميد البطاقة';
+
+  @override
+  String get freezeInfo1 => 'تجميد البطاقة يمنع جميع المعاملات فوراً';
+
+  @override
+  String get freezeInfo2 => 'يمكنك إلغاء التجميد في أي وقت لاستعادة الاستخدام الطبيعي';
+
+  @override
+  String get freezeInfo3 => 'الذكاء الاصطناعي يجمد المعاملات عالية المخاطر تلقائياً';
+
+  @override
+  String get cardFrozenSnackbar => '❄️ تم تجميد البطاقة';
+
+  @override
+  String get cardUnfrozenSnackbar => '✅ تم إلغاء تجميد البطاقة';
+
+  @override
+  String get viewAll => 'عرض الكل';
+
+  @override
+  String get numTransactions => 'المعاملات';
+
+  @override
+  String get totalAmount => 'إجمالي المبلغ';
+
+  @override
+  String get transactionsCount => 'المعاملات';
+
+  @override
+  String get searchHint => 'ابحث عن معاملة....';
+
+  @override
+  String get all => 'الكل';
+
+  @override
+  String get warning => 'Warning';
+
+  @override
+  String get fraud => 'احتيال';
+
+  @override
+  String get restaurant => 'مطعم';
+
+  @override
+  String get flightTicket => 'تذكرة طيران';
+
+  @override
+  String get gym => 'جيم';
+
+  @override
+  String get amount => 'المبلغ';
+
+  @override
+  String get percentage => '٪';
+
+  @override
+  String get dateTime => 'التاريخ والوقت';
+
+  @override
+  String get transactions => 'المعاملات';
+
+  @override
+  String get noTransactionsYet => 'لا توجد معاملات بعد!!';
+
+  @override
+  String get startAddingTransactions => 'ابدأ بإضافة معاملاتك الأولى';
+
+  @override
+  String get addTransaction => 'إضافة معاملة';
 }
