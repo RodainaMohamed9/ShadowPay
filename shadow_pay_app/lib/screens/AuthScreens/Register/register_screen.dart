@@ -2,9 +2,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
-import 'package:shadow_pay_app/screens/login/login_Screen.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
 import 'package:shadow_pay_app/services/auth_service.dart';
-import 'package:shadow_pay_app/screens/ForgetPassword/otp_screen.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/ForgetPassword/otp_screen.dart';
 
 
 class RegisterScreen extends StatefulWidget {
@@ -433,7 +433,6 @@ class _RegisterScreenState extends State<RegisterScreen>
           int.parse(parts[0]),
         );
 
-        // ✅ استخدم ApiService.registerUser الموجود عندك
         bool success = await ApiService.registerUser(
           context: context,
           fullName: fullNameController.text.trim(),
@@ -449,7 +448,6 @@ class _RegisterScreenState extends State<RegisterScreen>
         if (!mounted) return;
 
         if (success) {
-          // ✅ بعد نجاح إرسال البيانات و OTP، نروح لشاشة OTP
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -460,7 +458,6 @@ class _RegisterScreenState extends State<RegisterScreen>
             ),
           );
         }
-        // لو success = false، الـ ApiService already showed error dialog
         
       } catch (e) {
         print("ERROR in submit: $e");
@@ -511,7 +508,7 @@ class _RegisterScreenState extends State<RegisterScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo with enhanced shadow (في مكانه الأصلي)
+
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),

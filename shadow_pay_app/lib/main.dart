@@ -3,8 +3,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/screens/splash/splash_screen.dart';
 import 'package:shadow_pay_app/screens/Onboard/onboarding_screen.dart';
-import 'package:shadow_pay_app/screens/ForgetPassword/otp_screen.dart';
-import 'package:shadow_pay_app/screens/login/login_Screen.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/ForgetPassword/otp_screen.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/providers/language_provider.dart';
 
