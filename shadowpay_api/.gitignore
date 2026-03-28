@@ -13,6 +13,3 @@ obj/
 
 # Logs
 *.log
-
-# Secrets (لو عندك أي ملفات فيها API Keys)
-appsettings.json

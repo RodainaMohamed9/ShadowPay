@@ -640,4 +640,5 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get addTransaction => 'إضافة معاملة';
+
 }

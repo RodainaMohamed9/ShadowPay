@@ -128,7 +128,8 @@
     "welcomeBack": "Welcome back,",
       "aiWatchdogActive": "AI Watchdog Active",
       "system": "System",
-        "liveProtection": "Live protection monitoring all transactions",        
+        "liveProtection": "Live protection monitoring all transactions",
+        
   "settingsTitle": "Settings",
   "settingsSubtitle": "Manage your preferences and account",
   "notifications": "Notifications",

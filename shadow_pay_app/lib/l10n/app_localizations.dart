@@ -1252,7 +1252,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'✅ Card Unfrozen'**
   String get cardUnfrozenSnackbar;
-
   /// No description provided for @viewAll.
   ///
   /// In en, this message translates to:
@@ -1360,6 +1359,7 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Transaction'**
   String get addTransaction;
+
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
