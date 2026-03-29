@@ -586,4 +586,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardUnfrozenSnackbar => '✅ Card Unfrozen';
+
+  @override
+  String get viewAll => 'View All';
+
+  @override
+  String get numTransactions => 'Transactions';
+
+  @override
+  String get totalAmount => 'Total Amount';
+
+  @override
+  String get transactionsCount => 'Transactions';
+
+  @override
+  String get searchHint => 'Search for a transaction....';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get warning => 'Warning';
+
+  @override
+  String get fraud => 'Fraud';
+
+  @override
+  String get restaurant => 'Restaurant';
+
+  @override
+  String get flightTicket => 'Flight Ticket';
+
+  @override
+  String get gym => 'Gym';
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get percentage => '%';
+
+  @override
+  String get dateTime => 'Date & Time';
+
+  @override
+  String get transactions => 'Transactions';
+
+  @override
+  String get noTransactionsYet => 'No Transactions Yet!!';
+
+  @override
+  String get startAddingTransactions => 'Start adding your first transaction';
+
+  @override
+  String get addTransaction => 'Add Transaction';
+
 }

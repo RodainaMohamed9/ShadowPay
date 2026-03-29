@@ -34,7 +34,6 @@ static Future<void> unfreezeCard() async {
   static const String _keyUserCardName = 'user_card_name';
   static const String _keyUserCardExpiry = 'user_card_expiry';
 
-
   // ---- Onboarding ----
   static Future<void> setOnboardingSeen() async {
     final prefs = await SharedPreferences.getInstance();

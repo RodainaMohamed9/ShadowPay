@@ -1252,6 +1252,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'✅ Card Unfrozen'**
   String get cardUnfrozenSnackbar;
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get viewAll;
+
+  /// No description provided for @numTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get numTransactions;
+
+  /// No description provided for @totalAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Amount'**
+  String get totalAmount;
+
+  /// No description provided for @transactionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactionsCount;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a transaction....'**
+  String get searchHint;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get warning;
+
+  /// No description provided for @fraud.
+  ///
+  /// In en, this message translates to:
+  /// **'Fraud'**
+  String get fraud;
+
+  /// No description provided for @restaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get restaurant;
+
+  /// No description provided for @flightTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight Ticket'**
+  String get flightTicket;
+
+  /// No description provided for @gym.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym'**
+  String get gym;
+
+  /// No description provided for @amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amount;
+
+  /// No description provided for @percentage.
+  ///
+  /// In en, this message translates to:
+  /// **'%'**
+  String get percentage;
+
+  /// No description provided for @dateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Date & Time'**
+  String get dateTime;
+
+  /// No description provided for @transactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactions;
+
+  /// No description provided for @noTransactionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No Transactions Yet!!'**
+  String get noTransactionsYet;
+
+  /// No description provided for @startAddingTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Start adding your first transaction'**
+  String get startAddingTransactions;
+
+  /// No description provided for @addTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Transaction'**
+  String get addTransaction;
+
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -360,7 +360,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recentActivity => 'النشاط الأخير';
 
   @override
-  String get safe => 'آمن';
+  String get safe => 'Safe';
 
   @override
   String get risk => 'خطر';
@@ -586,4 +586,59 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cardUnfrozenSnackbar => '✅ تم إلغاء تجميد البطاقة';
+
+  @override
+  String get viewAll => 'عرض الكل';
+
+  @override
+  String get numTransactions => 'المعاملات';
+
+  @override
+  String get totalAmount => 'إجمالي المبلغ';
+
+  @override
+  String get transactionsCount => 'المعاملات';
+
+  @override
+  String get searchHint => 'ابحث عن معاملة....';
+
+  @override
+  String get all => 'الكل';
+
+  @override
+  String get warning => 'Warning';
+
+  @override
+  String get fraud => 'احتيال';
+
+  @override
+  String get restaurant => 'مطعم';
+
+  @override
+  String get flightTicket => 'تذكرة طيران';
+
+  @override
+  String get gym => 'جيم';
+
+  @override
+  String get amount => 'المبلغ';
+
+  @override
+  String get percentage => '٪';
+
+  @override
+  String get dateTime => 'التاريخ والوقت';
+
+  @override
+  String get transactions => 'المعاملات';
+
+  @override
+  String get noTransactionsYet => 'لا توجد معاملات بعد!!';
+
+  @override
+  String get startAddingTransactions => 'ابدأ بإضافة معاملاتك الأولى';
+
+  @override
+  String get addTransaction => 'إضافة معاملة';
+
 }

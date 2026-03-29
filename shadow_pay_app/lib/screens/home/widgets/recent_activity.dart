@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 
+import 'package:shadow_pay_app/screens/TransactionScreens/transaction_list.dart';
+
 class RecentActivity extends StatelessWidget {
   const RecentActivity({super.key});
 
@@ -31,17 +33,39 @@ class RecentActivity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          loc.recentActivity,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              loc.recentActivity,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                     MaterialPageRoute(
+                      builder: (context) => TransactionList()
+                      )
+                      );
+                },
+
+                child: Text(
+                 loc.viewAll,
+                style: const TextStyle(
+                  color: Color(0xff00D5BE),
+                ),
+                )
+                )
+          ],
         ),
         const SizedBox(height: 16),
         ...activities.map((activity) => _buildActivityItem(activity, loc)),
