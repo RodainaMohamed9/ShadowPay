@@ -1,18 +1,20 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/screens/home/home_screen.dart';
-import 'package:shadow_pay_app/constants/colors.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
-import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/login/login_screen.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
-import 'package:shadow_pay_app/services/auth_service.dart'; // ✅ تأكد من هذا الـ import
+import 'package:shadow_pay_app/services/auth_service.dart';
+import 'package:shadow_pay_app/providers/theme_provider.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
-  final String? otp; 
+  final String? otp;
 
-  const ResetPasswordScreen({super.key, required this.email, this.otp}); 
-  
+  const ResetPasswordScreen({super.key, required this.email, this.otp});
+
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
 }
@@ -26,7 +28,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   Future<void> resetPassword() async {
     final loc = AppLocalizations.of(context)!;
-    
+
     if (passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(loc.passwordRequired)),
@@ -61,11 +63,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       if (!mounted) return;
 
       if (result['success'] == true) {
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message'] ?? loc.passwordResetSuccess),
-            backgroundColor: Colors.teal,
+            backgroundColor: context.primaryColor,
           ),
         );
 
@@ -78,17 +79,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message'] ?? 'Failed to reset password'),
-            backgroundColor: Colors.red,
+            backgroundColor: context.errorColor,
           ),
         );
       }
-    } 
-    catch (e) {
+    } catch (e) {
       print("Reset password error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("An unexpected error occurred: $e"),
-          backgroundColor: Colors.red,
+          backgroundColor: context.errorColor,
         ),
       );
     } finally {
@@ -100,16 +100,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     final isRTL = Localizations.localeOf(context).languageCode == 'ar';
+    final isDarkMode = context.isDarkMode;
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xff0a1628),
-              Color(0xff0f1f3a),
-              Color(0xff0a1628)
-            ],
+            colors: isDarkMode
+                ? [Color(0xff0a1628), Color(0xff0f1f3a), Color(0xff0a1628)]
+                : [Color(0xfff5f7fa), Color(0xffe8ecf1), Color(0xfff5f7fa)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -119,52 +118,53 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
+                // Logo
                 Container(
-                  width: 80,
-                  height: 80,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Colors.white10,
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
+                        color: context.primaryColor.withOpacity(0.3),
+                        blurRadius: 25,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 10),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 15,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 5),
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.lock_reset,
-                    color: Colors.white,
-                    size: 40,
-                  ),
+                  child: ResetLogoWidget(isDarkMode: isDarkMode),
                 ),
                 const SizedBox(height: 25),
 
                 Text(
                   loc.resetPassword,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.textPrimary,
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 30),
 
-                GlassCard(
+                GlassCardReset(
+                  isDarkMode: isDarkMode,
                   child: Column(
                     children: [
-                      buildField(
+                      _buildField(
                         controller: passwordController,
                         hint: loc.newPassword,
                         icon: Icons.lock,
                         obscure: !showPassword,
+                        isDarkMode: isDarkMode,
                         suffix: IconButton(
                           icon: Icon(
-                            showPassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: Colors.white70,
+                            showPassword ? Icons.visibility_off : Icons.visibility,
+                            color: context.textSecondary,
                           ),
                           onPressed: () {
                             setState(() {
@@ -175,17 +175,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       ),
                       const SizedBox(height: 15),
 
-                      buildField(
+                      _buildField(
                         controller: confirmController,
                         hint: loc.confirmPassword,
                         icon: Icons.lock,
                         obscure: !showConfirm,
+                        isDarkMode: isDarkMode,
                         suffix: IconButton(
                           icon: Icon(
-                            showConfirm
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: Colors.white70,
+                            showConfirm ? Icons.visibility_off : Icons.visibility,
+                            color: context.textSecondary,
                           ),
                           onPressed: () {
                             setState(() {
@@ -202,11 +201,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         child: ElevatedButton(
                           onPressed: isLoading ? null : resetPassword,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryTeal,
-                            foregroundColor: Colors.white, 
+                            backgroundColor: context.primaryColor,
+                            foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                             ),
+                            elevation: 5,
                           ),
                           child: isLoading
                               ? const SizedBox(
@@ -223,28 +223,26 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                 ),
                         ),
                       ),
-                      
                       const SizedBox(height: 15),
-                      
                       TextButton(
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const LoginScreen(),
-                            )
+                            ),
                           );
                         },
                         child: Text(
                           loc.backToLogin,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: context.textSecondary,
                           ),
                         ),
                       )
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -253,44 +251,103 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     );
   }
 
-  Widget buildField({
+  Widget _buildField({
     required TextEditingController controller,
     required String hint,
     required IconData icon,
     bool obscure = false,
     Widget? suffix,
+    required bool isDarkMode,
   }) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       obscureText: obscure,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: context.textPrimary,
+        fontSize: 16,
       ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(
-          color: Colors.white54,
+        hintStyle: TextStyle(
+          color: context.hintColor,
         ),
         prefixIcon: Icon(
           icon,
-          color: Colors.white70,
+          color: context.textSecondary,
         ),
         suffixIcon: suffix,
         filled: true,
-        fillColor: Colors.black26,
+        fillColor: context.progressBgColor,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isDarkMode ? Colors.transparent : Colors.grey.shade300,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: context.primaryColor,
+            width: 1.5,
+          ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+      ),
+    );
+  }
+}
+
+// Reset Logo Widget
+class ResetLogoWidget extends StatelessWidget {
+  final bool isDarkMode;
+  const ResetLogoWidget({super.key, required this.isDarkMode});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.asset(
+          'assets/icon/icon.png',
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+              child: Icon(
+                Icons.lock_reset,
+                color: context.textSecondary,
+                size: 40,
+              ),
+            );
+          },
         ),
       ),
     );
   }
 }
 
-class GlassCard extends StatelessWidget {
+// GlassCard Widget for Reset Password
+class GlassCardReset extends StatelessWidget {
   final Widget child;
-
-  const GlassCard({super.key, required this.child});
+  final bool isDarkMode;
+  const GlassCardReset({super.key, required this.child, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -301,9 +358,15 @@ class GlassCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.05),
+            color: isDarkMode
+                ? Colors.white.withOpacity(0.05)
+                : Colors.white.withOpacity(0.7),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white10),
+            border: Border.all(
+              color: isDarkMode
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.white.withOpacity(0.5),
+            ),
           ),
           child: child,
         ),

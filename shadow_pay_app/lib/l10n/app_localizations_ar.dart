@@ -360,7 +360,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recentActivity => 'النشاط الأخير';
 
   @override
-  String get safe => 'Safe';
+  String get safe => 'آمن';
 
   @override
   String get risk => 'خطر';
@@ -585,7 +585,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cardFrozenSnackbar => '❄️ تم تجميد البطاقة';
 
   @override
-  String get cardUnfrozenSnackbar => '✅ تم إلغاء تجميد البطاقة';
+  String get cardUnfrozenSnackbar => ' تم إلغاء تجميد البطاقة';
 
   @override
   String get viewAll => 'عرض الكل';
@@ -641,4 +641,27 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get addTransaction => 'إضافة معاملة';
 
+  @override
+  String get fullControl => 'تحكم كامل';
+
+  @override
+  String get advancedAI => 'ذكاء اصطناعي متقدم';
+
+  @override
+  String get freeze_detail_message => ' عند تجميد البطاقة، يتم إيقاف جميع عمليات الشراء والسحب الفوري لحماية أموالك. يمكنك إلغاء التجميد بنقرة واحدة عند الحاجة للاستخدام.\n\n المدفوعات المتكررة المجدولة لا تتأثر بعملية التجميد.';
+
+  @override
+  String get full_control_detail_message => ' التحكم الكامل في بطاقتك بين يديك.\n\n• قم بتجميدها أو إلغاء تجميدها في أي وقت\n• يمكنك إجراء ذلك من أي مكان عبر التطبيق\n• الأمان المطلق مع سهولة الاستخدام\n• إشعارات فورية عند كل تغيير';
+
+  @override
+  String get advanced_ai_detail_message => ' نظام الذكاء الاصطناعي المتطور:\n\n• يحلل أنماط معاملاتك في الوقت الفعلي\n• يكتشف أي نشاط غير معتاد أو عالي المخاطر\n• يقوم بتجميد البطاقة تلقائياً لحمايتك من الاحتيال\n• يتعلم من عاداتك المالية لتحسين الدقة';
+
+  @override
+  String get securityControlCenter => 'مركز التحكم الأمني';
+
+  @override
+  String get securityControlSubtitle => 'ميزات متقدمة لحماية بطاقتك';
+
+  @override
+  String get cardStyle => 'نمط البطاقة';
 }

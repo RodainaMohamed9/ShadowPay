@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
+import 'package:shadow_pay_app/providers/theme_provider.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -39,32 +42,42 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final localizations = AppLocalizations.of(context)!;
     final isRTL = Localizations.localeOf(context).languageCode == 'ar';
     
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+    
+    final primaryColor = isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary;
+    final backgroundColor = isDarkMode ? AppColors.darkBackground : AppColors.lightBackground;
+    final surfaceColor = isDarkMode ? AppColors.darkSurface : AppColors.lightSurface;
+    final inputColor = isDarkMode ? AppColors.darkProgressBg : AppColors.lightProgressBg;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final textSecondaryColor = isDarkMode ? Colors.white70 : Colors.grey[700];
+    final hintColor = isDarkMode ? Colors.white38 : Colors.grey.shade500;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF0D111F),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D111F),
+        backgroundColor: backgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Transform.scale(
             scaleX: isRTL ? -1 : 1,
-            child: const Icon(Icons.arrow_back, color: Colors.white),
+            child: Icon(Icons.arrow_back, color: textColor),
           ),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: textColor),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Title فوق الـ box
             Padding(
               padding: const EdgeInsets.only(top: 24, bottom: 16),
               child: Text(
                 localizations.add_transaction,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: textColor,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
@@ -72,13 +85,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 textAlign: TextAlign.center,
               ),
             ),
-            // Container بتاع الفورم
             Center(
               child: Container(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF141A2B),
+                  color: surfaceColor,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
@@ -94,13 +106,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // العنوان الداخلي (اتجاهه حسب اللغة)
                       Align(
                         alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
                         child: Text(
                           localizations.enter_transaction_details,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: textColor,
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -113,8 +124,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
                         child: Text(
                           localizations.transaction_amount,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: textSecondaryColor,
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -124,24 +135,26 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       TextFormField(
                         controller: _amountController,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
-                        textDirection: TextDirection.ltr, // الأرقام LTR
+                        style: TextStyle(color: textColor, fontSize: 16),
+                        textDirection: TextDirection.ltr,
                         textAlign: TextAlign.left,
-                        decoration: _inputDecoration(localizations.amount_hint).copyWith(
-                          prefixIcon: const Icon(
-                            Icons.attach_money,
-                            color: Color(0xFF00D8A2),
-                          ),
+                        decoration: _inputDecoration(
+                          localizations.amount_hint,
+                          hintColor,
+                          inputColor,
+                          primaryColor,
+                        ).copyWith(
+                          prefixIcon: Icon(Icons.attach_money, color: primaryColor),
                           suffixIcon: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Container(
                                 width: 1,
                                 height: 30,
-                                color: Colors.white24,
+                                color: hintColor,
                               ),
                               IconButton(
-                                icon: const Icon(Icons.remove, color: Colors.white70, size: 20),
+                                icon: Icon(Icons.remove, color: textSecondaryColor, size: 20),
                                 onPressed: () {
                                   if (_amountController.text.isNotEmpty) {
                                     double currentValue = double.tryParse(_amountController.text) ?? 0;
@@ -157,7 +170,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                 },
                               ),
                               IconButton(
-                                icon: const Icon(Icons.add, color: Colors.white70, size: 20),
+                                icon: Icon(Icons.add, color: textSecondaryColor, size: 20),
                                 onPressed: () {
                                   double currentValue = double.tryParse(_amountController.text) ?? 0;
                                   double newValue = currentValue + 1;
@@ -190,8 +203,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
                         child: Text(
                           localizations.transaction_hour,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: textSecondaryColor,
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -200,36 +213,24 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text(
-                            "0",
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 12,
-                            ),
-                          ),
-                          Text(
-                            "23",
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 12,
-                            ),
-                          ),
+                        children: [
+                          Text("0", style: TextStyle(color: hintColor, fontSize: 12)),
+                          Text("23", style: TextStyle(color: hintColor, fontSize: 12)),
                         ],
                       ),
                       SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           showValueIndicator: ShowValueIndicator.always,
-                          valueIndicatorColor: const Color(0xFF00D8A2),
+                          valueIndicatorColor: primaryColor,
                           valueIndicatorTextStyle: const TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
-                          overlayColor: const Color(0xFF00D8A2).withOpacity(0.2),
-                          thumbColor: const Color(0xFF00D8A2),
-                          activeTrackColor: const Color(0xFF00D8A2),
-                          inactiveTrackColor: Colors.white24,
+                          overlayColor: primaryColor.withValues(alpha: 0.2),
+                          thumbColor: primaryColor,
+                          activeTrackColor: primaryColor,
+                          inactiveTrackColor: hintColor,
                           thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
                           overlayShape: const RoundSliderOverlayShape(overlayRadius: 24),
                         ),
@@ -253,8 +254,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
                         child: Text(
                           localizations.transaction_category,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: textSecondaryColor,
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -269,21 +270,23 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           radius: const Radius.circular(10),
                           child: DropdownButtonFormField<String>(
                             isExpanded: true,
-                            dropdownColor: const Color(0xFF1F2A44),
+                            dropdownColor: inputColor,
                             value: _selectedCategory,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: _inputDecoration(localizations.category_hint).copyWith(
-                              prefixIcon: const Icon(
-                                Icons.category,
-                                color: Color(0xFF00D8A2),
-                              ),
+                            style: TextStyle(color: textColor),
+                            decoration: _inputDecoration(
+                              localizations.category_hint,
+                              hintColor,
+                              inputColor,
+                              primaryColor,
+                            ).copyWith(
+                              prefixIcon: Icon(Icons.category, color: primaryColor),
                             ),
                             items: categories.map((cat) {
                               return DropdownMenuItem(
                                 value: cat,
                                 child: Text(
                                   cat,
-                                  style: const TextStyle(fontSize: 14),
+                                  style: TextStyle(fontSize: 14, color: textColor),
                                 ),
                               );
                             }).toList(),
@@ -293,10 +296,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                               });
                             },
                             menuMaxHeight: 200,
-                            icon: const Icon(
-                              Icons.arrow_drop_down,
-                              color: Color(0xFF00D8A2),
-                            ),
+                            icon: Icon(Icons.arrow_drop_down, color: primaryColor),
                           ),
                         ),
                       ),
@@ -307,8 +307,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
                         child: Text(
                           localizations.zip_code,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: textSecondaryColor,
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -318,14 +318,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       TextFormField(
                         controller: _zipController,
                         keyboardType: TextInputType.number,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: textColor),
                         textDirection: TextDirection.ltr,
                         textAlign: TextAlign.left,
-                        decoration: _inputDecoration(localizations.zip_code_hint).copyWith(
-                          prefixIcon: const Icon(
-                            Icons.location_on,
-                            color: Color(0xFF00D8A2),
-                          ),
+                        decoration: _inputDecoration(
+                          localizations.zip_code_hint,
+                          hintColor,
+                          inputColor,
+                          primaryColor,
+                        ).copyWith(
+                          prefixIcon: Icon(Icons.location_on, color: primaryColor),
                         ),
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
@@ -347,13 +349,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00D8A2),
+                            backgroundColor: primaryColor,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
                             elevation: 5,
-                            shadowColor: const Color(0xFF00D8A2).withOpacity(0.5),
+                            shadowColor: primaryColor.withValues(alpha: 0.5),
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
@@ -371,7 +373,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                 return;
                               }
                               
-                              // البيانات كلها بالإنجليزي للـ API
                               print("Amount: ${_amountController.text}");
                               print("Hour: $_hour");
                               print("Category: $_selectedCategory");
@@ -401,36 +402,27 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-  InputDecoration _inputDecoration(String hint) {
+  InputDecoration _inputDecoration(String hint, Color hintColor, Color fillColor, Color primaryColor) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.white38, fontSize: 14),
+      hintStyle: TextStyle(color: hintColor, fontSize: 14),
       filled: true,
-      fillColor: const Color(0xFF1F2A44),
+      fillColor: fillColor,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(
-          color: Color(0xFF00D8A2),
-          width: 1.5,
-        ),
+        borderSide: BorderSide(color: primaryColor, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(
-          color: Colors.red,
-          width: 1.5,
-        ),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(
-          color: Colors.red,
-          width: 1.5,
-        ),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
       ),
       errorStyle: const TextStyle(color: Colors.red, fontSize: 12),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

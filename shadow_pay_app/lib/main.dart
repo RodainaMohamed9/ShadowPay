@@ -4,9 +4,13 @@ import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/screens/splash/splash_screen.dart';
 import 'package:shadow_pay_app/screens/Onboard/onboarding_screen.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/ForgetPassword/otp_screen.dart';
-import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/login/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/providers/language_provider.dart';
+import 'package:shadow_pay_app/providers/theme_provider.dart';
+import 'package:shadow_pay_app/screens/home/home_screen.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
+import 'package:shadow_pay_app/theme/app_theme_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,26 +22,18 @@ class MyApp extends StatefulWidget {
 
   @override
   State<MyApp> createState() => _MyAppState();
-
-  static _MyAppState of(BuildContext context) =>
-      context.findAncestorStateOfType<_MyAppState>()!;
 }
 
 class _MyAppState extends State<MyApp> {
-  Locale _locale = const Locale('en');
-
-  void setLocale(Locale locale) {
-    setState(() {
-      _locale = locale;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => LanguageProvider(),
-      child: Consumer<LanguageProvider>(
-        builder: (context, languageProvider, child) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => LanguageProvider()),
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+      ],
+      child: Consumer2<LanguageProvider, ThemeProvider>(
+        builder: (context, languageProvider, themeProvider, child) {
           return MaterialApp(
             title: 'Shadow Pay',
             debugShowCheckedModeBanner: false,
@@ -47,14 +43,13 @@ class _MyAppState extends State<MyApp> {
               Locale('ar'),
             ],
             localizationsDelegates: const [
-              AppLocalizations.delegate, // ✅ ده الصح مش S.delegate
+              AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
             localeResolutionCallback: (locale, supportedLocales) {
               if (locale == null) return supportedLocales.first;
-
               for (var supportedLocale in supportedLocales) {
                 if (supportedLocale.languageCode == locale.languageCode) {
                   return supportedLocale;
@@ -62,6 +57,9 @@ class _MyAppState extends State<MyApp> {
               }
               return supportedLocales.first;
             },
+            theme: AppThemes.lightTheme,
+            darkTheme: AppThemes.darkTheme,
+            themeMode: themeProvider.themeMode,
             home: const SplashScreen(),
           );
         },

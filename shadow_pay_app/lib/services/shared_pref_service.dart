@@ -101,7 +101,7 @@ static Future<void> unfreezeCard() async {
     return prefs.getString(_keyUserEmail);
   }
 
-  
+  // رقم الهاتف
   static Future<void> setUserPhone(String phone) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyUserPhone, phone);
@@ -176,4 +176,17 @@ static Future<void> unfreezeCard() async {
     await prefs.remove(_tokenKey);
 
   }
+
+  //fatma
+  static const String _keyCardFrozen = 'card_frozen';
+
+static Future<bool> getCardFrozenStatus() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool(_keyCardFrozen) ?? false;
+}
+
+static Future<void> setCardFrozen(bool isFrozen) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(_keyCardFrozen, isFrozen);
+}
 }
