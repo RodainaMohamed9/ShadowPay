@@ -1252,6 +1252,7 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'✅ Card Unfrozen'**
   String get cardUnfrozenSnackbar;
+
   /// No description provided for @viewAll.
   ///
   /// In en, this message translates to:
@@ -1360,6 +1361,53 @@ abstract class AppLocalizations {
   /// **'Add Transaction'**
   String get addTransaction;
 
+  /// No description provided for @fullControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Control'**
+  String get fullControl;
+
+  /// No description provided for @advancedAI.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced AI'**
+  String get advancedAI;
+
+  /// No description provided for @freeze_detail_message.
+  ///
+  /// In en, this message translates to:
+  /// **' When you freeze your card, all purchases and instant withdrawals are stopped immediately to protect your money. You can unfreeze with one tap when you need to use it.\n\n Recurring scheduled payments are not affected by freezing.'**
+  String get freeze_detail_message;
+
+  /// No description provided for @full_control_detail_message.
+  ///
+  /// In en, this message translates to:
+  /// **' Full control of your card is in your hands.\n\n• Freeze or unfreeze it anytime\n• Do it from anywhere through the app\n• Absolute security with ease of use\n• Instant notifications for every change'**
+  String get full_control_detail_message;
+
+  /// No description provided for @advanced_ai_detail_message.
+  ///
+  /// In en, this message translates to:
+  /// **' Advanced AI system:\n\n• Analyzes your transaction patterns in real-time\n• Detects any unusual or high-risk activity\n• Automatically freezes your card to protect you from fraud\n• Learns from your financial habits to improve accuracy'**
+  String get advanced_ai_detail_message;
+
+  /// No description provided for @securityControlCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Control Center'**
+  String get securityControlCenter;
+
+  /// No description provided for @securityControlSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced card protection features'**
+  String get securityControlSubtitle;
+
+  /// No description provided for @cardStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Style'**
+  String get cardStyle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
