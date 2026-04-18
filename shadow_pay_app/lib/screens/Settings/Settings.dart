@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
+import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/providers/language_provider.dart'; // أضف المسار الصحيح لملف الـ Provider
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -17,15 +19,40 @@ class _SettingsScreenState extends State<SettingsPage>
   static const Color primary = Color(0xFF1E8F7A);
   static const Color cardBorderColor = Color(0xFF1E2A3D);
   static const Color textSecondary = Color(0xFF8A9BB5);
+  
+  // Light theme colors
+  static const Color bgLight = Color(0xFFF5F5F5);
+  static const Color bgLight2 = Color(0xFFFFFFFF);
+  static const Color cardBorderColorLight = Color(0xFFE0E0E0);
+  static const Color textSecondaryLight = Color(0xFF666666);
+  static const Color textPrimaryLight = Color(0xFF1A1A1A);
 
   // ================= ANIMATION CONTROLLERS =================
   late AnimationController _mainController;
   late AnimationController _headerController;
   late AnimationController _cardController;
-  late List<AnimationController> _sectionControllers = [];
-  late List<AnimationController> _itemControllers = [];
-  late List<AnimationController> _pressControllers = [];
+  late final List<AnimationController> _sectionControllers = [];
+  late final List<AnimationController> _itemControllers = [];
+  late final List<AnimationController> _pressControllers = [];
   late AnimationController _dialogController;
+  late AnimationController _langDialogController;
+  late AnimationController _themeDialogController;
+
+  // ================= STATES =================
+  bool push = true;
+  bool email = false;
+  bool sms = true;
+  bool sound = true;
+  bool vibration = true;
+  bool biometric = true;
+  bool twoFA = false;
+  bool autoLock = true;
+  bool hideBalance = false;
+  bool showLogout = false;
+  bool showDelete = false;
+  bool showLangDialog = false;
+  bool showThemeDialog = false;
+  bool isDarkMode = true; // Current theme state
 
   @override
   void initState() {
@@ -77,6 +104,16 @@ class _SettingsScreenState extends State<SettingsPage>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
+    
+    _langDialogController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    
+    _themeDialogController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
   }
 
   @override
@@ -88,6 +125,8 @@ class _SettingsScreenState extends State<SettingsPage>
     for (var c in _itemControllers) { c.dispose(); }
     for (var c in _pressControllers) { c.dispose(); }
     _dialogController.dispose();
+    _langDialogController.dispose();
+    _themeDialogController.dispose();
     super.dispose();
   }
 
@@ -124,21 +163,7 @@ class _SettingsScreenState extends State<SettingsPage>
       ),
     );
   }
-
-  // ================= STATES =================
-  bool push = true;
-  bool email = false;
-  bool sms = true;
-  bool sound = true;
-  bool vibration = true;
-  bool biometric = true;
-  bool twoFA = false;
-  bool autoLock = true;
-  bool hideBalance = false;
-  bool showLogout = false;
-  bool showDelete = false;
-
-  void _showDialog(bool delete) {
+ void _showDialog(bool delete) {
     _dialogController.forward(from: 0.0);
     setState(() {
       if (delete) {
@@ -158,6 +183,94 @@ class _SettingsScreenState extends State<SettingsPage>
     });
   }
 
+  void _showLanguageDialog() {
+    _langDialogController.forward(from: 0.0);
+    setState(() {
+      showLangDialog = true;
+    });
+  }
+
+  void _hideLanguageDialog() {
+    _langDialogController.reverse().then((_) {
+      setState(() {
+        showLangDialog = false;
+      });
+    });
+  }
+
+  void _showThemeDialog() {
+    _themeDialogController.forward(from: 0.0);
+    setState(() {
+      showThemeDialog = true;
+    });
+  }
+
+  void _hideThemeDialog() {
+    _themeDialogController.reverse().then((_) {
+      setState(() {
+        showThemeDialog = false;
+      });
+    });
+  }
+
+  Future<void> _changeLanguage(String languageCode) async {
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    await languageProvider.changeLanguage(languageCode);
+    _hideLanguageDialog();
+    
+    // عرض رسالة تأكيد
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          languageCode == 'ar' 
+              ? 'تم تغيير اللغة إلى العربية' 
+              : 'Language changed to English',
+        ),
+        backgroundColor: primary,
+        duration: const Duration(milliseconds: 1500),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _changeTheme(bool isDark) {
+    setState(() {
+      isDarkMode = isDark;
+    });
+    _hideThemeDialog();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isDark ? 'تم التبديل إلى الوضع الداكن' : 'Switched to light mode'),
+        backgroundColor: primary,
+        duration: const Duration(milliseconds: 1500),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Color getCurrentBgColor() {
+    return isDarkMode ? bgDark : bgLight;
+  }
+
+  Color getCurrentCardBorderColor() {
+    return isDarkMode ? cardBorderColor : cardBorderColorLight;
+  }
+
+  Color getCurrentTextSecondaryColor() {
+    return isDarkMode ? textSecondary : textSecondaryLight;
+  }
+
+  String _getCurrentLanguageName() {
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    final currentLang = languageProvider.locale.languageCode;
+    
+    if (currentLang == 'ar') {
+      return 'العربية';
+    } else {
+      return 'English';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
@@ -166,7 +279,7 @@ class _SettingsScreenState extends State<SettingsPage>
     return Directionality(
       textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
       child: Scaffold(
-        backgroundColor: bgDark,
+        backgroundColor: getCurrentBgColor(),
         body: Stack(
           children: [
             AnimatedBuilder(
@@ -177,11 +290,17 @@ class _SettingsScreenState extends State<SettingsPage>
                     gradient: LinearGradient(
                       begin: Alignment.topRight,
                       end: Alignment.bottomLeft,
-                      colors: const [
-                        Color(0xFF070C16),
-                        Color(0xFF0B1A2A),
-                        Color(0xFF070C16),
-                      ],
+                      colors: isDarkMode
+                          ? const [
+                              Color(0xFF070C16),
+                              Color(0xFF0B1A2A),
+                              Color(0xFF070C16),
+                            ]
+                          : const [
+                              Color(0xFFF5F5F5),
+                              Color(0xFFFFFFFF),
+                              Color(0xFFF5F5F5),
+                            ],
                     ),
                   ),
                 );
@@ -323,9 +442,20 @@ class _SettingsScreenState extends State<SettingsPage>
                     color: primary,
                     icon: Icons.settings,
                     children: [
-                      _button(loc.language, loc.language, Icons.language, index: 9),
-                      _button(loc.theme, loc.dark, Icons.dark_mode, index: 10),
-                      _button(loc.currency, "USD", Icons.currency_bitcoin, index: 11),
+                      _button(
+                        loc.language, 
+                        _getCurrentLanguageName(),
+                        Icons.language, 
+                        index: 9, 
+                        onTap: _showLanguageDialog
+                      ),
+                      _button(
+                        loc.theme, 
+                        isDarkMode ? loc.dark : loc.light, 
+                        Icons.dark_mode, 
+                        index: 10, 
+                        onTap: _showThemeDialog
+                      )
                     ],
                   ),
 
@@ -337,10 +467,10 @@ class _SettingsScreenState extends State<SettingsPage>
                     color: primary,
                     icon: Icons.help_center,
                     children: [
-                      _button(loc.about, null, Icons.info, index: 12),
-                      _button(loc.helpCenter, null, Icons.support_agent, index: 13),
-                      _button(loc.privacyPolicy, null, Icons.privacy_tip, index: 14),
-                      _button(loc.termsOfService, null, Icons.description, index: 15),
+                      _button(loc.about, null, Icons.info, index: 12, supportType: 'about'),
+                      _button(loc.helpCenter, null, Icons.support_agent, index: 13, supportType: 'help'),
+                      _button(loc.privacyPolicy, null, Icons.privacy_tip, index: 14, supportType: 'privacy'),
+                      _button(loc.termsOfService, null, Icons.description, index: 15, supportType: 'terms'),
                     ],
                   ),
 
@@ -368,6 +498,8 @@ class _SettingsScreenState extends State<SettingsPage>
             ),
 
             if (showLogout || showDelete) _animatedDialog(loc),
+            if (showLangDialog) _animatedLanguageDialog(loc),
+            if (showThemeDialog) _animatedThemeDialog(loc),
           ],
         ),
       ),
@@ -443,6 +575,46 @@ class _SettingsScreenState extends State<SettingsPage>
     );
   }
 
+  Widget _animatedLanguageDialog(AppLocalizations loc) {
+    return AnimatedBuilder(
+      animation: _langDialogController,
+      builder: (context, child) {
+        return FadeTransition(
+          opacity: _langDialogController,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.7, end: 1.0).animate(
+              CurvedAnimation(
+                parent: _langDialogController,
+                curve: Curves.easeOutBack,
+              ),
+            ),
+            child: _languageDialog(loc),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _animatedThemeDialog(AppLocalizations loc) {
+    return AnimatedBuilder(
+      animation: _themeDialogController,
+      builder: (context, child) {
+        return FadeTransition(
+          opacity: _themeDialogController,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.7, end: 1.0).animate(
+              CurvedAnimation(
+                parent: _themeDialogController,
+                curve: Curves.easeOutBack,
+              ),
+            ),
+            child: _themeDialog(loc),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _container({
     required String title,
     required Color color,
@@ -451,15 +623,15 @@ class _SettingsScreenState extends State<SettingsPage>
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0F1C2E),
+        color: isDarkMode ? const Color(0xFF0F1C2E) : bgLight2,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: cardBorderColor,
+          color: getCurrentCardBorderColor(),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withOpacity(isDarkMode ? 0.5 : 0.1),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
@@ -488,8 +660,8 @@ class _SettingsScreenState extends State<SettingsPage>
                 const SizedBox(width: 12),
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : textPrimaryLight,
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.3,
@@ -553,8 +725,8 @@ class _SettingsScreenState extends State<SettingsPage>
                 children: [
                   Text(
                     loc.settingsTitle,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : textPrimaryLight,
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       letterSpacing: -0.5,
@@ -562,7 +734,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   ),
                   Text(
                     loc.settingsSubtitle,
-                    style: TextStyle(color: textSecondary, fontSize: 13),
+                    style: TextStyle(color: getCurrentTextSecondaryColor(), fontSize: 13),
                   ),
                 ],
               ),
@@ -591,17 +763,22 @@ class _SettingsScreenState extends State<SettingsPage>
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(25),
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0F2F2F),
-              Color(0xFF0A2323),
-            ],
+            colors: isDarkMode
+                ? const [
+                    Color(0xFF0F2F2F),
+                    Color(0xFF0A2323),
+                  ]
+                : const [
+                    Color(0xFFE8F5E9),
+                    Color(0xFFC8E6C9),
+                  ],
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.45),
+              color: Colors.black.withOpacity(isDarkMode ? 0.45 : 0.1),
               blurRadius: 25,
               offset: const Offset(0, 10),
             ),
@@ -652,10 +829,10 @@ class _SettingsScreenState extends State<SettingsPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "ShadowPay",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: isDarkMode ? Colors.white : textPrimaryLight,
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                     ),
@@ -740,7 +917,7 @@ class _SettingsScreenState extends State<SettingsPage>
                 color: Colors.white.withOpacity(0.02),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: cardBorderColor.withOpacity(0.25),
+                  color: getCurrentCardBorderColor().withOpacity(0.25),
                   width: 0.5,
                 ),
               ),
@@ -761,8 +938,8 @@ class _SettingsScreenState extends State<SettingsPage>
                       children: [
                         Text(
                           title,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: isDarkMode ? Colors.white : textPrimaryLight,
                             fontWeight: FontWeight.w500,
                             fontSize: 14,
                           ),
@@ -770,7 +947,7 @@ class _SettingsScreenState extends State<SettingsPage>
                         Text(
                           desc,
                           style: TextStyle(
-                            color: textSecondary,
+                            color: getCurrentTextSecondaryColor(),
                             fontSize: 11,
                           ),
                         ),
@@ -787,7 +964,23 @@ class _SettingsScreenState extends State<SettingsPage>
     );
   }
 
-  Widget _button(String title, String? value, IconData icon, {required int index}) {
+  String _getSupportUrl(String type) {
+    switch (type) {
+      case 'about':
+        return 'https://martinasameh1.github.io/settings/';
+      case 'help':
+        return 'https://martinasameh1.github.io/settings/help.html';
+      case 'privacy':
+        return 'https://martinasameh1.github.io/settings/privacy.html';
+      case 'terms':
+        return 'https://martinasameh1.github.io/settings/terms.html';
+      default:
+        return 'https://martinasameh1.github.io/settings/';
+    }
+  }
+
+  Widget _button(String title, String? value, IconData icon, 
+      {required int index, String supportType = '', VoidCallback? onTap}) {
     return AnimatedBuilder(
       animation: _itemControllers[index],
       builder: (context, child) {
@@ -796,15 +989,28 @@ class _SettingsScreenState extends State<SettingsPage>
           child: SlideTransition(
             position: _slideUp(_itemControllers[index], delay: 0.2),
             child: GestureDetector(
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('جاري فتح $title...'),
-                    backgroundColor: primary,
-                    duration: const Duration(milliseconds: 800),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
+              onTap: onTap ?? () async {
+                if (supportType.isNotEmpty) {
+                  String url = _getSupportUrl(supportType);
+                  final uri = Uri.parse(url);
+                  if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('فشل في فتح $title'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('جاري فتح $title...'),
+                      backgroundColor: primary,
+                      duration: const Duration(milliseconds: 800),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
               },
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -813,7 +1019,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   color: Colors.white.withOpacity(0.02),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: cardBorderColor.withOpacity(0.25),
+                    color: getCurrentCardBorderColor().withOpacity(0.25),
                     width: 0.5,
                   ),
                 ),
@@ -831,7 +1037,10 @@ class _SettingsScreenState extends State<SettingsPage>
                     Expanded(
                       child: Text(
                         title,
-                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.white : textPrimaryLight, 
+                          fontSize: 14
+                        ),
                       ),
                     ),
                     if (value != null)
@@ -847,7 +1056,7 @@ class _SettingsScreenState extends State<SettingsPage>
                         ),
                       ),
                     const SizedBox(width: 8),
-                    Icon(Icons.arrow_forward_ios, size: 14, color: textSecondary),
+                    Icon(Icons.arrow_forward_ios, size: 14, color: getCurrentTextSecondaryColor()),
                   ],
                 ),
               ),
@@ -858,46 +1067,331 @@ class _SettingsScreenState extends State<SettingsPage>
     );
   }
 
-  Widget _dangerBtn(String text, IconData icon, VoidCallback onTap, 
+  Widget _dangerBtn(String title, IconData icon, VoidCallback onTap,
       {bool small = false, required AnimationController pressController}) {
-    return AnimatedBuilder(
-      animation: pressController,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _pressAnimation(pressController).value,
-          child: GestureDetector(
-            onTapDown: (_) => pressController.forward(),
-            onTapUp: (_) {
-              pressController.reverse();
-              onTap();
-            },
-            onTapCancel: () => pressController.reverse(),
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: small ? 14 : 16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.red.withOpacity(0.25), width: 1.2),
-                color: Colors.red.withOpacity(0.04),
+    return GestureDetector(
+      onTapDown: (_) => pressController.forward(),
+      onTapUp: (_) => pressController.reverse(),
+      onTapCancel: () => pressController.reverse(),
+      onTap: onTap,
+      child: ScaleTransition(
+        scale: _pressAnimation(pressController),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: small ? 10 : 14,
+          ),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: small
+                  ? [Colors.red.shade600, Colors.red.shade800]
+                  : [Colors.red.shade700, Colors.red.shade900],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.red.withOpacity(0.35),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.white, size: small ? 16 : 20),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _languageDialog(AppLocalizations loc) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+    final currentLang = languageProvider.locale.languageCode;
+    
+    return GestureDetector(
+      onTap: _hideLanguageDialog,
+      child: Container(
+        color: Colors.black.withOpacity(0.7),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDarkMode ? const Color(0xFF0F1C2E) : bgLight2,
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(
+                color: primary.withOpacity(0.25),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 25,
+                  offset: const Offset(0, 15),
+                ),
+                BoxShadow(
+                  color: primary.withOpacity(0.05),
+                  blurRadius: 20,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TweenAnimationBuilder(
+                  duration: const Duration(milliseconds: 500),
+                  tween: Tween<double>(begin: 0.5, end: 1.0),
+                  curve: Curves.easeOutBack,
+                  builder: (context, scale, child) {
+                    return Transform.scale(
+                      scale: scale,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.language,
+                          size: 44,
+                          color: primary.withOpacity(0.8),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'اختر اللغة',
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : textPrimaryLight,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _dialogOption(
+                  title: 'العربية',
+                  subtitle: 'Arabic',
+                  icon: Icons.translate,
+                  isSelected: currentLang == 'ar',
+                  onTap: () => _changeLanguage('ar'),
+                ),
+                const SizedBox(height: 12),
+                _dialogOption(
+                  title: 'English',
+                  subtitle: 'الإنجليزية',
+                  icon: Icons.translate,
+                  isSelected: currentLang == 'en',
+                  onTap: () => _changeLanguage('en'),
+                ),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: _hideLanguageDialog,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: getCurrentCardBorderColor().withOpacity(0.25),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        loc.cancel,
+                        style: TextStyle(color: isDarkMode ? Colors.white : textPrimaryLight, fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _themeDialog(AppLocalizations loc) {
+    return GestureDetector(
+      onTap: _hideThemeDialog,
+      child: Container(
+        color: Colors.black.withOpacity(0.7),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            margin: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: isDarkMode ? const Color(0xFF0F1C2E) : bgLight2,
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(
+                color: primary.withOpacity(0.25),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 25,
+                  offset: const Offset(0, 15),
+                ),
+                BoxShadow(
+                  color: primary.withOpacity(0.05),
+                  blurRadius: 20,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TweenAnimationBuilder(
+                  duration: const Duration(milliseconds: 500),
+                  tween: Tween<double>(begin: 0.5, end: 1.0),
+                  curve: Curves.easeOutBack,
+                  builder: (context, scale, child) {
+                    return Transform.scale(
+                      scale: scale,
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.palette,
+                          size: 44,
+                          color: primary.withOpacity(0.8),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'اختر الثيم',
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : textPrimaryLight,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _dialogOption(
+                  title: 'داكن',
+                  subtitle: 'Dark Mode',
+                  icon: Icons.dark_mode,
+                  isSelected: isDarkMode == true,
+                  onTap: () => _changeTheme(true),
+                ),
+                const SizedBox(height: 12),
+                _dialogOption(
+                  title: 'فاتح',
+                  subtitle: 'Light Mode',
+                  icon: Icons.light_mode,
+                  isSelected: isDarkMode == false,
+                  onTap: () => _changeTheme(false),
+                ),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: _hideThemeDialog,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: getCurrentCardBorderColor().withOpacity(0.25),
+                        width: 0.5,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        loc.cancel,
+                        style: TextStyle(color: isDarkMode ? Colors.white : textPrimaryLight, fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _dialogOption({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? primary.withOpacity(0.15) : Colors.white.withOpacity(0.02),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? primary : getCurrentCardBorderColor().withOpacity(0.25),
+            width: isSelected ? 1.5 : 0.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: primary.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: primary.withOpacity(0.8), size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(icon, color: Colors.red.shade300, size: 20),
-                  const SizedBox(width: 10),
                   Text(
-                    text,
+                    title,
                     style: TextStyle(
-                      color: Colors.red.shade300,
-                      fontSize: small ? 14 : 15,
-                      fontWeight: FontWeight.w600,
+                      color: isDarkMode ? Colors.white : textPrimaryLight,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: getCurrentTextSecondaryColor(),
+                      fontSize: 12,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-        );
-      },
+            if (isSelected)
+              Icon(Icons.check_circle, color: primary, size: 22),
+          ],
+        ),
+      ),
     );
   }
 
@@ -911,7 +1405,7 @@ class _SettingsScreenState extends State<SettingsPage>
             padding: const EdgeInsets.all(24),
             margin: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF0F1C2E),
+              color: isDarkMode ? const Color(0xFF0F1C2E) : bgLight2,
               borderRadius: BorderRadius.circular(32),
               border: Border.all(
                 color: delete ? Colors.red.withOpacity(0.25) : primary.withOpacity(0.25),
@@ -959,8 +1453,8 @@ class _SettingsScreenState extends State<SettingsPage>
                 const SizedBox(height: 20),
                 Text(
                   delete ? loc.deleteDialogTitle : loc.logoutDialogTitle,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : textPrimaryLight,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -968,7 +1462,7 @@ class _SettingsScreenState extends State<SettingsPage>
                 const SizedBox(height: 12),
                 Text(
                   delete ? loc.deleteDialogMessage : loc.logoutDialogMessage,
-                  style: TextStyle(color: textSecondary, fontSize: 14),
+                  style: TextStyle(color: getCurrentTextSecondaryColor(), fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 28),
@@ -983,14 +1477,14 @@ class _SettingsScreenState extends State<SettingsPage>
                             color: Colors.white.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
-                              color: cardBorderColor.withOpacity(0.25),
+                              color: getCurrentCardBorderColor().withOpacity(0.25),
                               width: 0.5,
                             ),
                           ),
                           child: Center(
                             child: Text(
                               loc.cancel,
-                              style: const TextStyle(color: Colors.white, fontSize: 16),
+                              style: TextStyle(color: isDarkMode ? Colors.white : textPrimaryLight, fontSize: 16),
                             ),
                           ),
                         ),
