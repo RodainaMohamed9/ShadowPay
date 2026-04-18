@@ -1252,6 +1252,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'✅ Card Unfrozen'**
   String get cardUnfrozenSnackbar;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View All'**
+  String get viewAll;
+
+  /// No description provided for @numTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get numTransactions;
+
+  /// No description provided for @totalAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Amount'**
+  String get totalAmount;
+
+  /// No description provided for @transactionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactionsCount;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a transaction....'**
+  String get searchHint;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get warning;
+
+  /// No description provided for @fraud.
+  ///
+  /// In en, this message translates to:
+  /// **'Fraud'**
+  String get fraud;
+
+  /// No description provided for @restaurant.
+  ///
+  /// In en, this message translates to:
+  /// **'Restaurant'**
+  String get restaurant;
+
+  /// No description provided for @flightTicket.
+  ///
+  /// In en, this message translates to:
+  /// **'Flight Ticket'**
+  String get flightTicket;
+
+  /// No description provided for @gym.
+  ///
+  /// In en, this message translates to:
+  /// **'Gym'**
+  String get gym;
+
+  /// No description provided for @amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amount;
+
+  /// No description provided for @percentage.
+  ///
+  /// In en, this message translates to:
+  /// **'%'**
+  String get percentage;
+
+  /// No description provided for @dateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Date & Time'**
+  String get dateTime;
+
+  /// No description provided for @transactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get transactions;
+
+  /// No description provided for @noTransactionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No Transactions Yet!!'**
+  String get noTransactionsYet;
+
+  /// No description provided for @startAddingTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Start adding your first transaction'**
+  String get startAddingTransactions;
+
+  /// No description provided for @addTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Transaction'**
+  String get addTransaction;
+
+  /// No description provided for @fullControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Control'**
+  String get fullControl;
+
+  /// No description provided for @advancedAI.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced AI'**
+  String get advancedAI;
+
+  /// No description provided for @freeze_detail_message.
+  ///
+  /// In en, this message translates to:
+  /// **' When you freeze your card, all purchases and instant withdrawals are stopped immediately to protect your money. You can unfreeze with one tap when you need to use it.\n\n Recurring scheduled payments are not affected by freezing.'**
+  String get freeze_detail_message;
+
+  /// No description provided for @full_control_detail_message.
+  ///
+  /// In en, this message translates to:
+  /// **' Full control of your card is in your hands.\n\n• Freeze or unfreeze it anytime\n• Do it from anywhere through the app\n• Absolute security with ease of use\n• Instant notifications for every change'**
+  String get full_control_detail_message;
+
+  /// No description provided for @advanced_ai_detail_message.
+  ///
+  /// In en, this message translates to:
+  /// **' Advanced AI system:\n\n• Analyzes your transaction patterns in real-time\n• Detects any unusual or high-risk activity\n• Automatically freezes your card to protect you from fraud\n• Learns from your financial habits to improve accuracy'**
+  String get advanced_ai_detail_message;
+
+  /// No description provided for @securityControlCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Security Control Center'**
+  String get securityControlCenter;
+
+  /// No description provided for @securityControlSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced card protection features'**
+  String get securityControlSubtitle;
+
+  /// No description provided for @cardStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Style'**
+  String get cardStyle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

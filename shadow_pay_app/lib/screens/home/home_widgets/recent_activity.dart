@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
+import 'package:shadow_pay_app/screens/TransactionScreens/transaction_list.dart';
 
 class RecentActivity extends StatelessWidget {
-  const RecentActivity({super.key});
+  final bool isDarkMode;
+
+  const RecentActivity({
+    super.key,
+    required this.isDarkMode,
+  });
 
   final List<Map<String, dynamic>> activities = const [
     {
@@ -31,17 +38,38 @@ class RecentActivity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          loc.recentActivity,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              loc.recentActivity,
+              style: TextStyle(
+                color: isDarkMode ? Colors.white : Colors.black87,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TransactionList(),
+                  ),
+                );
+              },
+              child: Text(
+                loc.viewAll,
+                style: TextStyle(
+                  color: isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         ...activities.map((activity) => _buildActivityItem(activity, loc)),
@@ -50,7 +78,6 @@ class RecentActivity extends StatelessWidget {
   }
 
   Widget _buildActivityItem(Map<String, dynamic> activity, AppLocalizations loc) {
-    // ترجمة الحالة
     String statusText = '';
     if (activity['status'] == 'SAFE') {
       statusText = loc.safe;
@@ -66,10 +93,10 @@ class RecentActivity extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1F2E),
+        color: isDarkMode ? const Color(0xFF1A1F2E) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.05),
+          color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.05),
           width: 1,
         ),
       ),
@@ -95,8 +122,8 @@ class RecentActivity extends StatelessWidget {
               children: [
                 Text(
                   activity['title'],
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white : Colors.black87,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -104,8 +131,8 @@ class RecentActivity extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   activity['time'],
-                  style: const TextStyle(
-                    color: Colors.white54,
+                  style: TextStyle(
+                    color: isDarkMode ? Colors.white54 : Colors.grey[600],
                     fontSize: 12,
                   ),
                 ),
@@ -117,8 +144,8 @@ class RecentActivity extends StatelessWidget {
             children: [
               Text(
                 activity['amount'],
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black87,
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),

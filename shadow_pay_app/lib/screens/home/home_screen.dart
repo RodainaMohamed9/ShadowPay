@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
+import 'package:shadow_pay_app/providers/theme_provider.dart';
+import 'package:shadow_pay_app/screens/CardManagement/CardManagementScreen.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
-import 'widgets/welcome_header.dart';
-import 'widgets/shield_status.dart';
-import 'widgets/virtual_card.dart';
-import 'widgets/quick_actions.dart';
-import 'widgets/recent_activity.dart';
-import 'widgets/bottom_nav_bar.dart';
-import 'Screens/report_screen.dart';
-import '../../services/shared_pref_service.dart';
+import 'package:shadow_pay_app/screens/home/home_widgets/bottom_nav_bar.dart';
+import 'package:shadow_pay_app/screens/home/home_widgets/quick_actions.dart';
+import 'package:shadow_pay_app/screens/home/home_widgets/recent_activity.dart';
+import 'package:shadow_pay_app/screens/home/home_widgets/shield_status.dart';
+import 'package:shadow_pay_app/screens/home/home_widgets/virtual_card.dart';
+import 'package:shadow_pay_app/screens/home/home_widgets/welcome_header.dart';
+import 'package:shadow_pay_app/screens/TransactionScreens/add_transaction_screen.dart';
+import 'package:shadow_pay_app/screens/report/report_screen.dart';
+import 'package:shadow_pay_app/screens/profile/profile_screen.dart';
+import 'package:shadow_pay_app/screens/TransactionScreens/transaction_list.dart';
 import '../AuthScreens/login/login_Screen.dart';
 
-// import 'screens/analytics_screen.dart';
-// import 'screens/cards_screen.dart';
-// import 'screens/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,18 +30,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _pages = [
     const HomeContent(),
-    const HomeContent(), // Analytics placeholder
-    const HomeContent(), // Cards placeholder
-    const HomeContent(), // Profile placeholder
+    const HomeContent(),
+    const CardManagementScreen(),
+    const ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+
     return Scaffold(
+      backgroundColor: isDarkMode ? AppColors.darkBackground : AppColors.lightBackground,
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
+        isDarkMode: isDarkMode,
       ),
     );
   }
@@ -81,46 +89,87 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   Future<void> _loadCardStatus() async {
-    final frozen = await SharedPrefService.isCardFrozen();
+    final frozen = await SharedPrefService.getCardFrozenStatus();
     setState(() {
       isCardFrozen = frozen;
       isLoading = false;
     });
   }
 
-  Future<void> _freezeCard() async {
-    await SharedPrefService.freezeCard();
-    setState(() => isCardFrozen = true);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Card frozen successfully'), backgroundColor: Color(0xFFF44336)),
+  Future<void> _goToCardManagement() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CardManagementScreen(),
+      ),
     );
+    
+    final newStatus = await SharedPrefService.getCardFrozenStatus();
+    setState(() {
+      isCardFrozen = newStatus;
+    });
+    
+    if (mounted) {
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+      final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isCardFrozen 
+                ? 'Card frozen successfully' 
+                : 'Card unfrozen successfully',
+          ),
+          backgroundColor: isCardFrozen ? Colors.red : (isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary),
+        ),
+      );
+    }
   }
 
-  void _goToCards() {
-    // هنا لما يخلصوا صفحة Cards يغيروا الكود
-    // Navigator.push(context, MaterialPageRoute(builder: (_) => const CardsScreen()));
+  void _freezeCard() {
+    _goToCardManagement();
+  }
+
+  void _manageCard() {
+    _goToCardManagement();
   }
 
   void _goToReport() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const ReportScreen()),
-  );
-}
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ReportScreen()),
+    );
+  }
+
+  void _goToAddTransaction() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddTransactionScreen(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0F1F),
+      backgroundColor: isDarkMode ? AppColors.darkBackground : AppColors.lightBackground,
       body: SafeArea(
         child: isLoading
-            ? const Center(child: CircularProgressIndicator(color: Color(0xFF00D8A2)))
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary,
+                ),
+              )
             : Column(
                 children: [
                   WelcomeHeader(
                     userName: userName,
                     isFrozen: isCardFrozen,
-                    onManageTap: isCardFrozen ? _goToCards : null,
+                    onManageTap: isCardFrozen ? _manageCard : null,
+                    isDarkMode: isDarkMode,
                   ),
                   Expanded(
                     child: SingleChildScrollView(
@@ -128,7 +177,7 @@ class _HomeContentState extends State<HomeContent> {
                       child: Column(
                         children: [
                           const SizedBox(height: 8),
-                          const ShieldStatus(),
+                          ShieldStatus(isDarkMode: isDarkMode),
                           const SizedBox(height: 20),
                           VirtualCard(
                             cardNumber: cardNumber,
@@ -136,18 +185,20 @@ class _HomeContentState extends State<HomeContent> {
                             expiry: cardExpiry,
                             balance: cardBalance,
                             isFrozen: isCardFrozen,
+                            isDarkMode: isDarkMode,
                           ),
                           const SizedBox(height: 24),
                           QuickActions(
-                            onAddTap: () {}, // هيتعدل بعدين
-                            onReportTap: _goToReport ,
+                            onAddTap: _goToAddTransaction,
+                            onReportTap: _goToReport,
                             onDetailsTap: () {},
                             onFreezeTap: _freezeCard,
-                            onManageTap: _goToCards,
+                            onManageTap: _manageCard,
                             isCardFrozen: isCardFrozen,
+                            isDarkMode: isDarkMode,
                           ),
                           const SizedBox(height: 24),
-                          const RecentActivity(),
+                          RecentActivity(isDarkMode: isDarkMode),
                           const SizedBox(height: 80),
                         ],
                       ),

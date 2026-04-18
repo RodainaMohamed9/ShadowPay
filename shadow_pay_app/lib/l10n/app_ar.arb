@@ -70,7 +70,7 @@
   "transaction_hour": "ساعة المعاملة (٠–٢٣)",
   "transaction_category": "فئة المعاملة",
   "category_hint": "اختر الفئة",
-  "zip_code":"الرمز البريدى",
+  "zip_code": "الرمز البريدى",
   "zip_code_hint": "أدخل الرمز البريدي",
   "analyze_transaction": "تحليل المعاملة",
   "transaction_added_success": "تمت إضافة المعاملة بنجاح!",
@@ -95,7 +95,6 @@
   "describeIssueHint": "الرجاء وصف مشكلتك بالتفصيل...",
   "submitReport": "إرسال البلاغ",
   "reportSubmitted": "تم إرسال البلاغ بنجاح!",
-  
   "suspiciousTransaction": "معاملة مشبوهة",
   "suspiciousTransactionDesc": "معاملة لا تعرفها أو تبدو غير طبيعية",
   "cardLostStolen": "البطاقة مفقودة أو مسروقة",
@@ -104,11 +103,12 @@
   "unauthorizedChargeDesc": "رسوم لم أصرح بها أو أوافق عليها",
   "other": "أخرى",
   "otherDesc": "مشكلة أخرى غير مذكورة أعلاه",
-    "home": "الرئيسية",
+  "home": "الرئيسية",
   "analytics": "التحليلات",
   "cards": "البطاقات",
   "profile": "الملف الشخصي",
-   "quickActions": "إجراءات سريعة",
+  "quickActions": "إجراءات سريعة",
+
   "add": "إضافة",
   "report": "إبلاغ",
   "details": "التفاصيل",
@@ -125,7 +125,6 @@
     "aiWatchdogActive": "AI Watchdog Active",
     "system": "النظام",
       "liveProtection": "حماية فورية تراقب جميع المعاملات",
-
   "settingsTitle": "الإعدادات",
   "settingsSubtitle": "إدارة تفضيلاتك وحسابك",
   "notifications": "الإشعارات",
@@ -169,7 +168,6 @@
   "deleteDialogMessage": "هل أنت متأكد؟ هذا الإجراء لا يمكن التراجع عنه",
   "confirm": "تأكيد",
   "delete": "حذف",
-
   "cardManagement": "إدارة البطاقات",
   "cardManagementSubtitle": "تحكم في بطاقاتك وأمانها",
   "cardFrozen": "البطاقة مجمدة",
@@ -207,5 +205,34 @@
   "securityControlSubtitle": "ميزات متقدمة لحماية بطاقتك",
   "cardStyle": "نمط البطاقة",
   "light":"مضئ"
+  "cardFrozenSnackbar": "❄️ تم تجميد البطاقة",
+  "cardUnfrozenSnackbar": " تم إلغاء تجميد البطاقة",
+  "viewAll": "عرض الكل",
+  "numTransactions": "المعاملات",
+  "totalAmount": "إجمالي المبلغ",
+  "transactionsCount": "المعاملات",
+  "searchHint": "ابحث عن معاملة....",
+  "all": "الكل",
+  "fraud": "احتيال",
+  "restaurant": "مطعم",
+  "flightTicket": "تذكرة طيران",
+  "gym": "جيم",
+  "amount": "المبلغ",
+  "percentage": "٪",
+  "dateTime": "التاريخ والوقت",
+  "transactions" : "المعاملات",
+  "noTransactionsYet": "لا توجد معاملات بعد!!",
+  "startAddingTransactions": "ابدأ بإضافة معاملاتك الأولى",
+  "addTransaction": "إضافة معاملة",
+"fullControl": "تحكم كامل",
+  "advancedAI": "ذكاء اصطناعي متقدم",
+    "freeze_detail_message": " عند تجميد البطاقة، يتم إيقاف جميع عمليات الشراء والسحب الفوري لحماية أموالك. يمكنك إلغاء التجميد بنقرة واحدة عند الحاجة للاستخدام.\n\n المدفوعات المتكررة المجدولة لا تتأثر بعملية التجميد.",
+
+  "full_control_detail_message": " التحكم الكامل في بطاقتك بين يديك.\n\n• قم بتجميدها أو إلغاء تجميدها في أي وقت\n• يمكنك إجراء ذلك من أي مكان عبر التطبيق\n• الأمان المطلق مع سهولة الاستخدام\n• إشعارات فورية عند كل تغيير",
+
+  "advanced_ai_detail_message": " نظام الذكاء الاصطناعي المتطور:\n\n• يحلل أنماط معاملاتك في الوقت الفعلي\n• يكتشف أي نشاط غير معتاد أو عالي المخاطر\n• يقوم بتجميد البطاقة تلقائياً لحمايتك من الاحتيال\n• يتعلم من عاداتك المالية لتحسين الدقة",
+   "securityControlCenter": "مركز التحكم الأمني",
+  "securityControlSubtitle": "ميزات متقدمة لحماية بطاقتك",
+  "cardStyle": "نمط البطاقة"
 
 }

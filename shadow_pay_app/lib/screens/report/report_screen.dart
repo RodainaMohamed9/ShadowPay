@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
+import 'package:shadow_pay_app/providers/theme_provider.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -14,26 +17,10 @@ class _ReportScreenState extends State<ReportScreen> {
   bool _isSubmitting = false;
 
   final List<Map<String, dynamic>> _reasons = [
-    {
-      'icon': Icons.shopping_bag_outlined,
-      'titleKey': 'suspiciousTransaction',
-      'subtitleKey': 'suspiciousTransactionDesc',
-    },
-    {
-      'icon': Icons.credit_card_off_outlined,
-      'titleKey': 'cardLostStolen',
-      'subtitleKey': 'cardLostStolenDesc',
-    },
-    {
-      'icon': Icons.security_outlined,
-      'titleKey': 'unauthorizedCharge',
-      'subtitleKey': 'unauthorizedChargeDesc',
-    },
-    {
-      'icon': Icons.help_outline,
-      'titleKey': 'other',
-      'subtitleKey': 'otherDesc',
-    },
+    {'icon': Icons.shopping_bag_outlined, 'titleKey': 'suspiciousTransaction', 'subtitleKey': 'suspiciousTransactionDesc'},
+    {'icon': Icons.credit_card_off_outlined, 'titleKey': 'cardLostStolen', 'subtitleKey': 'cardLostStolenDesc'},
+    {'icon': Icons.security_outlined, 'titleKey': 'unauthorizedCharge', 'subtitleKey': 'unauthorizedChargeDesc'},
+    {'icon': Icons.help_outline, 'titleKey': 'other', 'subtitleKey': 'otherDesc'},
   ];
 
   @override
@@ -43,63 +30,51 @@ class _ReportScreenState extends State<ReportScreen> {
   }
 
   Future<void> _submitReport() async {
+    final loc = AppLocalizations.of(context)!;
+
     if (_selectedReasonIndex == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.selectReason),
-          backgroundColor: Colors.orange,
-        ),
+        SnackBar(content: Text(loc.selectReason), backgroundColor: Colors.orange),
       );
       return;
     }
 
-    // لو اختار Other والمربع فاضي
     if (_selectedReasonIndex == 3 && _otherController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.describeIssue),
-          backgroundColor: Colors.orange,
-        ),
+        SnackBar(content: Text(loc.describeIssue), backgroundColor: Colors.orange),
       );
       return;
     }
 
     setState(() => _isSubmitting = true);
-
-    // محاكاة إرسال البلاغ
     await Future.delayed(const Duration(seconds: 1));
 
     if (mounted) {
       setState(() => _isSubmitting = false);
-
-      // رسالة نجاح
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.reportSubmitted),
-          backgroundColor: const Color(0xFF00D8A2),
+          content: Text(loc.reportSubmitted), 
+          backgroundColor: context.primaryColor,
         ),
       );
-
-      // الرجوع للـ Home بعد ثانية
       await Future.delayed(const Duration(seconds: 1));
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      if (mounted) Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final isDarkMode = context.isDarkMode;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0F1F),
+      backgroundColor: context.backgroundColor,
       appBar: AppBar(
-        title: Text(loc.report),
+        title: Text(loc.report, style: TextStyle(color: context.textPrimary)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: context.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -109,16 +84,15 @@ class _ReportScreenState extends State<ReportScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              loc.whatWouldYouLikeToReport,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
+              loc.whatWouldYouLikeToReport, 
+              style: TextStyle(
+                color: context.textPrimary, 
+                fontSize: 18, 
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 20),
 
-            // ✅ أسباب الإبلاغ
             Expanded(
               child: ListView.separated(
                 itemCount: _reasons.length,
@@ -131,23 +105,20 @@ class _ReportScreenState extends State<ReportScreen> {
                     onTap: () {
                       setState(() {
                         _selectedReasonIndex = index;
-                        // لو مش Other، نمسح النص
-                        if (index != 3) {
-                          _otherController.clear();
-                        }
+                        if (index != 3) _otherController.clear();
                       });
                     },
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0xFF00D8A2).withOpacity(0.1)
-                            : const Color(0xFF1A1F2E),
+                        color: isSelected 
+                            ? context.primaryColor.withOpacity(0.1) 
+                            : context.surfaceColor,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: isSelected
-                              ? const Color(0xFF00D8A2)
-                              : Colors.white.withOpacity(0.1),
+                          color: isSelected 
+                              ? context.primaryColor 
+                              : context.textSecondary.withOpacity(0.1),
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -157,14 +128,12 @@ class _ReportScreenState extends State<ReportScreen> {
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF00D8A2).withOpacity(0.1),
+                              color: context.primaryColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
-                              reason['icon'],
-                              color: isSelected
-                                  ? const Color(0xFF00D8A2)
-                                  : Colors.white70,
+                              reason['icon'], 
+                              color: isSelected ? context.primaryColor : context.textSecondary, 
                               size: 24,
                             ),
                           ),
@@ -174,33 +143,25 @@ class _ReportScreenState extends State<ReportScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  _getTitle(reason['titleKey'], loc),
+                                  _getTitle(reason['titleKey'], loc), 
                                   style: TextStyle(
-                                    color: isSelected
-                                        ? const Color(0xFF00D8A2)
-                                        : Colors.white,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
+                                    color: isSelected ? context.primaryColor : context.textPrimary, 
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  _getSubtitle(reason['subtitleKey'], loc),
-                                  style: const TextStyle(
-                                    color: Colors.white54,
+                                  _getSubtitle(reason['subtitleKey'], loc), 
+                                  style: TextStyle(
+                                    color: context.textSecondary, 
                                     fontSize: 12,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          if (isSelected)
-                            const Icon(
-                              Icons.check_circle,
-                              color: Color(0xFF00D8A2),
-                              size: 20,
-                            ),
+                          if (isSelected) 
+                            Icon(Icons.check_circle, color: context.primaryColor, size: 20),
                         ],
                       ),
                     ),
@@ -209,57 +170,55 @@ class _ReportScreenState extends State<ReportScreen> {
               ),
             ),
 
-            // ✅ حقل إضافي لـ Other
             if (_selectedReasonIndex == 3) ...[
               const SizedBox(height: 16),
               TextField(
                 controller: _otherController,
                 maxLines: 3,
-                style: const TextStyle(color: Colors.white),
+                style: TextStyle(color: context.textPrimary),
                 decoration: InputDecoration(
                   hintText: loc.describeIssueHint,
-                  hintStyle: const TextStyle(color: Colors.white54),
+                  hintStyle: TextStyle(color: context.hintColor),
                   filled: true,
-                  fillColor: const Color(0xFF1F2A44),
+                  fillColor: context.progressBgColor,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12), 
                     borderSide: BorderSide.none,
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF00D8A2)),
+                    borderRadius: BorderRadius.circular(12), 
+                    borderSide: BorderSide(color: context.primaryColor),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
             ],
 
-            // ✅ زر Submit
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
                 onPressed: _isSubmitting ? null : _submitReport,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF00D8A2),
+                  backgroundColor: context.primaryColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
                 child: _isSubmitting
                     ? const SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: 20, 
+                        height: 20, 
                         child: CircularProgressIndicator(
-                          color: Colors.white,
+                          color: Colors.white, 
                           strokeWidth: 2,
                         ),
                       )
                     : Text(
-                        loc.submitReport,
+                        loc.submitReport, 
                         style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 16, 
+                          fontWeight: FontWeight.bold, 
                           color: Colors.white,
                         ),
                       ),
@@ -274,31 +233,21 @@ class _ReportScreenState extends State<ReportScreen> {
 
   String _getTitle(String key, AppLocalizations loc) {
     switch (key) {
-      case 'suspiciousTransaction':
-        return loc.suspiciousTransaction;
-      case 'cardLostStolen':
-        return loc.cardLostStolen;
-      case 'unauthorizedCharge':
-        return loc.unauthorizedCharge;
-      case 'other':
-        return loc.other;
-      default:
-        return '';
+      case 'suspiciousTransaction': return loc.suspiciousTransaction;
+      case 'cardLostStolen': return loc.cardLostStolen;
+      case 'unauthorizedCharge': return loc.unauthorizedCharge;
+      case 'other': return loc.other;
+      default: return '';
     }
   }
 
   String _getSubtitle(String key, AppLocalizations loc) {
     switch (key) {
-      case 'suspiciousTransactionDesc':
-        return loc.suspiciousTransactionDesc;
-      case 'cardLostStolenDesc':
-        return loc.cardLostStolenDesc;
-      case 'unauthorizedChargeDesc':
-        return loc.unauthorizedChargeDesc;
-      case 'otherDesc':
-        return loc.otherDesc;
-      default:
-        return '';
+      case 'suspiciousTransactionDesc': return loc.suspiciousTransactionDesc;
+      case 'cardLostStolenDesc': return loc.cardLostStolenDesc;
+      case 'unauthorizedChargeDesc': return loc.unauthorizedChargeDesc;
+      case 'otherDesc': return loc.otherDesc;
+      default: return '';
     }
   }
 }

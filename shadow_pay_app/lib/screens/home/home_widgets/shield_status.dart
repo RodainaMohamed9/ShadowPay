@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
 
 class ShieldStatus extends StatefulWidget {
-  const ShieldStatus({super.key});
+  final bool isDarkMode;
+
+  const ShieldStatus({
+    super.key,
+    required this.isDarkMode,
+  });
 
   @override
   State<ShieldStatus> createState() => _ShieldStatusState();
@@ -38,25 +44,25 @@ class _ShieldStatusState extends State<ShieldStatus>
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final primaryColor = widget.isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1F2E),
+        color: widget.isDarkMode ? const Color(0xFF1A1F2E) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFF00D8A2).withOpacity(0.2),
+          color: primaryColor.withOpacity(0.2),
           width: 1,
         ),
       ),
       child: Row(
         children: [
-          // ✅ أيقونة Shield أكبر (size 36)
           RotationTransition(
             turns: _rotationAnimation,
-            child: const Icon(
+            child: Icon(
               Icons.shield_outlined,
-              color: Color(0xFF00D8A2),
+              color: primaryColor,
               size: 36,
             ),
           ),
@@ -85,8 +91,8 @@ class _ShieldStatusState extends State<ShieldStatus>
                     const SizedBox(width: 6),
                     Text(
                       loc.aiWatchdogActive,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: widget.isDarkMode ? Colors.white : Colors.black87,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -94,8 +100,8 @@ class _ShieldStatusState extends State<ShieldStatus>
                     const Spacer(),
                     Text(
                       loc.system,
-                      style: const TextStyle(
-                        color: Colors.white54,
+                      style: TextStyle(
+                        color: widget.isDarkMode ? Colors.white54 : Colors.grey[600],
                         fontSize: 12,
                       ),
                     ),
@@ -104,12 +110,11 @@ class _ShieldStatusState extends State<ShieldStatus>
                 const SizedBox(height: 6),
                 Text(
                   loc.liveProtection,
-                  style: const TextStyle(
-                    color: Colors.white54,
+                  style: TextStyle(
+                    color: widget.isDarkMode ? Colors.white54 : Colors.grey[600],
                     fontSize: 12,
                   ),
                 ),
-                
               ],
             ),
           ),

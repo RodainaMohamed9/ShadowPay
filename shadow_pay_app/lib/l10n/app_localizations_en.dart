@@ -586,4 +586,82 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cardUnfrozenSnackbar => '✅ Card Unfrozen';
+
+  @override
+  String get viewAll => 'View All';
+
+  @override
+  String get numTransactions => 'Transactions';
+
+  @override
+  String get totalAmount => 'Total Amount';
+
+  @override
+  String get transactionsCount => 'Transactions';
+
+  @override
+  String get searchHint => 'Search for a transaction....';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get warning => 'Warning';
+
+  @override
+  String get fraud => 'Fraud';
+
+  @override
+  String get restaurant => 'Restaurant';
+
+  @override
+  String get flightTicket => 'Flight Ticket';
+
+  @override
+  String get gym => 'Gym';
+
+  @override
+  String get amount => 'Amount';
+
+  @override
+  String get percentage => '%';
+
+  @override
+  String get dateTime => 'Date & Time';
+
+  @override
+  String get transactions => 'Transactions';
+
+  @override
+  String get noTransactionsYet => 'No Transactions Yet!!';
+
+  @override
+  String get startAddingTransactions => 'Start adding your first transaction';
+
+  @override
+  String get addTransaction => 'Add Transaction';
+
+  @override
+  String get fullControl => 'Full Control';
+
+  @override
+  String get advancedAI => 'Advanced AI';
+
+  @override
+  String get freeze_detail_message => ' When you freeze your card, all purchases and instant withdrawals are stopped immediately to protect your money. You can unfreeze with one tap when you need to use it.\n\n Recurring scheduled payments are not affected by freezing.';
+
+  @override
+  String get full_control_detail_message => ' Full control of your card is in your hands.\n\n• Freeze or unfreeze it anytime\n• Do it from anywhere through the app\n• Absolute security with ease of use\n• Instant notifications for every change';
+
+  @override
+  String get advanced_ai_detail_message => ' Advanced AI system:\n\n• Analyzes your transaction patterns in real-time\n• Detects any unusual or high-risk activity\n• Automatically freezes your card to protect you from fraud\n• Learns from your financial habits to improve accuracy';
+
+  @override
+  String get securityControlCenter => 'Security Control Center';
+
+  @override
+  String get securityControlSubtitle => 'Advanced card protection features';
+
+  @override
+  String get cardStyle => 'Card Style';
 }
