@@ -6,6 +6,7 @@ import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
+import 'package:shadow_pay_app/screens/home/home_screen.dart'; // ✅ أضفنا الـ import
 
 class CardManagementScreen extends StatefulWidget {
   const CardManagementScreen({super.key});
@@ -35,6 +36,7 @@ class _CardManagementScreenState extends State<CardManagementScreen>
   late List<Snowflake> snowflakes = [];
 
   bool isAlertExpanded = false;
+  bool _isFromUserAction = false;
 
   @override
   void initState() {
@@ -97,13 +99,11 @@ class _CardManagementScreenState extends State<CardManagementScreen>
     );
 
     _cardTapScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(
-          parent: _cardTapController, curve: Curves.easeOutBack),
+      CurvedAnimation(parent: _cardTapController, curve: Curves.easeOutBack),
     );
 
     _cardTapRotationAnimation = Tween<double>(begin: 0, end: 0.05).animate(
-      CurvedAnimation(
-          parent: _cardTapController, curve: Curves.easeOutQuad),
+      CurvedAnimation(parent: _cardTapController, curve: Curves.easeOutQuad),
     );
 
     _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
@@ -174,10 +174,11 @@ class _CardManagementScreenState extends State<CardManagementScreen>
 
     _saveCardStatusToPreferences();
 
-    if (loc != null) {
+    if (loc != null && _isFromUserAction) {
       _showSnackBar(
         isCardFrozen ? loc.cardFrozenSnackbar : loc.cardUnfrozenSnackbar,
       );
+      _isFromUserAction = false;
     }
 
     Future.delayed(const Duration(milliseconds: 700), () {
@@ -232,7 +233,8 @@ class _CardManagementScreenState extends State<CardManagementScreen>
           children: [
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,46 +255,34 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                         },
                         child: Row(
                           children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    (isDarkMode ? Colors.white : Colors.black).withOpacity(0.2),
-                                    (isDarkMode ? Colors.white : Colors.black).withOpacity(0.08),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
+                            // ✅ الـ leading الجديد (circle و transparent)
+                            IconButton(
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                  (isDarkMode
+                                          ? const Color(0xff1D293D)
+                                          : Colors.grey.shade200)
+                                      .withOpacity(0.4),
                                 ),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.3),
-                                  width: 1.2,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.15),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () => Navigator.pop(context),
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Icon(
-                                      isRTL
-                                          ? Icons.arrow_forward_ios_rounded
-                                          : Icons.arrow_back_ios_new_rounded,
-                                      color: context.textPrimary.withOpacity(0.9),
-                                      size: 20,
-                                    ),
+                                side: MaterialStateProperty.all(
+                                  BorderSide(
+                                    color:
+                                        context.textSecondary.withOpacity(0.4),
+                                    width: 1,
                                   ),
                                 ),
                               ),
+                              iconSize: 25,
+                              onPressed: () {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const HomeScreen()),
+                                  (route) => false,
+                                );
+                              },
+                              icon: Icon(Icons.arrow_back,
+                                  color: context.textSecondary),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -351,7 +341,8 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                 child: Row(
                                   children: [
                                     AnimatedSwitcher(
-                                      duration: const Duration(milliseconds: 500),
+                                      duration:
+                                          const Duration(milliseconds: 500),
                                       transitionBuilder: (child, animation) {
                                         return ScaleTransition(
                                           scale: animation,
@@ -359,7 +350,9 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                         );
                                       },
                                       child: Icon(
-                                        isCardFrozen ? Icons.ac_unit : Icons.shield,
+                                        isCardFrozen
+                                            ? Icons.ac_unit
+                                            : Icons.shield,
                                         key: ValueKey(isCardFrozen),
                                         color: isCardFrozen
                                             ? Colors.blue[300]
@@ -370,16 +363,20 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                     const SizedBox(width: 15),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           AnimatedSwitcher(
-                                            duration: const Duration(milliseconds: 400),
-                                            transitionBuilder: (child, animation) {
+                                            duration: const Duration(
+                                                milliseconds: 400),
+                                            transitionBuilder:
+                                                (child, animation) {
                                               return FadeTransition(
                                                 opacity: animation,
                                                 child: SlideTransition(
                                                   position: Tween<Offset>(
-                                                    begin: const Offset(0, -0.2),
+                                                    begin:
+                                                        const Offset(0, -0.2),
                                                     end: Offset.zero,
                                                   ).animate(animation),
                                                   child: child,
@@ -387,7 +384,9 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                               );
                                             },
                                             child: Text(
-                                              isCardFrozen ? loc.cardFrozen : loc.cardActive,
+                                              isCardFrozen
+                                                  ? loc.cardFrozen
+                                                  : loc.cardActive,
                                               key: ValueKey(isCardFrozen),
                                               style: TextStyle(
                                                 color: context.textPrimary,
@@ -398,15 +397,19 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                           ),
                                           const SizedBox(height: 5),
                                           AnimatedSwitcher(
-                                            duration: const Duration(milliseconds: 400),
-                                            transitionBuilder: (child, animation) {
+                                            duration: const Duration(
+                                                milliseconds: 400),
+                                            transitionBuilder:
+                                                (child, animation) {
                                               return FadeTransition(
                                                 opacity: animation,
                                                 child: child,
                                               );
                                             },
                                             child: Text(
-                                              isCardFrozen ? loc.cardFrozenDesc : loc.cardActiveDesc,
+                                              isCardFrozen
+                                                  ? loc.cardFrozenDesc
+                                                  : loc.cardActiveDesc,
                                               key: ValueKey(isCardFrozen),
                                               style: TextStyle(
                                                 color: isCardFrozen
@@ -441,8 +444,11 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                             ]),
                             builder: (context, child) {
                               final tapScale = _cardTapScaleAnimation.value;
-                              final tapRotateX = _cardTapRotationAnimation.value * (isCardFrozen ? -1 : 1);
-                              final tapRotateY = _cardTapRotationAnimation.value * 0.5;
+                              final tapRotateX =
+                                  _cardTapRotationAnimation.value *
+                                      (isCardFrozen ? -1 : 1);
+                              final tapRotateY =
+                                  _cardTapRotationAnimation.value * 0.5;
 
                               return Transform(
                                 alignment: Alignment.center,
@@ -463,11 +469,14 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                         ..setEntry(3, 2, 0.001)
                                         ..rotateY(math.pi * flipValue),
                                       child: isFront
-                                          ? _buildCardFront(loc, isCardFrozen, flipValue)
+                                          ? _buildCardFront(
+                                              loc, isCardFrozen, flipValue)
                                           : Transform(
                                               alignment: Alignment.center,
-                                              transform: Matrix4.identity()..rotateY(math.pi),
-                                              child: _buildCardBack(loc, isCardFrozen, flipValue),
+                                              transform: Matrix4.identity()
+                                                ..rotateY(math.pi),
+                                              child: _buildCardBack(
+                                                  loc, isCardFrozen, flipValue),
                                             ),
                                     );
                                   },
@@ -494,21 +503,30 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                 padding: const EdgeInsets.all(20),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
-                                  color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.06),
+                                  color:
+                                      (isDarkMode ? Colors.white : Colors.black)
+                                          .withOpacity(0.06),
                                   border: Border.all(
-                                    color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.08),
+                                    color: (isDarkMode
+                                            ? Colors.white
+                                            : Colors.black)
+                                        .withOpacity(0.08),
                                     width: 1,
                                   ),
                                 ),
                                 child: Column(
                                   children: [
-                                    _row(loc.cardHolder, loc.cardHolderValue, value),
+                                    _row(loc.cardHolder, loc.cardHolderValue,
+                                        value),
                                     const SizedBox(height: 8),
-                                    _row(loc.cardType, loc.cardTypeValue, value),
+                                    _row(
+                                        loc.cardType, loc.cardTypeValue, value),
                                     const SizedBox(height: 8),
-                                    _row(loc.issueDate, loc.issueDateValue, value),
+                                    _row(loc.issueDate, loc.issueDateValue,
+                                        value),
                                     const SizedBox(height: 8),
-                                    _row(loc.expiryDate, loc.expiryDateValue, value),
+                                    _row(loc.expiryDate, loc.expiryDateValue,
+                                        value),
                                   ],
                                 ),
                               ),
@@ -522,6 +540,7 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                       /// FREEZE/UNFREEZE BUTTON
                       GestureDetector(
                         onTap: () {
+                          _isFromUserAction = true;
                           _animationController.forward(from: 0);
                           toggleFreeze(loc);
                         },
@@ -532,7 +551,8 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                               scale: 1 + (_animationController.value * 0.02),
                               child: Container(
                                 width: double.infinity,
-                                padding: const EdgeInsets.symmetric(vertical: 18),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 18),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20),
                                   color: isCardFrozen
@@ -567,7 +587,9 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                       );
                                     },
                                     child: Text(
-                                      isCardFrozen ? loc.unfreezeCard : loc.freezeCard,
+                                      isCardFrozen
+                                          ? loc.unfreezeCard
+                                          : loc.freezeCard,
                                       key: ValueKey(isCardFrozen),
                                       style: const TextStyle(
                                         color: Colors.white,
@@ -606,46 +628,60 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                         });
                                       },
                                       child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 500),
+                                        duration:
+                                            const Duration(milliseconds: 500),
                                         curve: Curves.easeOutCubic,
                                         padding: const EdgeInsets.all(20),
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(24),
+                                          borderRadius:
+                                              BorderRadius.circular(24),
                                           gradient: LinearGradient(
                                             begin: Alignment.topLeft,
                                             end: Alignment.bottomRight,
                                             colors: [
-                                              context.primaryColor.withOpacity(0.08),
-                                              context.primaryColor.withOpacity(0.04),
+                                              context.primaryColor
+                                                  .withOpacity(0.08),
+                                              context.primaryColor
+                                                  .withOpacity(0.04),
                                             ],
                                           ),
                                           border: Border.all(
                                             color: isAlertExpanded
-                                                ? context.primaryColor.withOpacity(0.5)
-                                                : context.primaryColor.withOpacity(0.2),
+                                                ? context.primaryColor
+                                                    .withOpacity(0.5)
+                                                : context.primaryColor
+                                                    .withOpacity(0.2),
                                             width: 1.5,
                                           ),
                                         ),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
                                                 Container(
-                                                  padding: const EdgeInsets.all(12),
+                                                  padding:
+                                                      const EdgeInsets.all(12),
                                                   decoration: BoxDecoration(
                                                     gradient: LinearGradient(
                                                       colors: [
                                                         context.primaryColor,
-                                                        context.primaryColor.withOpacity(0.7),
+                                                        context.primaryColor
+                                                            .withOpacity(0.7),
                                                       ],
                                                     ),
-                                                    borderRadius: BorderRadius.circular(16),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16),
                                                     boxShadow: [
                                                       BoxShadow(
-                                                        color: context.primaryColor.withOpacity(0.3),
+                                                        color: context
+                                                            .primaryColor
+                                                            .withOpacity(0.3),
                                                         blurRadius: 10,
-                                                        offset: const Offset(0, 2),
+                                                        offset:
+                                                            const Offset(0, 2),
                                                       ),
                                                     ],
                                                   ),
@@ -658,14 +694,18 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                                 const SizedBox(width: 16),
                                                 Expanded(
                                                   child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Text(
                                                         loc.securityControlCenter,
                                                         style: TextStyle(
-                                                          color: context.textPrimary,
+                                                          color: context
+                                                              .textPrimary,
                                                           fontSize: 17,
-                                                          fontWeight: FontWeight.bold,
+                                                          fontWeight:
+                                                              FontWeight.bold,
                                                           letterSpacing: -0.3,
                                                         ),
                                                       ),
@@ -673,7 +713,8 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                                       Text(
                                                         loc.securityControlSubtitle,
                                                         style: TextStyle(
-                                                          color: context.textSecondary,
+                                                          color: context
+                                                              .textSecondary,
                                                           fontSize: 12,
                                                         ),
                                                       ),
@@ -681,17 +722,27 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                                   ),
                                                 ),
                                                 AnimatedRotation(
-                                                  duration: const Duration(milliseconds: 400),
-                                                  turns: isAlertExpanded ? 0.5 : 0.0,
+                                                  duration: const Duration(
+                                                      milliseconds: 400),
+                                                  turns: isAlertExpanded
+                                                      ? 0.5
+                                                      : 0.0,
                                                   child: Container(
-                                                    padding: const EdgeInsets.all(6),
+                                                    padding:
+                                                        const EdgeInsets.all(6),
                                                     decoration: BoxDecoration(
-                                                      color: context.primaryColor.withOpacity(0.2),
-                                                      borderRadius: BorderRadius.circular(12),
+                                                      color: context
+                                                          .primaryColor
+                                                          .withOpacity(0.2),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12),
                                                     ),
                                                     child: Icon(
-                                                      Icons.keyboard_arrow_down_rounded,
-                                                      color: context.primaryColor,
+                                                      Icons
+                                                          .keyboard_arrow_down_rounded,
+                                                      color:
+                                                          context.primaryColor,
                                                       size: 22,
                                                     ),
                                                   ),
@@ -699,7 +750,8 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                               ],
                                             ),
                                             AnimatedCrossFade(
-                                              firstChild: const SizedBox.shrink(),
+                                              firstChild:
+                                                  const SizedBox.shrink(),
                                               secondChild: Column(
                                                 children: [
                                                   const SizedBox(height: 20),
@@ -709,7 +761,8 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                                       gradient: LinearGradient(
                                                         colors: [
                                                           Colors.transparent,
-                                                          context.primaryColor.withOpacity(0.3),
+                                                          context.primaryColor
+                                                              .withOpacity(0.3),
                                                           Colors.transparent,
                                                         ],
                                                       ),
@@ -719,29 +772,34 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                                   _buildSecurityFeature(
                                                     icon: Icons.ac_unit,
                                                     title: loc.aboutFreeze,
-                                                    description: loc.freezeInfo1,
+                                                    description:
+                                                        loc.freezeInfo1,
                                                     color: context.primaryColor,
                                                   ),
                                                   const SizedBox(height: 16),
                                                   _buildSecurityFeature(
                                                     icon: Icons.touch_app,
                                                     title: loc.fullControl,
-                                                    description: loc.freezeInfo2,
+                                                    description:
+                                                        loc.freezeInfo2,
                                                     color: Colors.green[300]!,
                                                   ),
                                                   const SizedBox(height: 16),
                                                   _buildSecurityFeature(
                                                     icon: Icons.auto_awesome,
                                                     title: loc.advancedAI,
-                                                    description: loc.freezeInfo3,
-                                                    color: const Color(0xFF3DB892),
+                                                    description:
+                                                        loc.freezeInfo3,
+                                                    color:
+                                                        const Color(0xFF3DB892),
                                                   ),
                                                 ],
                                               ),
                                               crossFadeState: isAlertExpanded
                                                   ? CrossFadeState.showSecond
                                                   : CrossFadeState.showFirst,
-                                              duration: const Duration(milliseconds: 400),
+                                              duration: const Duration(
+                                                  milliseconds: 400),
                                             ),
                                           ],
                                         ),
@@ -781,7 +839,8 @@ class _CardManagementScreenState extends State<CardManagementScreen>
     );
   }
 
-  Widget _buildCardFront(AppLocalizations loc, bool isCardFrozen, double flipValue) {
+  Widget _buildCardFront(
+      AppLocalizations loc, bool isCardFrozen, double flipValue) {
     final textOpacity = flipValue <= 0.3
         ? 1.0
         : (1.0 - (flipValue - 0.3) / 0.2).clamp(0.0, 1.0);
@@ -793,7 +852,7 @@ class _CardManagementScreenState extends State<CardManagementScreen>
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           colors: isCardFrozen
-              ? [const Color(0xFF2A4A7A), const Color(0xFF3A6A9A)]
+              ? [const Color(0xFF2A4A7A), const Color(0xFF3A6A9A)] 
               : (isDarkMode
                   ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
                   : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)]),
@@ -802,7 +861,9 @@ class _CardManagementScreenState extends State<CardManagementScreen>
         ),
         boxShadow: [
           BoxShadow(
-            color: (isCardFrozen ? Colors.blue : context.primaryColor).withOpacity(0.3),
+            color:
+                (isCardFrozen ? const Color(0xFF3A6A9A) : context.primaryColor)
+                    .withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -812,7 +873,6 @@ class _CardManagementScreenState extends State<CardManagementScreen>
         borderRadius: BorderRadius.circular(20),
         child: Stack(
           children: [
-            // Background decorative elements
             if (isCardFrozen) ...[
               Positioned(
                 top: -50,
@@ -912,7 +972,8 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                           children: [
                             Text(
                               loc.availableBalance,
-                              style: TextStyle(color: context.textSecondary, fontSize: 12),
+                              style: TextStyle(
+                                  color: context.textSecondary, fontSize: 12),
                             ),
                             const SizedBox(height: 5),
                             Text(
@@ -963,15 +1024,12 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                         ],
                       ),
                     if (isCardFrozen)
-                      Text(
-                        loc.cardNumberMasked,
-                        style: TextStyle(
-                          color: context.textPrimary,
-                          fontSize: 20,
-                          letterSpacing: 2.5,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                      Text(loc.cardNumberMasked,
+                          style: TextStyle(
+                              color: context.textPrimary,
+                              fontSize: 20,
+                              letterSpacing: 2.5,
+                              fontWeight: FontWeight.w500)),
                     const SizedBox(height: 15),
                     if (!isCardFrozen)
                       Row(
@@ -982,32 +1040,32 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                             decoration: BoxDecoration(
                               color: Colors.amber.withOpacity(0.3),
                               borderRadius: BorderRadius.circular(5),
-                              border: Border.all(color: Colors.amber.withOpacity(0.5), width: 1),
+                              border: Border.all(
+                                  color: Colors.amber.withOpacity(0.5),
+                                  width: 1),
                             ),
-                            child: const Icon(Icons.sim_card, color: Colors.amber, size: 16),
+                            child: const Icon(Icons.sim_card,
+                                color: Colors.amber, size: 16),
                           ),
                           const SizedBox(width: 20),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  loc.cardHolderValue.toUpperCase(),
-                                  style: TextStyle(
-                                    color: context.textPrimary,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
+                                Text(loc.cardHolderValue.toUpperCase(),
+                                    style: TextStyle(
+                                        color: context.textPrimary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        letterSpacing: 0.5)),
                                 const SizedBox(height: 2),
                                 Row(
                                   children: [
                                     Text(loc.expiryDateValue,
-                                        style: TextStyle(color: context.textSecondary, fontSize: 10)),
+                                        style: TextStyle(
+                                            color: context.textSecondary,
+                                            fontSize: 10)),
                                     const SizedBox(width: 12),
-                                    Text("CVV ***",
-                                        style: TextStyle(color: context.textSecondary, fontSize: 10)),
                                   ],
                                 ),
                               ],
@@ -1016,22 +1074,20 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(
-                                "VISA",
-                                style: TextStyle(
-                                  color: context.primaryColor.withOpacity(0.7),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.5,
-                                ),
-                              ),
+                              Text("VISA",
+                                  style: TextStyle(
+                                      color:
+                                          context.primaryColor.withOpacity(0.7),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.5)),
                               Container(
                                 width: 30,
                                 height: 20,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(colors: [
                                     Colors.amber.withOpacity(0.6),
-                                    Colors.orange.withOpacity(0.4),
+                                    Colors.orange.withOpacity(0.4)
                                   ]),
                                   borderRadius: BorderRadius.circular(3),
                                 ),
@@ -1045,18 +1101,20 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(loc.cardHolderValue,
-                              style: TextStyle(color: context.textSecondary, fontSize: 12)),
+                              style: TextStyle(
+                                  color: context.textSecondary, fontSize: 12)),
                           Text(loc.expiryDateValue,
-                              style: TextStyle(color: context.textSecondary, fontSize: 12)),
+                              style: TextStyle(
+                                  color: context.textSecondary, fontSize: 12)),
                           const Text("***",
-                              style: TextStyle(color: Colors.white, fontSize: 12)),
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 12)),
                         ],
                       ),
                   ],
                 ),
               ),
             ),
-            // Frozen overlay effect
             if (isCardFrozen)
               Positioned.fill(
                 child: ClipRRect(
@@ -1086,18 +1144,21 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                           colors: [
                                             Colors.blue.withOpacity(0.7),
                                             Colors.blue.withOpacity(0.3),
-                                            Colors.transparent,
+                                            Colors.transparent
                                           ],
                                           stops: const [0.3, 0.6, 1.0],
                                         ),
                                       ),
-                                      child: const Icon(Icons.ac_unit, color: Colors.blue, size: 70),
+                                      child: const Icon(Icons.ac_unit,
+                                          color: Colors.blue, size: 70),
                                     ),
                                   ),
                                   for (int i = 0; i < 3; i++)
-                                    _buildIceRing(i, _iceRotationAnimation.value),
+                                    _buildIceRing(
+                                        i, _iceRotationAnimation.value),
                                   for (int i = 0; i < 12; i++)
-                                    _buildFloatingIceParticle(i, _icePulseAnimation.value),
+                                    _buildFloatingIceParticle(
+                                        i, _icePulseAnimation.value),
                                 ],
                               ),
                             );
@@ -1114,8 +1175,10 @@ class _CardManagementScreenState extends State<CardManagementScreen>
     );
   }
 
-  Widget _buildCardBack(AppLocalizations loc, bool isCardFrozen, double flipValue) {
-    final textOpacity = flipValue >= 0.7 ? ((flipValue - 0.7) / 0.3).clamp(0.0, 1.0) : 0.0;
+  Widget _buildCardBack(
+      AppLocalizations loc, bool isCardFrozen, double flipValue) {
+    final textOpacity =
+        flipValue >= 0.7 ? ((flipValue - 0.7) / 0.3).clamp(0.0, 1.0) : 0.0;
     final isDarkMode = context.isDarkMode;
 
     return Container(
@@ -1124,7 +1187,7 @@ class _CardManagementScreenState extends State<CardManagementScreen>
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           colors: isCardFrozen
-              ? [const Color(0xFF2A4A7A), const Color(0xFF3A6A9A)]
+              ? [const Color(0xFF800020), const Color(0xFF4A0020)] // ✅ Burgundy
               : (isDarkMode
                   ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
                   : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)]),
@@ -1133,10 +1196,12 @@ class _CardManagementScreenState extends State<CardManagementScreen>
         ),
         boxShadow: [
           BoxShadow(
-            color: (isCardFrozen ? Colors.blue : context.primaryColor).withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
+              color: (isCardFrozen
+                      ? const Color(0xFF800020)
+                      : context.primaryColor)
+                  .withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8)),
         ],
       ),
       child: ClipRRect(
@@ -1151,7 +1216,10 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                 height: 150,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: (isCardFrozen ? Colors.blue : context.primaryColor).withOpacity(0.15),
+                  color: (isCardFrozen
+                          ? const Color(0xFF800020)
+                          : context.primaryColor)
+                      .withOpacity(0.15),
                 ),
               ),
             ),
@@ -1163,11 +1231,10 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      width: double.infinity,
-                      height: 45,
-                      color: Colors.black.withOpacity(0.5),
-                      margin: const EdgeInsets.only(top: 10),
-                    ),
+                        width: double.infinity,
+                        height: 45,
+                        color: Colors.black.withOpacity(0.5),
+                        margin: const EdgeInsets.only(top: 10)),
                     const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1176,14 +1243,18 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text("CVV",
-                                style: TextStyle(color: context.textSecondary, fontSize: 10)),
+                                style: TextStyle(
+                                    color: context.textSecondary,
+                                    fontSize: 10)),
                             const SizedBox(height: 5),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 8),
                               decoration: BoxDecoration(
-                                color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
+                                  color:
+                                      (isDarkMode ? Colors.white : Colors.black)
+                                          .withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8)),
                               child: Text("***",
                                   style: TextStyle(
                                       color: context.textPrimary,
@@ -1197,17 +1268,19 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text("CARD TYPE",
-                                style: TextStyle(color: context.textSecondary, fontSize: 10)),
+                                style: TextStyle(
+                                    color: context.textSecondary,
+                                    fontSize: 10)),
                             const SizedBox(height: 5),
-                            Text(
-                              "PREMIUM",
-                              style: TextStyle(
-                                color: (isCardFrozen ? Colors.blue : context.primaryColor).withOpacity(0.8),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1,
-                              ),
-                            ),
+                            Text("PREMIUM",
+                                style: TextStyle(
+                                    color: (isCardFrozen
+                                            ? const Color(0xFF800020)
+                                            : context.primaryColor)
+                                        .withOpacity(0.8),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1)),
                           ],
                         ),
                       ],
@@ -1217,9 +1290,11 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text("24/7 Support",
-                            style: TextStyle(color: context.textSecondary, fontSize: 10)),
+                            style: TextStyle(
+                                color: context.textSecondary, fontSize: 10)),
                         Text("www.shadowpay.com",
-                            style: TextStyle(color: context.textSecondary, fontSize: 10)),
+                            style: TextStyle(
+                                color: context.textSecondary, fontSize: 10)),
                       ],
                     ),
                   ],
@@ -1236,32 +1311,25 @@ class _CardManagementScreenState extends State<CardManagementScreen>
     double size = 120 + (index * 15);
     double opacity = 0.4 - (index * 0.1);
     double speed = 1.0 - (index * 0.2);
-
     return Transform.rotate(
       angle: rotation * speed,
       child: Container(
         width: size,
         height: size,
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.blue.withOpacity(opacity),
-            width: 2.0 - (index * 0.5),
-          ),
-        ),
+            shape: BoxShape.circle,
+            border: Border.all(
+                color: Colors.blue.withOpacity(opacity),
+                width: 2.0 - (index * 0.5))),
         child: Center(
-          child: Container(
-            width: size - 20,
-            height: size - 20,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.cyan.withOpacity(opacity * 0.6),
-                width: 1.0,
-              ),
-            ),
-          ),
-        ),
+            child: Container(
+                width: size - 20,
+                height: size - 20,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: Colors.cyan.withOpacity(opacity * 0.6),
+                        width: 1.0)))),
       ),
     );
   }
@@ -1271,7 +1339,6 @@ class _CardManagementScreenState extends State<CardManagementScreen>
     double radius = 70 + (pulseValue * 20);
     double x = radius * math.cos(angle + pulseValue * 2);
     double y = radius * math.sin(angle + pulseValue * 2);
-
     return Positioned(
       left: 100 + x,
       top: 100 + y,
@@ -1286,16 +1353,14 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                 width: 8 + (index % 5).toDouble(),
                 height: 8 + (index % 5).toDouble(),
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.blue.withOpacity(0.6 + (pulseValue * 0.3)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blue.withOpacity(0.4),
-                      blurRadius: 6,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
+                    shape: BoxShape.circle,
+                    color: Colors.blue.withOpacity(0.6 + (pulseValue * 0.3)),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.blue.withOpacity(0.4),
+                          blurRadius: 6,
+                          spreadRadius: 2)
+                    ]),
               ),
             ),
           );
@@ -1304,42 +1369,34 @@ class _CardManagementScreenState extends State<CardManagementScreen>
     );
   }
 
-  Widget _buildSecurityFeature({
-    required IconData icon,
-    required String title,
-    required String description,
-    required Color color,
-  }) {
+  Widget _buildSecurityFeature(
+      {required IconData icon,
+      required String title,
+      required String description,
+      required Color color}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: color, size: 20),
-        ),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12)),
+            child: Icon(icon, color: color, size: 20)),
         const SizedBox(width: 12),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title,
-                  style: TextStyle(
-                      color: context.textPrimary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600)),
-              const SizedBox(height: 4),
-              Text(description,
-                  style: TextStyle(
-                      color: context.textSecondary,
-                      fontSize: 12,
-                      height: 1.4)),
-            ],
-          ),
-        ),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title,
+              style: TextStyle(
+                  color: context.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600)),
+          const SizedBox(height: 4),
+          Text(description,
+              style: TextStyle(
+                  color: context.textSecondary, fontSize: 12, height: 1.4)),
+        ])),
       ],
     );
   }
@@ -1366,10 +1423,8 @@ class _CardManagementScreenState extends State<CardManagementScreen>
   }
 }
 
-// Egyptian Visa Pattern Painter
 class EgyptianVisaPattern extends CustomPainter {
   final Color color;
-
   EgyptianVisaPattern({required this.color});
 
   @override
@@ -1377,7 +1432,6 @@ class EgyptianVisaPattern extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.fill;
-
     final path = Path();
     for (int i = 0; i < 3; i++) {
       final startX = size.width * (0.2 + i * 0.3);
@@ -1388,25 +1442,19 @@ class EgyptianVisaPattern extends CustomPainter {
       path.close();
     }
     canvas.drawPath(path, paint);
-
     for (int i = 0; i < 3; i++) {
       final linePaint = Paint()
         ..color = color
         ..strokeWidth = 1
         ..style = PaintingStyle.stroke;
-      canvas.drawLine(
-        Offset(size.width * 0.15, size.height * (0.4 + i * 0.15)),
-        Offset(size.width * 0.85, size.height * (0.4 + i * 0.15)),
-        linePaint,
-      );
+      canvas.drawLine(Offset(size.width * 0.15, size.height * (0.4 + i * 0.15)),
+          Offset(size.width * 0.85, size.height * (0.4 + i * 0.15)), linePaint);
     }
-
     for (int i = 0; i < 5; i++) {
       canvas.drawCircle(
-        Offset(size.width * (0.15 + i * 0.175), size.height * 0.6),
-        2.5,
-        paint,
-      );
+          Offset(size.width * (0.15 + i * 0.175), size.height * 0.6),
+          2.5,
+          paint);
     }
   }
 
@@ -1414,32 +1462,22 @@ class EgyptianVisaPattern extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// Snowflake Model
 class Snowflake {
   final int id;
-  final double startX;
-  final double startY;
-  final double size;
-  final double speed;
-  final double opacity;
-  final double sway;
-
-  Snowflake({
-    required this.id,
-    required this.startX,
-    required this.startY,
-    required this.size,
-    required this.speed,
-    required this.opacity,
-    required this.sway,
-  });
+  final double startX, startY, size, speed, opacity, sway;
+  Snowflake(
+      {required this.id,
+      required this.startX,
+      required this.startY,
+      required this.size,
+      required this.speed,
+      required this.opacity,
+      required this.sway});
 }
 
-// Snow Painter
 class SnowPainter extends CustomPainter {
   final List<Snowflake> snowflakes;
   final double progress;
-
   SnowPainter({required this.snowflakes, required this.progress});
 
   @override
@@ -1447,38 +1485,36 @@ class SnowPainter extends CustomPainter {
     for (var snowflake in snowflakes) {
       double y = snowflake.startY + (progress * snowflake.speed);
       if (y > 1.2) continue;
-
-      double swayOffset = math.sin(progress * 2 * math.pi * 0.6 + snowflake.id) * snowflake.sway;
+      double swayOffset =
+          math.sin(progress * 2 * math.pi * 0.6 + snowflake.id) *
+              snowflake.sway;
       double x = snowflake.startX + swayOffset;
       if (x < 0) x += 1.0;
       if (x > 1.0) x -= 1.0;
-
       final paint = Paint()
-        ..color = Colors.white.withOpacity(snowflake.opacity * (1 - progress * 0.2))
+        ..color =
+            Colors.white.withOpacity(snowflake.opacity * (1 - progress * 0.2))
         ..style = PaintingStyle.fill
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5);
-
-      canvas.drawCircle(Offset(x * size.width, y * size.height), snowflake.size, paint);
-
+      canvas.drawCircle(
+          Offset(x * size.width, y * size.height), snowflake.size, paint);
       final highlightPaint = Paint()
         ..color = Colors.white.withOpacity(snowflake.opacity * 0.6)
         ..style = PaintingStyle.fill;
-
-      canvas.drawCircle(Offset(x * size.width - 1, y * size.height - 1), snowflake.size * 0.4, highlightPaint);
-
+      canvas.drawCircle(Offset(x * size.width - 1, y * size.height - 1),
+          snowflake.size * 0.4, highlightPaint);
       if (snowflake.size > 6) {
         final glowPaint = Paint()
           ..color = Colors.blue.withOpacity(0.15)
           ..style = PaintingStyle.fill
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-
-        canvas.drawCircle(Offset(x * size.width, y * size.height), snowflake.size * 1.3, glowPaint);
+        canvas.drawCircle(Offset(x * size.width, y * size.height),
+            snowflake.size * 1.3, glowPaint);
       }
     }
   }
 
   @override
-  bool shouldRepaint(SnowPainter oldDelegate) {
-    return oldDelegate.progress != progress;
-  }
+  bool shouldRepaint(SnowPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }

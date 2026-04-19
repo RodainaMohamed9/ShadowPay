@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
-import 'package:shadow_pay_app/providers/language_provider.dart'; // أضف المسار الصحيح لملف الـ Provider
+import 'package:shadow_pay_app/providers/language_provider.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
+import 'package:shadow_pay_app/providers/theme_provider.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
+import 'package:shadow_pay_app/screens/home/home_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -13,20 +17,6 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsPage>
     with TickerProviderStateMixin {
-  // ================= COLORS =================
-  static const Color bgDark = Color(0xFF070C16);
-  static const Color bgDark2 = Color(0xFF0B1A2A);
-  static const Color primary = Color(0xFF1E8F7A);
-  static const Color cardBorderColor = Color(0xFF1E2A3D);
-  static const Color textSecondary = Color(0xFF8A9BB5);
-  
-  // Light theme colors
-  static const Color bgLight = Color(0xFFF5F5F5);
-  static const Color bgLight2 = Color(0xFFFFFFFF);
-  static const Color cardBorderColorLight = Color(0xFFE0E0E0);
-  static const Color textSecondaryLight = Color(0xFF666666);
-  static const Color textPrimaryLight = Color(0xFF1A1A1A);
-
   // ================= ANIMATION CONTROLLERS =================
   late AnimationController _mainController;
   late AnimationController _headerController;
@@ -52,7 +42,6 @@ class _SettingsScreenState extends State<SettingsPage>
   bool showDelete = false;
   bool showLangDialog = false;
   bool showThemeDialog = false;
-  bool isDarkMode = true; // Current theme state
 
   @override
   void initState() {
@@ -163,7 +152,8 @@ class _SettingsScreenState extends State<SettingsPage>
       ),
     );
   }
- void _showDialog(bool delete) {
+
+  void _showDialog(bool delete) {
     _dialogController.forward(from: 0.0);
     setState(() {
       if (delete) {
@@ -218,7 +208,6 @@ class _SettingsScreenState extends State<SettingsPage>
     await languageProvider.changeLanguage(languageCode);
     _hideLanguageDialog();
     
-    // عرض رسالة تأكيد
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -226,7 +215,7 @@ class _SettingsScreenState extends State<SettingsPage>
               ? 'تم تغيير اللغة إلى العربية' 
               : 'Language changed to English',
         ),
-        backgroundColor: primary,
+        backgroundColor: context.primaryColor,
         duration: const Duration(milliseconds: 1500),
         behavior: SnackBarBehavior.floating,
       ),
@@ -234,30 +223,17 @@ class _SettingsScreenState extends State<SettingsPage>
   }
 
   void _changeTheme(bool isDark) {
-    setState(() {
-      isDarkMode = isDark;
-    });
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    themeProvider.setThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
     _hideThemeDialog();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(isDark ? 'تم التبديل إلى الوضع الداكن' : 'Switched to light mode'),
-        backgroundColor: primary,
+        backgroundColor: context.primaryColor,
         duration: const Duration(milliseconds: 1500),
         behavior: SnackBarBehavior.floating,
       ),
     );
-  }
-
-  Color getCurrentBgColor() {
-    return isDarkMode ? bgDark : bgLight;
-  }
-
-  Color getCurrentCardBorderColor() {
-    return isDarkMode ? cardBorderColor : cardBorderColorLight;
-  }
-
-  Color getCurrentTextSecondaryColor() {
-    return isDarkMode ? textSecondary : textSecondaryLight;
   }
 
   String _getCurrentLanguageName() {
@@ -275,11 +251,12 @@ class _SettingsScreenState extends State<SettingsPage>
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     final isRTL = Localizations.localeOf(context).languageCode == 'ar';
+    final isDarkMode = context.isDarkMode;
     
     return Directionality(
       textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
       child: Scaffold(
-        backgroundColor: getCurrentBgColor(),
+        backgroundColor: context.backgroundColor,
         body: Stack(
           children: [
             AnimatedBuilder(
@@ -345,7 +322,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   _buildAnimatedSection(
                     index: 0,
                     title: loc.notifications,
-                    color: primary,
+                    color: context.primaryColor,
                     icon: Icons.notifications_active,
                     children: [
                       _toggle(
@@ -396,7 +373,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   _buildAnimatedSection(
                     index: 1,
                     title: loc.securityPrivacy,
-                    color: primary,
+                    color: context.primaryColor,
                     icon: Icons.security,
                     children: [
                       _toggle(
@@ -439,7 +416,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   _buildAnimatedSection(
                     index: 2,
                     title: loc.preferences,
-                    color: primary,
+                    color: context.primaryColor,
                     icon: Icons.settings,
                     children: [
                       _button(
@@ -464,7 +441,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   _buildAnimatedSection(
                     index: 3,
                     title: loc.supportInfo,
-                    color: primary,
+                    color: context.primaryColor,
                     icon: Icons.help_center,
                     children: [
                       _button(loc.about, null, Icons.info, index: 12, supportType: 'about'),
@@ -621,12 +598,14 @@ class _SettingsScreenState extends State<SettingsPage>
     required IconData icon,
     required List<Widget> children,
   }) {
+    final isDarkMode = context.isDarkMode;
+    
     return Container(
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF0F1C2E) : bgLight2,
+        color: isDarkMode ? const Color(0xFF0F1C2E) : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: getCurrentCardBorderColor(),
+          color: isDarkMode ? const Color(0xFF1E2A3D) : Colors.grey.shade200,
           width: 1,
         ),
         boxShadow: [
@@ -636,7 +615,7 @@ class _SettingsScreenState extends State<SettingsPage>
             offset: const Offset(0, 10),
           ),
           BoxShadow(
-            color: primary.withOpacity(0.05),
+            color: color.withOpacity(0.05),
             blurRadius: 20,
             spreadRadius: 1,
           ),
@@ -661,7 +640,7 @@ class _SettingsScreenState extends State<SettingsPage>
                 Text(
                   title,
                   style: TextStyle(
-                    color: isDarkMode ? Colors.white : textPrimaryLight,
+                    color: context.textPrimary,
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.3,
@@ -693,7 +672,10 @@ class _SettingsScreenState extends State<SettingsPage>
     );
   }
 
+  // ================= HEADER WITH NEW LEADING =================
   Widget _header(AppLocalizations loc) {
+    final isDarkMode = context.isDarkMode;
+    
     return TweenAnimationBuilder(
       duration: const Duration(milliseconds: 500),
       tween: Tween<double>(begin: 0.9, end: 1.0),
@@ -703,21 +685,28 @@ class _SettingsScreenState extends State<SettingsPage>
           scale: scale,
           child: Row(
             children: [
-              GestureDetector(
-                onTapUp: (_) => Navigator.pop(context),
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.06),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: primary.withOpacity(0.25),
+              // ✅ الـ leading الجديد (circle و transparent)
+              IconButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                    (isDarkMode ? const Color(0xff1D293D) : Colors.grey.shade200).withOpacity(0.4),
+                  ),
+                  side: MaterialStateProperty.all(
+                    BorderSide(
+                      color: context.textSecondary.withOpacity(0.4),
                       width: 1,
                     ),
                   ),
-                  child: Icon(Icons.arrow_forward_ios, color: primary.withOpacity(0.8), size: 20),
                 ),
+                iconSize: 25,
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    (route) => false,
+                  );
+                },
+                icon: Icon(Icons.arrow_back, color: context.textSecondary),
               ),
               const SizedBox(width: 16),
               Column(
@@ -726,7 +715,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   Text(
                     loc.settingsTitle,
                     style: TextStyle(
-                      color: isDarkMode ? Colors.white : textPrimaryLight,
+                      color: context.textPrimary,
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       letterSpacing: -0.5,
@@ -734,7 +723,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   ),
                   Text(
                     loc.settingsSubtitle,
-                    style: TextStyle(color: getCurrentTextSecondaryColor(), fontSize: 13),
+                    style: TextStyle(color: context.textSecondary, fontSize: 13),
                   ),
                 ],
               ),
@@ -746,13 +735,15 @@ class _SettingsScreenState extends State<SettingsPage>
   }
 
   Widget _appCard(AppLocalizations loc) {
+    final isDarkMode = context.isDarkMode;
+    
     return Container(
       padding: const EdgeInsets.all(1.2),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(26),
         gradient: LinearGradient(
           colors: [
-            primary.withOpacity(0.25),
+            context.primaryColor.withOpacity(0.25),
             Colors.transparent,
           ],
           begin: Alignment.topLeft,
@@ -783,7 +774,7 @@ class _SettingsScreenState extends State<SettingsPage>
               offset: const Offset(0, 10),
             ),
             BoxShadow(
-              color: primary.withOpacity(0.18),
+              color: context.primaryColor.withOpacity(0.18),
               blurRadius: 20,
               spreadRadius: 1,
             ),
@@ -796,7 +787,7 @@ class _SettingsScreenState extends State<SettingsPage>
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: primary.withOpacity(0.4),
+                    color: context.primaryColor.withOpacity(0.4),
                     blurRadius: 12,
                   )
                 ],
@@ -814,7 +805,7 @@ class _SettingsScreenState extends State<SettingsPage>
                       height: 54,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [primary, primary.withOpacity(0.6)],
+                          colors: [context.primaryColor, context.primaryColor.withOpacity(0.6)],
                         ),
                         borderRadius: BorderRadius.circular(18),
                       ),
@@ -832,7 +823,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   Text(
                     "ShadowPay",
                     style: TextStyle(
-                      color: isDarkMode ? Colors.white : textPrimaryLight,
+                      color: context.textPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                     ),
@@ -841,7 +832,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   Text(
                     loc.version,
                     style: TextStyle(
-                      color: primary.withOpacity(0.9),
+                      color: context.primaryColor.withOpacity(0.9),
                       fontSize: 12,
                     ),
                   ),
@@ -851,13 +842,13 @@ class _SettingsScreenState extends State<SettingsPage>
                       Icon(
                         Icons.verified,
                         size: 12,
-                        color: primary.withOpacity(0.9),
+                        color: context.primaryColor.withOpacity(0.9),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         loc.securedByAI,
                         style: TextStyle(
-                          color: primary.withOpacity(0.75),
+                          color: context.primaryColor.withOpacity(0.75),
                           fontSize: 10,
                         ),
                       ),
@@ -872,18 +863,18 @@ class _SettingsScreenState extends State<SettingsPage>
                 borderRadius: BorderRadius.circular(20),
                 gradient: LinearGradient(
                   colors: [
-                    primary.withOpacity(0.25),
-                    primary.withOpacity(0.1),
+                    context.primaryColor.withOpacity(0.25),
+                    context.primaryColor.withOpacity(0.1),
                   ],
                 ),
                 border: Border.all(
-                  color: primary.withOpacity(0.4),
+                  color: context.primaryColor.withOpacity(0.4),
                 ),
               ),
               child: Text(
                 loc.verified,
                 style: TextStyle(
-                  color: primary,
+                  color: context.primaryColor,
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                 ),
@@ -903,6 +894,8 @@ class _SettingsScreenState extends State<SettingsPage>
     required Function(bool) onChanged,
     required int index,
   }) {
+    final isDarkMode = context.isDarkMode;
+    
     return AnimatedBuilder(
       animation: _itemControllers[index],
       builder: (context, child) {
@@ -917,7 +910,7 @@ class _SettingsScreenState extends State<SettingsPage>
                 color: Colors.white.withOpacity(0.02),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: getCurrentCardBorderColor().withOpacity(0.25),
+                  color: (isDarkMode ? const Color(0xFF1E2A3D) : Colors.grey.shade200).withOpacity(0.25),
                   width: 0.5,
                 ),
               ),
@@ -926,10 +919,10 @@ class _SettingsScreenState extends State<SettingsPage>
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: primary.withOpacity(0.08),
+                      color: context.primaryColor.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(icon, color: primary.withOpacity(0.8), size: 18),
+                    child: Icon(icon, color: context.primaryColor.withOpacity(0.8), size: 18),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -939,7 +932,7 @@ class _SettingsScreenState extends State<SettingsPage>
                         Text(
                           title,
                           style: TextStyle(
-                            color: isDarkMode ? Colors.white : textPrimaryLight,
+                            color: context.textPrimary,
                             fontWeight: FontWeight.w500,
                             fontSize: 14,
                           ),
@@ -947,7 +940,7 @@ class _SettingsScreenState extends State<SettingsPage>
                         Text(
                           desc,
                           style: TextStyle(
-                            color: getCurrentTextSecondaryColor(),
+                            color: context.textSecondary,
                             fontSize: 11,
                           ),
                         ),
@@ -981,6 +974,8 @@ class _SettingsScreenState extends State<SettingsPage>
 
   Widget _button(String title, String? value, IconData icon, 
       {required int index, String supportType = '', VoidCallback? onTap}) {
+    final isDarkMode = context.isDarkMode;
+    
     return AnimatedBuilder(
       animation: _itemControllers[index],
       builder: (context, child) {
@@ -997,7 +992,7 @@ class _SettingsScreenState extends State<SettingsPage>
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('فشل في فتح $title'),
-                        backgroundColor: Colors.red,
+                        backgroundColor: context.errorColor,
                       ),
                     );
                   }
@@ -1005,7 +1000,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('جاري فتح $title...'),
-                      backgroundColor: primary,
+                      backgroundColor: context.primaryColor,
                       duration: const Duration(milliseconds: 800),
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -1019,7 +1014,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   color: Colors.white.withOpacity(0.02),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: getCurrentCardBorderColor().withOpacity(0.25),
+                    color: (isDarkMode ? const Color(0xFF1E2A3D) : Colors.grey.shade200).withOpacity(0.25),
                     width: 0.5,
                   ),
                 ),
@@ -1028,17 +1023,17 @@ class _SettingsScreenState extends State<SettingsPage>
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: primary.withOpacity(0.08),
+                        color: context.primaryColor.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(icon, color: primary.withOpacity(0.8), size: 18),
+                      child: Icon(icon, color: context.primaryColor.withOpacity(0.8), size: 18),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         title,
                         style: TextStyle(
-                          color: isDarkMode ? Colors.white : textPrimaryLight, 
+                          color: context.textPrimary, 
                           fontSize: 14
                         ),
                       ),
@@ -1047,16 +1042,16 @@ class _SettingsScreenState extends State<SettingsPage>
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: primary.withOpacity(0.1),
+                          color: context.primaryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           value,
-                          style: TextStyle(color: primary.withOpacity(0.7), fontSize: 12),
+                          style: TextStyle(color: context.primaryColor.withOpacity(0.7), fontSize: 12),
                         ),
                       ),
                     const SizedBox(width: 8),
-                    Icon(Icons.arrow_forward_ios, size: 14, color: getCurrentTextSecondaryColor()),
+                    Icon(Icons.arrow_forward_ios, size: 14, color: context.textSecondary),
                   ],
                 ),
               ),
@@ -1119,6 +1114,7 @@ class _SettingsScreenState extends State<SettingsPage>
   Widget _languageDialog(AppLocalizations loc) {
     final languageProvider = Provider.of<LanguageProvider>(context);
     final currentLang = languageProvider.locale.languageCode;
+    final isDarkMode = context.isDarkMode;
     
     return GestureDetector(
       onTap: _hideLanguageDialog,
@@ -1129,10 +1125,10 @@ class _SettingsScreenState extends State<SettingsPage>
             padding: const EdgeInsets.all(24),
             margin: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDarkMode ? const Color(0xFF0F1C2E) : bgLight2,
+              color: isDarkMode ? const Color(0xFF0F1C2E) : Colors.white,
               borderRadius: BorderRadius.circular(32),
               border: Border.all(
-                color: primary.withOpacity(0.25),
+                color: context.primaryColor.withOpacity(0.25),
                 width: 1,
               ),
               boxShadow: [
@@ -1142,7 +1138,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   offset: const Offset(0, 15),
                 ),
                 BoxShadow(
-                  color: primary.withOpacity(0.05),
+                  color: context.primaryColor.withOpacity(0.05),
                   blurRadius: 20,
                   spreadRadius: 1,
                 ),
@@ -1161,13 +1157,13 @@ class _SettingsScreenState extends State<SettingsPage>
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: primary.withOpacity(0.1),
+                          color: context.primaryColor.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.language,
                           size: 44,
-                          color: primary.withOpacity(0.8),
+                          color: context.primaryColor.withOpacity(0.8),
                         ),
                       ),
                     );
@@ -1177,7 +1173,7 @@ class _SettingsScreenState extends State<SettingsPage>
                 Text(
                   'اختر اللغة',
                   style: TextStyle(
-                    color: isDarkMode ? Colors.white : textPrimaryLight,
+                    color: context.textPrimary,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1207,14 +1203,14 @@ class _SettingsScreenState extends State<SettingsPage>
                       color: Colors.white.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: getCurrentCardBorderColor().withOpacity(0.25),
+                        color: (isDarkMode ? const Color(0xFF1E2A3D) : Colors.grey.shade200).withOpacity(0.25),
                         width: 0.5,
                       ),
                     ),
                     child: Center(
                       child: Text(
                         loc.cancel,
-                        style: TextStyle(color: isDarkMode ? Colors.white : textPrimaryLight, fontSize: 16),
+                        style: TextStyle(color: context.textPrimary, fontSize: 16),
                       ),
                     ),
                   ),
@@ -1228,6 +1224,8 @@ class _SettingsScreenState extends State<SettingsPage>
   }
 
   Widget _themeDialog(AppLocalizations loc) {
+    final isDarkMode = context.isDarkMode;
+    
     return GestureDetector(
       onTap: _hideThemeDialog,
       child: Container(
@@ -1237,10 +1235,10 @@ class _SettingsScreenState extends State<SettingsPage>
             padding: const EdgeInsets.all(24),
             margin: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDarkMode ? const Color(0xFF0F1C2E) : bgLight2,
+              color: isDarkMode ? const Color(0xFF0F1C2E) : Colors.white,
               borderRadius: BorderRadius.circular(32),
               border: Border.all(
-                color: primary.withOpacity(0.25),
+                color: context.primaryColor.withOpacity(0.25),
                 width: 1,
               ),
               boxShadow: [
@@ -1250,7 +1248,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   offset: const Offset(0, 15),
                 ),
                 BoxShadow(
-                  color: primary.withOpacity(0.05),
+                  color: context.primaryColor.withOpacity(0.05),
                   blurRadius: 20,
                   spreadRadius: 1,
                 ),
@@ -1269,13 +1267,13 @@ class _SettingsScreenState extends State<SettingsPage>
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: primary.withOpacity(0.1),
+                          color: context.primaryColor.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.palette,
                           size: 44,
-                          color: primary.withOpacity(0.8),
+                          color: context.primaryColor.withOpacity(0.8),
                         ),
                       ),
                     );
@@ -1285,7 +1283,7 @@ class _SettingsScreenState extends State<SettingsPage>
                 Text(
                   'اختر الثيم',
                   style: TextStyle(
-                    color: isDarkMode ? Colors.white : textPrimaryLight,
+                    color: context.textPrimary,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1315,14 +1313,14 @@ class _SettingsScreenState extends State<SettingsPage>
                       color: Colors.white.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: getCurrentCardBorderColor().withOpacity(0.25),
+                        color: (isDarkMode ? const Color(0xFF1E2A3D) : Colors.grey.shade200).withOpacity(0.25),
                         width: 0.5,
                       ),
                     ),
                     child: Center(
                       child: Text(
                         loc.cancel,
-                        style: TextStyle(color: isDarkMode ? Colors.white : textPrimaryLight, fontSize: 16),
+                        style: TextStyle(color: context.textPrimary, fontSize: 16),
                       ),
                     ),
                   ),
@@ -1342,15 +1340,17 @@ class _SettingsScreenState extends State<SettingsPage>
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final isDarkMode = context.isDarkMode;
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? primary.withOpacity(0.15) : Colors.white.withOpacity(0.02),
+          color: isSelected ? context.primaryColor.withOpacity(0.15) : Colors.white.withOpacity(0.02),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? primary : getCurrentCardBorderColor().withOpacity(0.25),
+            color: isSelected ? context.primaryColor : (isDarkMode ? const Color(0xFF1E2A3D) : Colors.grey.shade200).withOpacity(0.25),
             width: isSelected ? 1.5 : 0.5,
           ),
         ),
@@ -1359,10 +1359,10 @@ class _SettingsScreenState extends State<SettingsPage>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: primary.withOpacity(0.08),
+                color: context.primaryColor.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: primary.withOpacity(0.8), size: 20),
+              child: Icon(icon, color: context.primaryColor.withOpacity(0.8), size: 20),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -1372,7 +1372,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   Text(
                     title,
                     style: TextStyle(
-                      color: isDarkMode ? Colors.white : textPrimaryLight,
+                      color: context.textPrimary,
                       fontWeight: FontWeight.w500,
                       fontSize: 14,
                     ),
@@ -1380,7 +1380,7 @@ class _SettingsScreenState extends State<SettingsPage>
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: getCurrentTextSecondaryColor(),
+                      color: context.textSecondary,
                       fontSize: 12,
                     ),
                   ),
@@ -1388,7 +1388,7 @@ class _SettingsScreenState extends State<SettingsPage>
               ),
             ),
             if (isSelected)
-              Icon(Icons.check_circle, color: primary, size: 22),
+              Icon(Icons.check_circle, color: context.primaryColor, size: 22),
           ],
         ),
       ),
@@ -1396,6 +1396,8 @@ class _SettingsScreenState extends State<SettingsPage>
   }
 
   Widget _dialog(bool delete, AppLocalizations loc) {
+    final isDarkMode = context.isDarkMode;
+    
     return GestureDetector(
       onTap: _hideDialog,
       child: Container(
@@ -1405,10 +1407,10 @@ class _SettingsScreenState extends State<SettingsPage>
             padding: const EdgeInsets.all(24),
             margin: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDarkMode ? const Color(0xFF0F1C2E) : bgLight2,
+              color: isDarkMode ? const Color(0xFF0F1C2E) : Colors.white,
               borderRadius: BorderRadius.circular(32),
               border: Border.all(
-                color: delete ? Colors.red.withOpacity(0.25) : primary.withOpacity(0.25),
+                color: delete ? Colors.red.withOpacity(0.25) : context.primaryColor.withOpacity(0.25),
                 width: 1,
               ),
               boxShadow: [
@@ -1419,7 +1421,7 @@ class _SettingsScreenState extends State<SettingsPage>
                 ),
                 if (!delete)
                   BoxShadow(
-                    color: primary.withOpacity(0.05),
+                    color: context.primaryColor.withOpacity(0.05),
                     blurRadius: 20,
                     spreadRadius: 1,
                   ),
@@ -1438,13 +1440,13 @@ class _SettingsScreenState extends State<SettingsPage>
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: delete ? Colors.red.withOpacity(0.1) : primary.withOpacity(0.1),
+                          color: delete ? Colors.red.withOpacity(0.1) : context.primaryColor.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           delete ? Icons.delete_forever : Icons.logout,
                           size: 44,
-                          color: delete ? Colors.red.shade300 : primary.withOpacity(0.8),
+                          color: delete ? Colors.red.shade300 : context.primaryColor.withOpacity(0.8),
                         ),
                       ),
                     );
@@ -1454,7 +1456,7 @@ class _SettingsScreenState extends State<SettingsPage>
                 Text(
                   delete ? loc.deleteDialogTitle : loc.logoutDialogTitle,
                   style: TextStyle(
-                    color: isDarkMode ? Colors.white : textPrimaryLight,
+                    color: context.textPrimary,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1462,7 +1464,7 @@ class _SettingsScreenState extends State<SettingsPage>
                 const SizedBox(height: 12),
                 Text(
                   delete ? loc.deleteDialogMessage : loc.logoutDialogMessage,
-                  style: TextStyle(color: getCurrentTextSecondaryColor(), fontSize: 14),
+                  style: TextStyle(color: context.textSecondary, fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 28),
@@ -1477,14 +1479,14 @@ class _SettingsScreenState extends State<SettingsPage>
                             color: Colors.white.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
-                              color: getCurrentCardBorderColor().withOpacity(0.25),
+                              color: (isDarkMode ? const Color(0xFF1E2A3D) : Colors.grey.shade200).withOpacity(0.25),
                               width: 0.5,
                             ),
                           ),
                           child: Center(
                             child: Text(
                               loc.cancel,
-                              style: TextStyle(color: isDarkMode ? Colors.white : textPrimaryLight, fontSize: 16),
+                              style: TextStyle(color: context.textPrimary, fontSize: 16),
                             ),
                           ),
                         ),
@@ -1493,21 +1495,33 @@ class _SettingsScreenState extends State<SettingsPage>
                     const SizedBox(width: 14),
                     Expanded(
                       child: GestureDetector(
-                        onTap: _hideDialog,
+                        onTap: () {
+                          _hideDialog();
+                          if (delete) {
+                            // Handle delete account
+                          } else {
+                            // Handle logout - يروح للـ Login ويمسح كل الـ stack
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (context) => const LoginScreen()),
+                              (route) => false,
+                            );
+                          }
+                        },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: delete
                                   ? [Colors.red.shade700, Colors.red.shade900]
-                                  : [primary, primary.withOpacity(0.6)],
+                                  : [context.primaryColor, context.primaryColor.withOpacity(0.6)],
                             ),
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: delete
                                 ? []
                                 : [
                                     BoxShadow(
-                                      color: primary.withOpacity(0.25),
+                                      color: context.primaryColor.withOpacity(0.25),
                                       blurRadius: 8,
                                     ),
                                   ],
@@ -1545,12 +1559,12 @@ class _SettingsScreenState extends State<SettingsPage>
         height: 26,
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: value ? primary : const Color(0xFF2A354A),
+          color: value ? context.primaryColor : const Color(0xFF2A354A),
           borderRadius: BorderRadius.circular(20),
           boxShadow: value
               ? [
                   BoxShadow(
-                    color: primary.withOpacity(0.35),
+                    color: context.primaryColor.withOpacity(0.35),
                     blurRadius: 8,
                     spreadRadius: 0,
                   ),

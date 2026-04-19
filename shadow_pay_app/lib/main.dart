@@ -11,9 +11,13 @@ import 'package:shadow_pay_app/providers/theme_provider.dart';
 import 'package:shadow_pay_app/screens/home/home_screen.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/theme/app_theme_config.dart';
+import 'package:shadow_pay_app/services/shared_pref_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+   await SharedPreferences.getInstance();
   runApp(const MyApp());
 }
 

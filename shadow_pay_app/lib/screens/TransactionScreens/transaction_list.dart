@@ -4,6 +4,7 @@ import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
 import 'package:shadow_pay_app/screens/TransactionScreens/add_transaction_screen.dart';
+import 'package:shadow_pay_app/screens/home/home_screen.dart';
 
 class TransactionList extends StatefulWidget {
   const TransactionList({super.key});
@@ -13,10 +14,10 @@ class TransactionList extends StatefulWidget {
 }
 
 class _TransactionListState extends State<TransactionList> {
-  final List<Map<String, String>> transactions = [
-    {"category": "food_dining", "status": "Safe"},
-    {"category": "travel", "status": "Warning"},
-    {"category": "health_fitness", "status": "Fraud"},
+  final List<Map<String, dynamic>> transactions = [
+    {"category": "food_dining", "status": "Safe", "amount": 125.50, "percentage": 15},
+    {"category": "travel", "status": "Warning", "amount": 350.00, "percentage": 42},
+    {"category": "health_fitness", "status": "Fraud", "amount": 89.99, "percentage": 8},
   ];
 
   final Map<String, IconData> categoryIcons = {
@@ -42,7 +43,7 @@ class _TransactionListState extends State<TransactionList> {
     "Fraud": 0xFFF44336,
   };
 
-  List<Map<String, String>> displayedTransactions = [];
+  List<Map<String, dynamic>> displayedTransactions = [];
   String selectedFilter = "All";
 
   @override
@@ -69,7 +70,6 @@ class _TransactionListState extends State<TransactionList> {
     final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
     
     final backgroundColor = isDarkMode ? const Color(0xFF0a1729) : const Color(0xFFF5F7FA);
-    final surfaceColor = isDarkMode ? const Color(0xff1D293D).withOpacity(0.3) : Colors.grey.shade100;
     final textColor = isDarkMode ? Colors.white : Colors.black87;
     final textSecondaryColor = isDarkMode ? Colors.grey : Colors.grey[700];
     final primaryColor = isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary;
@@ -77,6 +77,8 @@ class _TransactionListState extends State<TransactionList> {
     int safeCount = transactions.where((t) => t['status'] == "Safe").length;
     int warningCount = transactions.where((t) => t['status'] == "Warning").length;
     int fraudCount = transactions.where((t) => t['status'] == "Fraud").length;
+    
+    double totalAmount = transactions.fold(0.0, (sum, t) => sum + (t['amount'] ?? 0.0));
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -85,6 +87,7 @@ class _TransactionListState extends State<TransactionList> {
         child: Column(
           children: [
             const SizedBox(height: 20),
+            // ── Header: السهم لوحده ─────────────────────────────────
             Row(
               children: [
                 IconButton(
@@ -101,32 +104,43 @@ class _TransactionListState extends State<TransactionList> {
                   ),
                   iconSize: 25,
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      (route) => false,
+                    );
                   },
                   icon: Icon(Icons.arrow_back, color: textSecondaryColor),
                 ),
-                const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      loc.allTransactions,
-                      style: TextStyle(
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 25,
-                      ),
-                    ),
-                    Text(
-                      "${transactions.length} ${loc.numTransactions}",
-                      style: TextStyle(color: textSecondaryColor, fontSize: 15),
-                    ),
-                  ],
-                ),
               ],
             ),
+const SizedBox(height: 15),
+// ── All Transactions تحت السهم ─────────────────────────
+Padding(
+  padding: const EdgeInsets.only(left: 8),
+  child: Align(  
+    alignment: Alignment.centerLeft,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          loc.allTransactions,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 25,
+          ),
+        ),
+        const SizedBox(height: 4),
+                  Text(
+                    "${transactions.length} ${loc.numTransactions}",
+                    style: TextStyle(color: textSecondaryColor, fontSize: 15),
+                  ),
+                ],
+              ),
+            ),),
             const SizedBox(height: 20),
+            // ── Stats Card ─────────────────────────────────────────
             Container(
               padding: const EdgeInsets.all(25),
               decoration: BoxDecoration(
@@ -156,7 +170,7 @@ class _TransactionListState extends State<TransactionList> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("\$3895.12", style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 25)),
+                      Text("\$${totalAmount.toStringAsFixed(2)}", style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 25)),
                       Text("${transactions.length}", style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 25)),
                     ],
                   ),
@@ -180,6 +194,7 @@ class _TransactionListState extends State<TransactionList> {
               ),
             ),
             const SizedBox(height: 20),
+            // ── Search Field ───────────────────────────────────────
             TextField(
               keyboardType: TextInputType.text,
               cursorColor: textSecondaryColor,
@@ -199,21 +214,155 @@ class _TransactionListState extends State<TransactionList> {
               ),
             ),
             const SizedBox(height: 10),
+            // ── Filter Buttons ─────────────────────────────────────
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterButton(loc.all, "All", safeCount + warningCount + fraudCount, selectedFilter == "All", primaryColor, isDarkMode),
+                  // All
+                  ElevatedButton(
+                    onPressed: () => filterSelection("All"),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (states) => selectedFilter == "All"
+                            ? primaryColor.withOpacity(0.1)
+                            : (isDarkMode ? const Color(0xff1D293D).withOpacity(0.3) : Colors.grey.shade200),
+                      ),
+                      side: MaterialStateProperty.resolveWith<BorderSide>(
+                        (states) => BorderSide(
+                          color: selectedFilter == "All"
+                              ? primaryColor
+                              : (isDarkMode ? const Color(0xff1D293D).withOpacity(0.7) : Colors.grey.shade400),
+                          width: 2,
+                        ),
+                      ),
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      minimumSize: MaterialStateProperty.all(const Size(80, 40)),
+                    ),
+                    child: Text(
+                      "${loc.all} (${transactions.length})",
+                      style: TextStyle(
+                        color: selectedFilter == "All"
+                            ? primaryColor
+                            : (isDarkMode ? Colors.grey.withOpacity(0.7) : Colors.grey[700]),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 15),
-                  _buildFilterButton(loc.safe, "Safe", safeCount, selectedFilter == "Safe", primaryColor, isDarkMode),
+                  // Safe
+                  ElevatedButton(
+                    onPressed: () => filterSelection("Safe"),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (states) => selectedFilter == "Safe"
+                            ? primaryColor.withOpacity(0.1)
+                            : (isDarkMode ? const Color(0xff1D293D).withOpacity(0.3) : Colors.grey.shade200),
+                      ),
+                      side: MaterialStateProperty.resolveWith<BorderSide>(
+                        (states) => BorderSide(
+                          color: selectedFilter == "Safe"
+                              ? primaryColor
+                              : (isDarkMode ? const Color(0xff1D293D).withOpacity(0.7) : Colors.grey.shade400),
+                          width: 2,
+                        ),
+                      ),
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      minimumSize: MaterialStateProperty.all(const Size(80, 40)),
+                    ),
+                    child: Text(
+                      "${loc.safe} ($safeCount)",
+                      style: TextStyle(
+                        color: selectedFilter == "Safe"
+                            ? primaryColor
+                            : (isDarkMode ? Colors.grey.withOpacity(0.7) : Colors.grey[700]),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 15),
-                  _buildFilterButton(loc.warning, "Warning", warningCount, selectedFilter == "Warning", primaryColor, isDarkMode),
+                  // Warning
+                  ElevatedButton(
+                    onPressed: () => filterSelection("Warning"),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (states) => selectedFilter == "Warning"
+                            ? primaryColor.withOpacity(0.1)
+                            : (isDarkMode ? const Color(0xff1D293D).withOpacity(0.3) : Colors.grey.shade200),
+                      ),
+                      side: MaterialStateProperty.resolveWith<BorderSide>(
+                        (states) => BorderSide(
+                          color: selectedFilter == "Warning"
+                              ? primaryColor
+                              : (isDarkMode ? const Color(0xff1D293D).withOpacity(0.7) : Colors.grey.shade400),
+                          width: 2,
+                        ),
+                      ),
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      minimumSize: MaterialStateProperty.all(const Size(80, 40)),
+                    ),
+                    child: Text(
+                      "${loc.warning} ($warningCount)",
+                      style: TextStyle(
+                        color: selectedFilter == "Warning"
+                            ? primaryColor
+                            : (isDarkMode ? Colors.grey.withOpacity(0.7) : Colors.grey[700]),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 15),
-                  _buildFilterButton(loc.fraud, "Fraud", fraudCount, selectedFilter == "Fraud", primaryColor, isDarkMode),
+                  // Fraud
+                  ElevatedButton(
+                    onPressed: () => filterSelection("Fraud"),
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                        (states) => selectedFilter == "Fraud"
+                            ? primaryColor.withOpacity(0.1)
+                            : (isDarkMode ? const Color(0xff1D293D).withOpacity(0.3) : Colors.grey.shade200),
+                      ),
+                      side: MaterialStateProperty.resolveWith<BorderSide>(
+                        (states) => BorderSide(
+                          color: selectedFilter == "Fraud"
+                              ? primaryColor
+                              : (isDarkMode ? const Color(0xff1D293D).withOpacity(0.7) : Colors.grey.shade400),
+                          width: 2,
+                        ),
+                      ),
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      minimumSize: MaterialStateProperty.all(const Size(80, 40)),
+                    ),
+                    child: Text(
+                      "${loc.fraud} ($fraudCount)",
+                      style: TextStyle(
+                        color: selectedFilter == "Fraud"
+                            ? primaryColor
+                            : (isDarkMode ? Colors.grey.withOpacity(0.7) : Colors.grey[700]),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 15),
+            // ── Transactions List ──────────────────────────────────
             Expanded(
               child: displayedTransactions.isEmpty
                   ? _buildEmptyState(loc, primaryColor, isDarkMode)
@@ -230,35 +379,6 @@ class _TransactionListState extends State<TransactionList> {
                     ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterButton(String label, String filter, int count, bool isSelected, Color primaryColor, bool isDarkMode) {
-    return ElevatedButton(
-      onPressed: () => filterSelection(filter),
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith<Color>(
-          (states) => isSelected
-              ? primaryColor.withOpacity(0.1)
-              : (isDarkMode ? const Color(0xff1D293D).withOpacity(0.3) : Colors.grey.shade200),
-        ),
-        side: MaterialStateProperty.resolveWith<BorderSide>(
-          (states) => BorderSide(
-            color: isSelected ? primaryColor : (isDarkMode ? const Color(0xff1D293D).withOpacity(0.7) : Colors.grey.shade400),
-            width: 2,
-          ),
-        ),
-        shape: MaterialStateProperty.all(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        ),
-      ),
-      child: Text(
-        "$label ($count)",
-        style: TextStyle(
-          color: isSelected ? primaryColor : (isDarkMode ? Colors.grey.withOpacity(0.7) : Colors.grey[700]),
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -286,11 +406,13 @@ class _TransactionListState extends State<TransactionList> {
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () async {
-                await Navigator.push(
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const AddTransactionScreen()),
                 );
-                setState(() {});
+                if (result == true) {
+                  setState(() {});
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
@@ -315,6 +437,8 @@ class _TransactionListState extends State<TransactionList> {
 
   Widget _buildTransactionDetails(Map<String, dynamic> transaction, AppLocalizations loc, Color primaryColor, bool isDarkMode) {
     final statusColor = Color(statusColors[transaction['status']] ?? 0xFFAAAAAA);
+    final amount = transaction['amount'] ?? 125.50;
+    final percentage = transaction['percentage'] ?? 15;
     
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -346,9 +470,9 @@ class _TransactionListState extends State<TransactionList> {
                 children: [
                   Row(
                     children: [
-                      Text("\$125.50", style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold)),
+                      Text("\$${amount.toStringAsFixed(2)}", style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87, fontWeight: FontWeight.bold)),
                       const Spacer(),
-                      Text("15${loc.percentage}", style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                      Text("$percentage${loc.percentage}", style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 15)),
                     ],
                   ),
                   Row(

@@ -47,7 +47,7 @@ class BottomNavBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(navItems.length, (index) {
-          final isSelected = currentIndex == index;
+final isSelected = currentIndex >= 0 && currentIndex == index;
           final color = isSelected
               ? (isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary)
               : (isDarkMode ? Colors.white.withOpacity(0.4) : Colors.grey.withOpacity(0.6));

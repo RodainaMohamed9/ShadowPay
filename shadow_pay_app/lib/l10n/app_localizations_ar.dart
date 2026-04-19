@@ -75,7 +75,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancel => 'إلغاء';
 
   @override
-  String get loginSuccess => 'تم تسجيل الدخول بنجاح! مرحباً بعودتك.';
+  String get loginSuccess => 'تم تسجيل الدخول بنجاح! مرحباً بعودتك';
 
   @override
   String get full_name => 'الاسم الكامل';
@@ -222,13 +222,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enter_transaction_details => 'أدخل تفاصيل المعاملة:';
 
   @override
-  String get transaction_amount => 'قيمة المعاملة ';
+  String get transaction_amount => 'قيمة المعاملة';
 
   @override
   String get amount_hint => '0.0';
 
   @override
-  String get transaction_hour => 'ساعة المعاملة (٠–٢٣)';
+  String get transaction_hour => 'ساعة المعاملة (0–23)';
 
   @override
   String get transaction_category => 'فئة المعاملة';
@@ -237,7 +237,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get category_hint => 'اختر الفئة';
 
   @override
-  String get zip_code => 'الرمز البريدى';
+  String get zip_code => 'الرمز البريدي';
 
   @override
   String get zip_code_hint => 'أدخل الرمز البريدي';
@@ -273,9 +273,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings => 'الإعدادات';
 
   @override
-  String get logout => 'تسجيل الخروج';
-
-  @override
   String get logout_confirmation => 'هل أنت متأكد من تسجيل الخروج؟';
 
   @override
@@ -283,9 +280,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get copied_to_clipboard => 'تم النسخ إلى الحافظة';
-
-  @override
-  String get allTransactions => 'كل المعاملات';
 
   @override
   String get report => 'إبلاغ';
@@ -408,7 +402,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get emailNotificationsDesc => 'تلقي التقارير والتحديثات عبر البريد';
 
   @override
-  String get sms => 'الرسائل النصية (SMS)';
+  String get sms => 'الرسائل النصية';
 
   @override
   String get smsDesc => 'تنبيهات المعاملات الحرجة';
@@ -435,7 +429,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get biometricDesc => 'بصمة الإصبع أو التعرف على الوجه';
 
   @override
-  String get twoFA => 'المصادقة الثنائية (2FA)';
+  String get twoFA => 'المصادقة الثنائية';
 
   @override
   String get twoFADesc => 'حماية إضافية لحسابك';
@@ -465,6 +459,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get dark => 'داكن';
 
   @override
+  String get light => 'مضئ';
+
+  @override
   String get currency => 'العملة الافتراضية';
 
   @override
@@ -483,7 +480,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get termsOfService => 'شروط الخدمة';
 
   @override
-  String get deleteAccount => 'حذف الحساب نهائيًا';
+  String get logout => 'تسجيل الخروج';
+
+  @override
+  String get deleteAccount => 'حذف الحساب نهائياً';
 
   @override
   String get verified => 'موثّق';
@@ -582,13 +582,40 @@ class AppLocalizationsAr extends AppLocalizations {
   String get freezeInfo3 => 'الذكاء الاصطناعي يجمد المعاملات عالية المخاطر تلقائياً';
 
   @override
-  String get cardFrozenSnackbar => '❄️ تم تجميد البطاقة';
+  String get cardFrozenSnackbar => ' تم تجميد البطاقة';
 
   @override
   String get cardUnfrozenSnackbar => ' تم إلغاء تجميد البطاقة';
 
   @override
+  String get fullControl => 'تحكم كامل';
+
+  @override
+  String get advancedAI => 'ذكاء اصطناعي متقدم';
+
+  @override
+  String get freeze_detail_message => 'عند تجميد البطاقة، يتم إيقاف جميع عمليات الشراء والسحب الفوري لحماية أموالك. يمكنك إلغاء التجميد بنقرة واحدة عند الحاجة للاستخدام.\n\nالمدفوعات المتكررة المجدولة لا تتأثر بعملية التجميد.';
+
+  @override
+  String get full_control_detail_message => 'التحكم الكامل في بطاقتك بين يديك.\n\n• قم بتجميدها أو إلغاء تجميدها في أي وقت\n• يمكنك إجراء ذلك من أي مكان عبر التطبيق\n• الأمان المطلق مع سهولة الاستخدام\n• إشعارات فورية عند كل تغيير';
+
+  @override
+  String get advanced_ai_detail_message => 'نظام الذكاء الاصطناعي المتطور:\n\n• يحلل أنماط معاملاتك في الوقت الفعلي\n• يكتشف أي نشاط غير معتاد أو عالي المخاطر\n• يقوم بتجميد البطاقة تلقائياً لحمايتك من الاحتيال\n• يتعلم من عاداتك المالية لتحسين الدقة';
+
+  @override
+  String get securityControlCenter => 'مركز التحكم الأمني';
+
+  @override
+  String get securityControlSubtitle => 'ميزات متقدمة لحماية بطاقتك';
+
+  @override
+  String get cardStyle => 'نمط البطاقة';
+
+  @override
   String get viewAll => 'عرض الكل';
+
+  @override
+  String get allTransactions => 'كل المعاملات';
 
   @override
   String get numTransactions => 'المعاملات';
@@ -640,28 +667,4 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get addTransaction => 'إضافة معاملة';
-
-  @override
-  String get fullControl => 'تحكم كامل';
-
-  @override
-  String get advancedAI => 'ذكاء اصطناعي متقدم';
-
-  @override
-  String get freeze_detail_message => ' عند تجميد البطاقة، يتم إيقاف جميع عمليات الشراء والسحب الفوري لحماية أموالك. يمكنك إلغاء التجميد بنقرة واحدة عند الحاجة للاستخدام.\n\n المدفوعات المتكررة المجدولة لا تتأثر بعملية التجميد.';
-
-  @override
-  String get full_control_detail_message => ' التحكم الكامل في بطاقتك بين يديك.\n\n• قم بتجميدها أو إلغاء تجميدها في أي وقت\n• يمكنك إجراء ذلك من أي مكان عبر التطبيق\n• الأمان المطلق مع سهولة الاستخدام\n• إشعارات فورية عند كل تغيير';
-
-  @override
-  String get advanced_ai_detail_message => ' نظام الذكاء الاصطناعي المتطور:\n\n• يحلل أنماط معاملاتك في الوقت الفعلي\n• يكتشف أي نشاط غير معتاد أو عالي المخاطر\n• يقوم بتجميد البطاقة تلقائياً لحمايتك من الاحتيال\n• يتعلم من عاداتك المالية لتحسين الدقة';
-
-  @override
-  String get securityControlCenter => 'مركز التحكم الأمني';
-
-  @override
-  String get securityControlSubtitle => 'ميزات متقدمة لحماية بطاقتك';
-
-  @override
-  String get cardStyle => 'نمط البطاقة';
 }
