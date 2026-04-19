@@ -1126,8 +1126,8 @@ class GlassCardRegister extends StatelessWidget {
   }
 }
 
-// Credit Card Preview Widget - Fixed with consistent colors
-class CreditCardPreviewRegister extends StatelessWidget {
+// Credit Card Preview Widget - Simple version without animations
+class CreditCardPreviewRegister extends StatefulWidget {
   final TextEditingController cardNameController;
   final TextEditingController cardNumberController;
   final TextEditingController expiryController;
@@ -1145,7 +1145,13 @@ class CreditCardPreviewRegister extends StatelessWidget {
     required this.isDarkMode,
   });
 
-  String formatCardNumber(String text) {
+  @override
+  State<CreditCardPreviewRegister> createState() =>
+      _CreditCardPreviewRegisterState();
+}
+
+class _CreditCardPreviewRegisterState extends State<CreditCardPreviewRegister> {
+  String _formatNumber(String text) {
     text = text.replaceAll(" ", "");
     if (text.isEmpty) return "•••• •••• •••• ••••";
     final buffer = StringBuffer();
@@ -1158,144 +1164,247 @@ class CreditCardPreviewRegister extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Fixed gradient - same colors for both dark and light mode
-    const List<Color> cardGradient = [
-      Color(0xFF1a1a2e),  // Dark navy
-      Color(0xFF16213e),  // Darker navy
-    ];
-    
-    const List<Color> errorGradient = [
-      Color(0xffdc2626),  // Red
-      Color(0xffb91c1c),  // Darker red
-    ];
+    final isDarkMode = context.isDarkMode;
+
+    // Colors matching CardManagementScreen
+    final List<Color> cardGradient = widget.hasError
+        ? [const Color(0xFF7F1D1D), const Color(0xFF991B1B)]
+        : (isDarkMode
+            ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
+            : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)]);
 
     return Container(
       width: double.infinity,
       height: 200,
-      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
-          colors: hasError ? errorGradient : cardGradient,
+          colors: cardGradient,
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: (hasError
+            color: (widget.hasError
                     ? Colors.red
-                    : const Color(0xFF1a1a2e))
-                .withOpacity(0.4),
+                    : context.primaryColor)
+                .withOpacity(0.3),
             blurRadius: 20,
-            spreadRadius: 2,
-            offset: const Offset(0, 10),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Card chip / icon row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width: 40,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-                child: const Center(
-                  child: Icon(Icons.wifi, color: Colors.white, size: 18),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          children: [
+            // Decorative circles (like CardManagementScreen)
+            if (!widget.hasError) ...[
+              Positioned(
+                top: -50,
+                right: -50,
+                child: Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: context.primaryColor.withOpacity(0.15),
+                  ),
                 ),
               ),
-              Container(
-                width: 50,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(5),
+              Positioned(
+                bottom: -40,
+                left: -40,
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: context.primaryColor.withOpacity(0.1),
+                  ),
                 ),
-                child: hasError
-                    ? const Icon(Icons.error, color: Colors.white, size: 20)
-                    : const Icon(Icons.credit_card, color: Colors.white70, size: 20),
               ),
             ],
-          ),
-          const Spacer(),
-          // Card Number
-          Text(
-            formatCardNumber(cardNumberController.text),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              letterSpacing: 2,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'monospace',
-            ),
-          ),
-          const SizedBox(height: 20),
-          // Card Holder & Expiry
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
+            if (!widget.hasError) ...[
+              // Egyptian pattern on top right
+              Positioned(
+                top: 0,
+                right: 0,
+                child: CustomPaint(
+                  size: const Size(120, 120),
+                  painter: EgyptianVisaPatternRegister(
+                    color: context.primaryColor.withOpacity(0.15),
+                  ),
+                ),
+              ),
+              // Egyptian pattern on bottom left
+              Positioned(
+                bottom: 0,
+                left: 0,
+                child: CustomPaint(
+                  size: const Size(100, 100),
+                  painter: EgyptianVisaPatternRegister(
+                    color: context.primaryColor.withOpacity(0.1),
+                  ),
+                ),
+              ),
+            ],
+            // Card content
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "CARD HOLDER",
-                    style: TextStyle(
-                      color: Colors.white60,
-                      fontSize: 10,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    width: 150,
-                    child: Text(
-                      cardNameController.text.isEmpty
-                          ? "YOUR NAME HERE"
-                          : cardNameController.text.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+                  // Card chip only (no balance)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.18),
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.25),
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.wifi,
+                          color: Colors.white60,
+                          size: 16,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    ],
                   ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    "EXPIRES",
-                    style: TextStyle(
-                      color: Colors.white60,
-                      fontSize: 10,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
+                  const Spacer(),
+                  // Card number
                   Text(
-                    expiryController.text.isEmpty
-                        ? "MM/YY"
-                        : expiryController.text,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
+                    _formatNumber(widget.cardNumberController.text),
+                    style: TextStyle(
+                      color: context.textPrimary,
+                      fontSize: 19,
+                      letterSpacing: 2.5,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  // Bottom row - Card holder and expiry only
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "CARD HOLDER",
+                            style: TextStyle(
+                              color: context.textSecondary,
+                              fontSize: 10,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          SizedBox(
+                            width: 150,
+                            child: Text(
+                              widget.cardNameController.text.isEmpty
+                                  ? "YOUR NAME HERE"
+                                  : widget.cardNameController.text
+                                      .toUpperCase(),
+                              style: TextStyle(
+                                color: context.textPrimary,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            "EXPIRES",
+                            style: TextStyle(
+                              color: context.textSecondary,
+                              fontSize: 10,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            widget.expiryController.text.isEmpty
+                                ? "MM/YY"
+                                : widget.expiryController.text,
+                            style: TextStyle(
+                              color: context.textPrimary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+// Egyptian Visa Pattern Painter (matching CardManagementScreen)
+class EgyptianVisaPatternRegister extends CustomPainter {
+  final Color color;
+
+  EgyptianVisaPatternRegister({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // Draw triangles (pyramid-like)
+    final path = Path();
+    for (int i = 0; i < 3; i++) {
+      final startX = size.width * (0.2 + i * 0.3);
+      final startY = size.height * 0.8;
+      path.moveTo(startX, startY);
+      path.lineTo(startX + 12, startY - 20);
+      path.lineTo(startX - 12, startY - 20);
+      path.close();
+    }
+    canvas.drawPath(path, paint);
+
+    // Draw horizontal lines
+    for (int i = 0; i < 3; i++) {
+      final linePaint = Paint()
+        ..color = color
+        ..strokeWidth = 1.5
+        ..style = PaintingStyle.stroke;
+      canvas.drawLine(
+        Offset(size.width * 0.15, size.height * (0.4 + i * 0.15)),
+        Offset(size.width * 0.85, size.height * (0.4 + i * 0.15)),
+        linePaint,
+      );
+    }
+
+    // Draw circles
+    for (int i = 0; i < 5; i++) {
+      canvas.drawCircle(
+        Offset(size.width * (0.15 + i * 0.175), size.height * 0.6),
+        3,
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
