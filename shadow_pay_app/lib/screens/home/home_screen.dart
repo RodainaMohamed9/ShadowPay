@@ -1,10 +1,5 @@
-// lib/screens/home/home_screen.dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
-import 'package:shadow_pay_app/providers/theme_provider.dart';
-import 'package:shadow_pay_app/screens/CardManagement/CardManagementScreen.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
 import 'package:shadow_pay_app/screens/home/home_widgets/welcome_header.dart';
 import 'package:shadow_pay_app/screens/home/home_widgets/shield_status.dart';
@@ -22,9 +17,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
-
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: isDarkMode ? AppColors.darkBackground : AppColors.lightBackground,
       body: SafeArea(
@@ -89,8 +82,7 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   void _handleFreeze() {
-    // ⭐ تروح لـ CardManagementScreen (index 1)
-    widget.onNavigate(1);
+    widget.onNavigate(1); // CardManagementScreen
   }
 
   @override
