@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
-import 'package:shadow_pay_app/screens/home/home_screen.dart';
+import 'package:shadow_pay_app/screens/main_screen.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -18,10 +18,26 @@ class _ReportScreenState extends State<ReportScreen> {
   bool _isSubmitting = false;
 
   final List<Map<String, dynamic>> _reasons = [
-    {'icon': Icons.shopping_bag_outlined, 'titleKey': 'suspiciousTransaction', 'subtitleKey': 'suspiciousTransactionDesc'},
-    {'icon': Icons.credit_card_off_outlined, 'titleKey': 'cardLostStolen', 'subtitleKey': 'cardLostStolenDesc'},
-    {'icon': Icons.security_outlined, 'titleKey': 'unauthorizedCharge', 'subtitleKey': 'unauthorizedChargeDesc'},
-    {'icon': Icons.help_outline, 'titleKey': 'other', 'subtitleKey': 'otherDesc'},
+    {
+      'icon': Icons.shopping_bag_outlined,
+      'titleKey': 'suspiciousTransaction',
+      'subtitleKey': 'suspiciousTransactionDesc'
+    },
+    {
+      'icon': Icons.credit_card_off_outlined,
+      'titleKey': 'cardLostStolen',
+      'subtitleKey': 'cardLostStolenDesc'
+    },
+    {
+      'icon': Icons.security_outlined,
+      'titleKey': 'unauthorizedCharge',
+      'subtitleKey': 'unauthorizedChargeDesc'
+    },
+    {
+      'icon': Icons.help_outline,
+      'titleKey': 'other',
+      'subtitleKey': 'otherDesc'
+    },
   ];
 
   @override
@@ -36,10 +52,11 @@ class _ReportScreenState extends State<ReportScreen> {
     if (_selectedReasonIndex == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(loc.selectReason), 
+          content: Text(loc.selectReason),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
       return;
@@ -48,10 +65,11 @@ class _ReportScreenState extends State<ReportScreen> {
     if (_selectedReasonIndex == 3 && _otherController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(loc.describeIssue), 
+          content: Text(loc.describeIssue),
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
       return;
@@ -64,19 +82,16 @@ class _ReportScreenState extends State<ReportScreen> {
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(loc.reportSubmitted), 
+          content: Text(loc.reportSubmitted),
           backgroundColor: context.primaryColor,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       );
       await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-          (route) => false,
-        );
+        Navigator.pop(context);
       }
     }
   }
@@ -93,7 +108,10 @@ class _ReportScreenState extends State<ReportScreen> {
         leading: IconButton(
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all(
-              (context.isDarkMode ? const Color(0xff1D293D) : Colors.grey.shade200).withOpacity(0.4),
+              (context.isDarkMode
+                      ? const Color(0xff1D293D)
+                      : Colors.grey.shade200)
+                  .withOpacity(0.4),
             ),
             side: MaterialStateProperty.all(
               BorderSide(
@@ -103,11 +121,7 @@ class _ReportScreenState extends State<ReportScreen> {
             ),
           ),
           iconSize: 25,
-          onPressed: () => Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-            (route) => false,
-          ),
+          onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back, color: context.textSecondary),
         ),
       ),
@@ -147,11 +161,11 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-
               Expanded(
                 child: ListView.separated(
                   itemCount: _reasons.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final reason = _reasons[index];
                     final isSelected = _selectedReasonIndex == index;
@@ -166,13 +180,13 @@ class _ReportScreenState extends State<ReportScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isSelected 
-                              ? context.primaryColor.withOpacity(0.1) 
+                          color: isSelected
+                              ? context.primaryColor.withOpacity(0.1)
                               : context.backgroundColor.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: isSelected 
-                                ? context.primaryColor 
+                            color: isSelected
+                                ? context.primaryColor
                                 : context.textSecondary.withOpacity(0.1),
                             width: isSelected ? 2 : 1,
                           ),
@@ -187,8 +201,10 @@ class _ReportScreenState extends State<ReportScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Icon(
-                                reason['icon'], 
-                                color: isSelected ? context.primaryColor : context.textSecondary, 
+                                reason['icon'],
+                                color: isSelected
+                                    ? context.primaryColor
+                                    : context.textSecondary,
                                 size: 24,
                               ),
                             ),
@@ -198,25 +214,30 @@ class _ReportScreenState extends State<ReportScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _getTitle(reason['titleKey'], loc), 
+                                    _getTitle(reason['titleKey'], loc),
                                     style: TextStyle(
-                                      color: isSelected ? context.primaryColor : context.textPrimary, 
-                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      color: isSelected
+                                          ? context.primaryColor
+                                          : context.textPrimary,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
                                     ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    _getSubtitle(reason['subtitleKey'], loc), 
+                                    _getSubtitle(reason['subtitleKey'], loc),
                                     style: TextStyle(
-                                      color: context.textSecondary, 
+                                      color: context.textSecondary,
                                       fontSize: 12,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            if (isSelected) 
-                              Icon(Icons.check_circle, color: context.primaryColor, size: 20),
+                            if (isSelected)
+                              Icon(Icons.check_circle,
+                                  color: context.primaryColor, size: 20),
                           ],
                         ),
                       ),
@@ -224,7 +245,6 @@ class _ReportScreenState extends State<ReportScreen> {
                   },
                 ),
               ),
-
               if (_selectedReasonIndex == 3) ...[
                 const SizedBox(height: 16),
                 TextField(
@@ -237,19 +257,17 @@ class _ReportScreenState extends State<ReportScreen> {
                     filled: true,
                     fillColor: context.progressBgColor,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12), 
+                      borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12), 
+                      borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(color: context.primaryColor),
                     ),
                   ),
                 ),
               ],
-
               const SizedBox(height: 24),
-
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -263,18 +281,18 @@ class _ReportScreenState extends State<ReportScreen> {
                   ),
                   child: _isSubmitting
                       ? const SizedBox(
-                          width: 20, 
-                          height: 20, 
+                          width: 20,
+                          height: 20,
                           child: CircularProgressIndicator(
-                            color: Colors.white, 
+                            color: Colors.white,
                             strokeWidth: 2,
                           ),
                         )
                       : Text(
-                          loc.submitReport, 
+                          loc.submitReport,
                           style: const TextStyle(
-                            fontSize: 16, 
-                            fontWeight: FontWeight.bold, 
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
@@ -289,21 +307,31 @@ class _ReportScreenState extends State<ReportScreen> {
 
   String _getTitle(String key, AppLocalizations loc) {
     switch (key) {
-      case 'suspiciousTransaction': return loc.suspiciousTransaction;
-      case 'cardLostStolen': return loc.cardLostStolen;
-      case 'unauthorizedCharge': return loc.unauthorizedCharge;
-      case 'other': return loc.other;
-      default: return '';
+      case 'suspiciousTransaction':
+        return loc.suspiciousTransaction;
+      case 'cardLostStolen':
+        return loc.cardLostStolen;
+      case 'unauthorizedCharge':
+        return loc.unauthorizedCharge;
+      case 'other':
+        return loc.other;
+      default:
+        return '';
     }
   }
 
   String _getSubtitle(String key, AppLocalizations loc) {
     switch (key) {
-      case 'suspiciousTransactionDesc': return loc.suspiciousTransactionDesc;
-      case 'cardLostStolenDesc': return loc.cardLostStolenDesc;
-      case 'unauthorizedChargeDesc': return loc.unauthorizedChargeDesc;
-      case 'otherDesc': return loc.otherDesc;
-      default: return '';
+      case 'suspiciousTransactionDesc':
+        return loc.suspiciousTransactionDesc;
+      case 'cardLostStolenDesc':
+        return loc.cardLostStolenDesc;
+      case 'unauthorizedChargeDesc':
+        return loc.unauthorizedChargeDesc;
+      case 'otherDesc':
+        return loc.otherDesc;
+      default:
+        return '';
     }
   }
 }

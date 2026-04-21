@@ -6,7 +6,7 @@ import 'package:shadow_pay_app/screens/Settings/Settings.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
-import 'package:shadow_pay_app/screens/home/home_screen.dart';
+import 'package:shadow_pay_app/screens/main_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -95,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
           onPressed: () {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
+              MaterialPageRoute(builder: (context) => const MainScreen()),
               (route) => false,
             );
           },

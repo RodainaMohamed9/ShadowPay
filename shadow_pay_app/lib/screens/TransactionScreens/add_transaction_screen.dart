@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
-import 'package:shadow_pay_app/screens/home/home_screen.dart';
+import 'package:shadow_pay_app/screens/main_screen.dart';
+
 
 class AddTransactionScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -40,17 +41,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     "travel",
   ];
 
-  void _handleBack() {
-    if (widget.onBack != null) {
-      widget.onBack!();
-    } else {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-        (route) => false,
-      );
-    }
+void _handleBack() {
+  if (widget.onBack != null) {
+    widget.onBack!();
+  } else {
+    Navigator.pop(context);  
   }
+}
 
   @override
   Widget build(BuildContext context) {

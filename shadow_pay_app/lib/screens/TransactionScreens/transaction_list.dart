@@ -4,7 +4,7 @@ import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
 import 'package:shadow_pay_app/screens/TransactionScreens/add_transaction_screen.dart';
-import 'package:shadow_pay_app/screens/home/home_screen.dart';
+import 'package:shadow_pay_app/screens/main_screen.dart';
 
 class TransactionList extends StatefulWidget {
   const TransactionList({super.key});
@@ -106,7 +106,7 @@ class _TransactionListState extends State<TransactionList> {
                   onPressed: () {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      MaterialPageRoute(builder: (context) => const MainScreen()),
                       (route) => false,
                     );
                   },
