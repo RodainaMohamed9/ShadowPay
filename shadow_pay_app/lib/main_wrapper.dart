@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shadow_pay_app/screens/home/home_screen.dart';
+import 'package:shadow_pay_app/screens/main_screen.dart';
 import 'package:shadow_pay_app/screens/profile/profile_screen.dart';
 import 'package:shadow_pay_app/screens/CardManagement/CardManagementScreen.dart';
 import 'package:shadow_pay_app/screens/report/report_screen.dart';
@@ -18,7 +18,7 @@ class _MainWrapperState extends State<MainWrapper> {
   int _currentIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
+    const MainScreen(),
     const CardManagementScreen(),
     const ReportScreen(),
     const ProfileScreen(),

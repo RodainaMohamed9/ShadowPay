@@ -6,7 +6,6 @@ import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
-import 'package:shadow_pay_app/screens/home/home_screen.dart'; // ✅ أضفنا الـ import
 
 class CardManagementScreen extends StatefulWidget {
   const CardManagementScreen({super.key});
@@ -239,7 +238,6 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      /// HEADER
                       TweenAnimationBuilder(
                         tween: Tween<double>(begin: -40, end: 0),
                         duration: const Duration(milliseconds: 600),
@@ -255,7 +253,6 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                         },
                         child: Row(
                           children: [
-                            // ✅ الـ leading الجديد (circle و transparent)
                             IconButton(
                               style: ButtonStyle(
                                 backgroundColor: MaterialStateProperty.all(
@@ -274,12 +271,7 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                               ),
                               iconSize: 25,
                               onPressed: () {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const HomeScreen()),
-                                  (route) => false,
-                                );
+                                Navigator.pop(context);
                               },
                               icon: Icon(Icons.arrow_back,
                                   color: context.textSecondary),
@@ -315,7 +307,6 @@ class _CardManagementScreenState extends State<CardManagementScreen>
 
                       const SizedBox(height: 25),
 
-                      /// STATUS CARD
                       AnimatedBuilder(
                         animation: _animationController,
                         builder: (context, child) {
@@ -432,7 +423,6 @@ class _CardManagementScreenState extends State<CardManagementScreen>
 
                       const SizedBox(height: 25),
 
-                      /// CARD UI WITH FLIP ANIMATION
                       SizedBox(
                         height: 230,
                         child: GestureDetector(
@@ -489,7 +479,6 @@ class _CardManagementScreenState extends State<CardManagementScreen>
 
                       const SizedBox(height: 25),
 
-                      /// DETAILS
                       TweenAnimationBuilder(
                         tween: Tween<double>(begin: 0, end: 1),
                         duration: const Duration(milliseconds: 700),
@@ -537,7 +526,6 @@ class _CardManagementScreenState extends State<CardManagementScreen>
 
                       const SizedBox(height: 25),
 
-                      /// FREEZE/UNFREEZE BUTTON
                       GestureDetector(
                         onTap: () {
                           _isFromUserAction = true;
@@ -607,7 +595,6 @@ class _CardManagementScreenState extends State<CardManagementScreen>
 
                       const SizedBox(height: 20),
 
-                      /// ALERT MESSAGE (Security Control Center)
                       if (!isCardFrozen)
                         AnimatedBuilder(
                           animation: _alertController,
@@ -819,7 +806,6 @@ class _CardManagementScreenState extends State<CardManagementScreen>
               ),
             ),
 
-            // Snow effect overlay
             if (showSnowEffect)
               AnimatedBuilder(
                 animation: _snowController,
@@ -1187,7 +1173,7 @@ class _CardManagementScreenState extends State<CardManagementScreen>
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           colors: isCardFrozen
-              ? [const Color(0xFF800020), const Color(0xFF4A0020)] // ✅ Burgundy
+              ? [const Color(0xFF800020), const Color(0xFF4A0020)]
               : (isDarkMode
                   ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
                   : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)]),
