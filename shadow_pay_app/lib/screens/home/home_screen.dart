@@ -67,13 +67,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
-
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: isDarkMode ? AppColors.darkBackground : AppColors.lightBackground,
-      body: _pages[_currentIndex],
-bottomNavigationBar: BottomNavBar(
+    backgroundColor: isDarkMode ? AppColors.darkBackground : AppColors.lightBackground,    
+    body: _pages[_currentIndex],
+    bottomNavigationBar: BottomNavBar(
   currentIndex: _currentIndex <= 3 ? _currentIndex : -1,
   onTap: (index) => setState(() => _currentIndex = index),
   isDarkMode: isDarkMode,
@@ -159,12 +157,10 @@ class _HomeContentState extends State<HomeContent> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? AppColors.darkBackground : AppColors.lightBackground,
-      body: SafeArea(
+        backgroundColor: isDarkMode ? AppColors.darkBackground : AppColors.lightBackground,      body: SafeArea(
         child: isLoading
             ? Center(
                 child: CircularProgressIndicator(

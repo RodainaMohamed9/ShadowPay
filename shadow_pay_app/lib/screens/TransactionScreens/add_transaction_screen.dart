@@ -57,8 +57,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final localizations = AppLocalizations.of(context)!;
     final isRTL = Localizations.localeOf(context).languageCode == 'ar';
     
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     final primaryColor = isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary;
     final backgroundColor = isDarkMode ? AppColors.darkBackground : AppColors.lightBackground;
