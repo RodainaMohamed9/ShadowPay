@@ -21,7 +21,7 @@ class BottomNavBar extends StatelessWidget {
     final List<Map<String, dynamic>> navItems = [
       {'icon': Icons.home_outlined, 'activeIcon': Icons.home, 'label': loc.home},
       {'icon': Icons.credit_card_outlined, 'activeIcon': Icons.credit_card, 'label': loc.cards},
-      {'icon': Icons.report_outlined, 'activeIcon': Icons.report, 'label': loc.report},
+      {'icon': Icons.report_outlined, 'activeIcon': Icons.report , 'label': loc.report},
       {'icon': Icons.person_outline, 'activeIcon': Icons.person, 'label': loc.profile},
     ];
 

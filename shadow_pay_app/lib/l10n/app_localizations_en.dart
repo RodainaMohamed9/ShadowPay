@@ -285,7 +285,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get report => 'Report';
 
   @override
-  String get whatWouldYouLikeToReport => 'What would you like to report?';
+  String get whatWouldYouLikeToReport => 'What Would You Like To Report ?';
 
   @override
   String get selectReason => 'Please select a reason';

@@ -650,7 +650,7 @@ abstract class AppLocalizations {
   /// No description provided for @whatWouldYouLikeToReport.
   ///
   /// In en, this message translates to:
-  /// **'What would you like to report?'**
+  /// **'What Would You Like To Report ?'**
   String get whatWouldYouLikeToReport;
 
   /// No description provided for @selectReason.

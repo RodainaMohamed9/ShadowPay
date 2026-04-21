@@ -5,7 +5,7 @@ import 'package:shadow_pay_app/providers/language_provider.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
-import 'package:shadow_pay_app/screens/home/home_screen.dart';
+import 'package:shadow_pay_app/screens/main_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -702,7 +702,7 @@ class _SettingsScreenState extends State<SettingsPage>
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    MaterialPageRoute(builder: (context) => const MainScreen()),
                     (route) => false,
                   );
                 },
