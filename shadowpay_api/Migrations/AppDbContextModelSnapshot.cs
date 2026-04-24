@@ -249,9 +249,8 @@ namespace shadowpay_api.Migrations
                     b.Property<bool>("IsFraud")
                         .HasColumnType("bit");
 
-                    b.Property<string>("MerchantCategory")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("MerchantCategory")
+                        .HasColumnType("int");
 
                     b.Property<string>("RiskLevel")
                         .IsRequired()
