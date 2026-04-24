@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shadow_pay_app/screens/home/home_screen.dart';
-import 'package:shadow_pay_app/constants/colors.dart';
+import 'package:shadow_pay_app/core/constants/colors.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';

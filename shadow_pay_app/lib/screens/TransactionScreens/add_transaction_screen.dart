@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/core/enums/category.dart' as my_enum;
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -15,24 +17,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
 
   int _hour = 12;
-  String? _selectedCategory;
-
-  final List<String> categories = [
-    "entertainment",
-    "food_dining",
-    "gas_transport",
-    "grocery_net",
-    "grocery_pos",
-    "health_fitness",
-    "home",
-    "kids_pets",
-    "misc_net",
-    "misc_pos",
-    "personal_care",
-    "shopping_net",
-    "shopping_pos",
-    "travel",
-  ];
+  my_enum.Category? _selectedCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -267,7 +252,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           thumbVisibility: true,
                           thickness: 6,
                           radius: const Radius.circular(10),
-                          child: DropdownButtonFormField<String>(
+                          child: DropdownButtonFormField<my_enum.Category>(
                             isExpanded: true,
                             dropdownColor: const Color(0xFF1F2A44),
                             value: _selectedCategory,
@@ -278,11 +263,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                                 color: Color(0xFF00D8A2),
                               ),
                             ),
-                            items: categories.map((cat) {
+                            items: my_enum.Category.values.map((cat) {
                               return DropdownMenuItem(
                                 value: cat,
                                 child: Text(
-                                  cat,
+                                  cat.displayName,
                                   style: const TextStyle(fontSize: 14),
                                 ),
                               );
@@ -436,4 +421,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
+  
 }
+

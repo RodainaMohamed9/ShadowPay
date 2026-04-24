@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shadow_pay_app/constants/colors.dart';
+import 'package:shadow_pay_app/core/constants/colors.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/ForgetPassword/reset_password_screen.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
