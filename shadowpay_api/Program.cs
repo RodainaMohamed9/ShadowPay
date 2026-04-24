@@ -7,6 +7,7 @@ using shadowpay_api.Models;
 using Microsoft.AspNetCore.Identity;
 using shadowpay_api.Services;
 using shadowpay_api.Services.Implements;
+using System.Text.Json.Serialization;
 
 namespace shadowpay_api
 {
@@ -23,7 +24,9 @@ namespace shadowpay_api
             builder.Services.AddMemoryCache();
             builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(x => 
+                x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -127,6 +130,10 @@ namespace shadowpay_api
                 await next();
             });
 
+            app.UseCors(builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
 
             app.UseAuthentication();
             app.UseAuthorization();
