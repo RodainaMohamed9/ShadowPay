@@ -1,51 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
-import 'widgets/welcome_header.dart';
-import 'widgets/shield_status.dart';
-import 'widgets/virtual_card.dart';
-import 'widgets/quick_actions.dart';
-import 'widgets/recent_activity.dart';
-import 'widgets/bottom_nav_bar.dart';
-import 'Screens/report_screen.dart';
-import '../../services/shared_pref_service.dart';
-import '../AuthScreens/login/login_Screen.dart';
+import 'package:shadow_pay_app/screens/home/home_widgets/welcome_header.dart';
+import 'package:shadow_pay_app/screens/home/home_widgets/shield_status.dart';
+import 'package:shadow_pay_app/screens/home/home_widgets/virtual_card.dart';
+import 'package:shadow_pay_app/screens/home/home_widgets/quick_actions.dart';
+import 'package:shadow_pay_app/screens/home/home_widgets/recent_activity.dart';
 
-// import 'screens/analytics_screen.dart';
-// import 'screens/cards_screen.dart';
-// import 'screens/profile_screen.dart';
+class HomeScreen extends StatelessWidget {
+  final Function(int) onNavigate;
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
-
-  final List<Widget> _pages = [
-    const HomeContent(),
-    const HomeContent(), // Analytics placeholder
-    const HomeContent(), // Cards placeholder
-    const HomeContent(), // Profile placeholder
-  ];
+  const HomeScreen({
+    super.key,
+    required this.onNavigate,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+      backgroundColor: isDarkMode ? AppColors.darkBackground : AppColors.lightBackground,
+      body: SafeArea(
+        child: HomeContent(
+          onNavigate: onNavigate,
+          isDarkMode: isDarkMode,
+        ),
       ),
     );
   }
 }
 
 class HomeContent extends StatefulWidget {
-  const HomeContent({super.key});
+  final Function(int) onNavigate;
+  final bool isDarkMode;
+
+  const HomeContent({
+    super.key,
+    required this.onNavigate,
+    required this.isDarkMode,
+  });
 
   @override
   State<HomeContent> createState() => _HomeContentState();
@@ -81,81 +74,69 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   Future<void> _loadCardStatus() async {
-    final frozen = await SharedPrefService.isCardFrozen();
+    final frozen = await SharedPrefService.getCardFrozenStatus();
     setState(() {
       isCardFrozen = frozen;
       isLoading = false;
     });
   }
 
-  Future<void> _freezeCard() async {
-    await SharedPrefService.freezeCard();
-    setState(() => isCardFrozen = true);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Card frozen successfully'), backgroundColor: Color(0xFFF44336)),
-    );
+  void _handleFreeze() {
+    widget.onNavigate(1); // CardManagementScreen
   }
-
-  void _goToCards() {
-    // هنا لما يخلصوا صفحة Cards يغيروا الكود
-    // Navigator.push(context, MaterialPageRoute(builder: (_) => const CardsScreen()));
-  }
-
-  void _goToReport() {
-  Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const ReportScreen()),
-  );
-}
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A0F1F),
-      body: SafeArea(
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator(color: Color(0xFF00D8A2)))
-            : Column(
-                children: [
-                  WelcomeHeader(
-                    userName: userName,
-                    isFrozen: isCardFrozen,
-                    onManageTap: isCardFrozen ? _goToCards : null,
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 8),
-                          const ShieldStatus(),
-                          const SizedBox(height: 20),
-                          VirtualCard(
-                            cardNumber: cardNumber,
-                            cardHolder: cardHolder,
-                            expiry: cardExpiry,
-                            balance: cardBalance,
-                            isFrozen: isCardFrozen,
-                          ),
-                          const SizedBox(height: 24),
-                          QuickActions(
-                            onAddTap: () {}, // هيتعدل بعدين
-                            onReportTap: _goToReport ,
-                            onDetailsTap: () {},
-                            onFreezeTap: _freezeCard,
-                            onManageTap: _goToCards,
-                            isCardFrozen: isCardFrozen,
-                          ),
-                          const SizedBox(height: 24),
-                          const RecentActivity(),
-                          const SizedBox(height: 80),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+    final isDarkMode = widget.isDarkMode;
+
+    return isLoading
+        ? Center(
+            child: CircularProgressIndicator(
+              color: isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary,
+            ),
+          )
+        : Column(
+            children: [
+              WelcomeHeader(
+                userName: userName,
+                isFrozen: isCardFrozen,
+                onManageTap: isCardFrozen ? _handleFreeze : null,
+                isDarkMode: isDarkMode,
               ),
-      ),
-    );
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 8),
+                      ShieldStatus(isDarkMode: isDarkMode),
+                      const SizedBox(height: 20),
+                      VirtualCard(
+                        cardNumber: cardNumber,
+                        cardHolder: cardHolder,
+                        expiry: cardExpiry,
+                        balance: cardBalance,
+                        isFrozen: isCardFrozen,
+                        isDarkMode: isDarkMode,
+                      ),
+                      const SizedBox(height: 24),
+                      QuickActions(
+                        onAddTap: () => widget.onNavigate(4),     // AddTransactionScreen
+                        onReportTap: () => widget.onNavigate(2),  // ReportScreen
+                        onDetailsTap: () => widget.onNavigate(5), // CardDetailsScreen
+                        onFreezeTap: _handleFreeze,               // CardManagementScreen
+                        onManageTap: _handleFreeze,
+                        isCardFrozen: isCardFrozen,
+                        isDarkMode: isDarkMode,
+                      ),
+                      const SizedBox(height: 24),
+                      RecentActivity(isDarkMode: isDarkMode),
+                      const SizedBox(height: 80),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
   }
 }

@@ -1,33 +1,32 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:shadow_pay_app/core/constants/colors.dart';
+import 'package:provider/provider.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/ForgetPassword/reset_password_screen.dart';
-import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/login/login_screen.dart';
 import 'package:shadow_pay_app/services/auth_service.dart';
-import 'dart:ui';
+import 'package:shadow_pay_app/providers/theme_provider.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
-  final String purpose; // "register" or "forgot"
+  final String purpose;
 
-  OtpScreen({super.key, required this.email, required this.purpose});
+  const OtpScreen({super.key, required this.email, required this.purpose});
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-
   final List<TextEditingController> controllers =
       List.generate(6, (index) => TextEditingController());
-      
   final List<FocusNode> focusNodes =
       List.generate(6, (index) => FocusNode());
 
   @override
   void initState() {
     super.initState();
-    // أول خانة تاخد focus تلقائي لما الصفحة تفتح
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(focusNodes[0]);
     });
@@ -51,7 +50,6 @@ class _OtpScreenState extends State<OtpScreen> {
     return true;
   }
 
-  //======= API =======
   void verifyCode() async {
     final loc = AppLocalizations.of(context)!;
 
@@ -59,7 +57,7 @@ class _OtpScreenState extends State<OtpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(loc.enterCompleteCode),
-          backgroundColor: Colors.red,
+          backgroundColor: context.errorColor,
         ),
       );
       return;
@@ -68,9 +66,9 @@ class _OtpScreenState extends State<OtpScreen> {
     String otp = controllers.map((c) => c.text).join();
 
     final response = await ApiService.verifyOtp(
-      email: widget.email, 
-      otp: otp, 
-      purpose: widget.purpose
+      email: widget.email,
+      otp: otp,
+      purpose: widget.purpose,
     );
 
     if (response.success) {
@@ -80,13 +78,12 @@ class _OtpScreenState extends State<OtpScreen> {
           MaterialPageRoute(builder: (_) => const LoginScreen()),
         );
       } else if (widget.purpose == "forgot") {
-
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => ResetPasswordScreen(
               email: widget.email,
-              otp: otp, 
+              otp: otp,
             ),
           ),
         );
@@ -95,7 +92,7 @@ class _OtpScreenState extends State<OtpScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(response.message),
-          backgroundColor: Colors.red,
+          backgroundColor: context.errorColor,
         ),
       );
     }
@@ -103,29 +100,23 @@ class _OtpScreenState extends State<OtpScreen> {
 
   void _onChanged(String value, int index) {
     setState(() {});
-    
+
     if (value.isNotEmpty) {
-      // لو دخلت رقم
       if (value.length == 1) {
-        // روح للخانة اللي بعدها
         if (index < 5) {
           FocusScope.of(context).requestFocus(focusNodes[index + 1]);
         } else {
-          // لو آخر خانة، أخفي الكيبورد
           FocusScope.of(context).unfocus();
         }
       }
     } else {
-      // لو الخانة فاضية (مسحت الرقم)
       if (index > 0) {
-        // امسح الخانة اللي قبلها كمان (اختياري)
-        // controllers[index - 1].clear();
         FocusScope.of(context).requestFocus(focusNodes[index - 1]);
       }
     }
   }
 
-  Widget otpBox(int index) {
+  Widget otpBox(int index, bool isDarkMode) {
     return SizedBox(
       width: 45,
       height: 55,
@@ -135,15 +126,15 @@ class _OtpScreenState extends State<OtpScreen> {
         textAlign: TextAlign.center,
         maxLength: 1,
         keyboardType: TextInputType.number,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: context.textPrimary,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
         decoration: InputDecoration(
           counterText: "",
           filled: true,
-          fillColor: Colors.black26,
+          fillColor: context.progressBgColor,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -151,14 +142,14 @@ class _OtpScreenState extends State<OtpScreen> {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: AppColors.primaryTeal,
+              color: context.primaryColor,
               width: 2,
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: Colors.white24,
+              color: isDarkMode ? Colors.white24 : Colors.grey.shade400,
               width: 1,
             ),
           ),
@@ -171,16 +162,15 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final isDarkMode = context.isDarkMode;
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xff0a1628),
-              Color(0xff0f1f3a),
-              Color(0xff0a1628)
-            ],
+            colors: isDarkMode
+                ? [Color(0xff0a1628), Color(0xff0f1f3a), Color(0xff0a1628)]
+                : [Color(0xfff5f7fa), Color(0xffe8ecf1), Color(0xfff5f7fa)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -193,31 +183,31 @@ class _OtpScreenState extends State<OtpScreen> {
               children: [
                 // Logo
                 Container(
-                  width: 80,
-                  height: 80,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Colors.white10,
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 10,
-                        offset: Offset(0, 5),
+                        color: context.primaryColor.withOpacity(0.3),
+                        blurRadius: 25,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 10),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 15,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 5),
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.verified_user,
-                    color: Colors.white,
-                    size: 40,
-                  ),
+                  child: OtpLogoWidget(isDarkMode: isDarkMode),
                 ),
                 const SizedBox(height: 25),
 
                 Text(
                   loc.verifyCode,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.textPrimary,
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
                   ),
@@ -227,36 +217,36 @@ class _OtpScreenState extends State<OtpScreen> {
                 Text(
                   loc.enter6DigitCode,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white70,
+                  style: TextStyle(
+                    color: context.textSecondary,
                     fontSize: 15,
                   ),
                 ),
                 const SizedBox(height: 30),
 
-                GlassCard(
+                GlassCardOTP(
+                  isDarkMode: isDarkMode,
                   child: Column(
                     children: [
                       const SizedBox(height: 10),
-                      
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: List.generate(6, (index) => otpBox(index)),
+                        children:
+                            List.generate(6, (index) => otpBox(index, isDarkMode)),
                       ),
-                      
                       const SizedBox(height: 25),
-
                       SizedBox(
                         width: double.infinity,
                         height: 55,
                         child: ElevatedButton(
                           onPressed: verifyCode,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryTeal,
-                            foregroundColor: Colors.white, // 👈 النص أبيض
+                            backgroundColor: context.primaryColor,
+                            foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                             ),
+                            elevation: 5,
                           ),
                           child: Text(
                             loc.verify,
@@ -267,23 +257,20 @@ class _OtpScreenState extends State<OtpScreen> {
                           ),
                         ),
                       ),
-                      
                       const SizedBox(height: 15),
-                      
-                      // Back to Login button
                       TextButton(
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const LoginScreen(),
-                            )
+                            ),
                           );
                         },
                         child: Text(
                           loc.backToLogin,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: context.textSecondary,
                             fontSize: 15,
                           ),
                         ),
@@ -300,10 +287,53 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 }
 
-class GlassCard extends StatelessWidget {
-  final Widget child;
+// OTP Logo Widget
+class OtpLogoWidget extends StatelessWidget {
+  final bool isDarkMode;
+  const OtpLogoWidget({super.key, required this.isDarkMode});
 
-  const GlassCard({super.key, required this.child});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.asset(
+          'assets/icon/icon.png',
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+              child: Icon(
+                Icons.verified_user,
+                color: context.textSecondary,
+                size: 40,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// GlassCard Widget for OTP
+class GlassCardOTP extends StatelessWidget {
+  final Widget child;
+  final bool isDarkMode;
+  const GlassCardOTP({super.key, required this.child, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -314,9 +344,15 @@ class GlassCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.05),
+            color: isDarkMode
+                ? Colors.white.withOpacity(0.05)
+                : Colors.white.withOpacity(0.7),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white10),
+            border: Border.all(
+              color: isDarkMode
+                  ? Colors.white.withOpacity(0.1)
+                  : Colors.white.withOpacity(0.5),
+            ),
           ),
           child: child,
         ),

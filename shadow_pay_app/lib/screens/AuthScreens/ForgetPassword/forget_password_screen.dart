@@ -1,10 +1,12 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:shadow_pay_app/core/constants/colors.dart';
+import 'package:provider/provider.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/ForgetPassword/otp_screen.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
-import 'package:shadow_pay_app/services/auth_service.dart'; // ✅ استخدم ApiService
-import 'dart:ui';
-import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
+import 'package:shadow_pay_app/services/auth_service.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/login/login_screen.dart';
+import 'package:shadow_pay_app/providers/theme_provider.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -24,11 +26,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (value == null || value.isEmpty) {
       return loc.emailRequired;
     }
-
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
       return loc.emailInvalid;
     }
-
     return null;
   }
 
@@ -38,7 +38,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     super.dispose();
   }
 
-  // ======= API =======
   Future<void> sendCode() async {
     if (!formKey.currentState!.validate()) return;
 
@@ -56,7 +55,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message'] ?? "OTP sent to your email"),
-            backgroundColor: Colors.teal,
+            backgroundColor: context.primaryColor, // ✅改用 extension
           ),
         );
 
@@ -73,7 +72,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result['message'] ?? "Email not found"),
-            backgroundColor: Colors.red,
+            backgroundColor: context.errorColor, // ✅改用 extension
           ),
         );
       }
@@ -82,7 +81,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Network error: $e"),
-          backgroundColor: Colors.red,
+          backgroundColor: context.errorColor, // ✅改用 extension
         ),
       );
     } finally {
@@ -94,16 +93,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     final isRTL = Localizations.localeOf(context).languageCode == 'ar';
+    
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = context.isDarkMode; // ✅改用 extension
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xff0a1628),
-              Color(0xff0f1f3a),
-              Color(0xff0a1628)
-            ],
+            colors: isDarkMode
+                ? [Color(0xff0a1628), Color(0xff0f1f3a), Color(0xff0a1628)]
+                : [Color(0xfff5f7fa), Color(0xffe8ecf1), Color(0xfff5f7fa)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -114,13 +114,32 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const LogoWidget(),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: context.primaryColor.withOpacity(0.3), // ✅改用 extension
+                        blurRadius: 25,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 10),
+                      ),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 15,
+                        spreadRadius: 1,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: LogoWidget(isDarkMode: isDarkMode),
+                ),
                 const SizedBox(height: 30),
 
                 Text(
                   loc.forgotPassword,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: context.textPrimary, // ✅改用 extension
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
                   ),
@@ -129,8 +148,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                 Text(
                   loc.enterEmailResetCode,
-                  style: const TextStyle(
-                    color: Colors.white70,
+                  style: TextStyle(
+                    color: context.textSecondary, // ✅改用 extension
                     fontSize: 15,
                   ),
                   textAlign: TextAlign.center,
@@ -138,16 +157,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 const SizedBox(height: 30),
 
                 GlassCard(
+                  isDarkMode: isDarkMode,
                   child: Form(
                     key: formKey,
                     child: Column(
                       children: [
-                        buildField(
+                        _buildField(
                           controller: emailController,
                           hint: loc.emailHint,
                           icon: Icons.email,
                           validator: validateEmail,
                           keyboardType: TextInputType.emailAddress,
+                          isDarkMode: isDarkMode,
                         ),
                         const SizedBox(height: 25),
 
@@ -157,11 +178,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           child: ElevatedButton(
                             onPressed: isLoading ? null : sendCode,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryTeal,
+                              backgroundColor: context.primaryColor, // ✅改用 extension
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(12),
                               ),
+                              elevation: 5,
                             ),
                             child: isLoading
                                 ? const SizedBox(
@@ -191,8 +213,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           },
                           child: Text(
                             loc.backToLogin,
-                            style: const TextStyle(
-                              color: Colors.white70,
+                            style: TextStyle(
+                              color: context.textSecondary, // ✅改用 extension
                             ),
                           ),
                         ),
@@ -208,45 +230,48 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  Widget buildField({
+  Widget _buildField({
     required TextEditingController controller,
     required String hint,
     required IconData icon,
     String? Function(String?)? validator,
     TextInputType? keyboardType,
+    required bool isDarkMode,
   }) {
     return TextFormField(
       controller: controller,
       validator: validator,
       keyboardType: keyboardType,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: context.textPrimary, // ✅改用 extension
         fontSize: 16,
       ),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(
-          color: Colors.white54,
+        hintStyle: TextStyle(
+          color: context.hintColor, // ✅改用 extension
         ),
         prefixIcon: Icon(
           icon,
-          color: Colors.white70,
+          color: context.textSecondary, // ✅改用 extension
         ),
         filled: true,
-        fillColor: Colors.black26,
+        fillColor: context.progressBgColor, // ✅改用 extension
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isDarkMode ? Colors.transparent : Colors.grey.shade300,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: AppColors.primaryTeal,
-            width: 1,
+            color: context.primaryColor, // ✅改用 extension
+            width: 1.5,
           ),
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
@@ -255,8 +280,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 }
 
+// Logo Widget (keep as is, but can also use extension if needed)
 class LogoWidget extends StatelessWidget {
-  const LogoWidget({super.key});
+  final bool isDarkMode;
+  const LogoWidget({super.key, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -265,7 +292,7 @@ class LogoWidget extends StatelessWidget {
       height: 80,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.white10,
+        color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
         boxShadow: const [
           BoxShadow(
             color: Colors.black26,
@@ -274,19 +301,32 @@ class LogoWidget extends StatelessWidget {
           ),
         ],
       ),
-      child: const Icon(
-        Icons.lock_reset,
-        color: Colors.white,
-        size: 40,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Image.asset(
+          'assets/icon/icon.png',
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: isDarkMode ? Colors.white10 : Colors.grey.shade200,
+              child: Icon(
+                Icons.lock_reset,
+                color: context.textSecondary,
+                size: 40,
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 }
 
+// GlassCard Widget (keep as is)
 class GlassCard extends StatelessWidget {
   final Widget child;
-
-  const GlassCard({super.key, required this.child});
+  final bool isDarkMode;
+  const GlassCard({super.key, required this.child, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -297,9 +337,15 @@ class GlassCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.05),
+            color: isDarkMode 
+                ? Colors.white.withOpacity(0.05) 
+                : Colors.white.withOpacity(0.7),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white10),
+            border: Border.all(
+              color: isDarkMode 
+                  ? Colors.white.withOpacity(0.1) 
+                  : Colors.white.withOpacity(0.5),
+            ),
           ),
           child: child,
         ),

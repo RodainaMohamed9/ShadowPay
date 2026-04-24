@@ -126,7 +126,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cardHolder => 'Card holder name';
 
   @override
-  String get cardNumber => 'Card Number';
+  String get cardNumber => 'Card number';
 
   @override
   String get back => 'Back';
@@ -273,9 +273,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
-  String get logout => 'Logout';
-
-  @override
   String get logout_confirmation => 'Are you sure you want to logout?';
 
   @override
@@ -285,13 +282,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copied_to_clipboard => 'Copied to clipboard';
 
   @override
-  String get allTransactions => 'All Transactions';
-
-  @override
   String get report => 'Report';
 
   @override
-  String get whatWouldYouLikeToReport => 'What would you like to report?';
+  String get whatWouldYouLikeToReport => 'What Would You Like To Report ?';
 
   @override
   String get selectReason => 'Please select a reason';
@@ -465,6 +459,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dark => 'Dark';
 
   @override
+  String get light => 'Light';
+
+  @override
   String get currency => 'Currency';
 
   @override
@@ -481,6 +478,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsOfService => 'Terms of Service';
+
+  @override
+  String get logout => 'Logout';
 
   @override
   String get deleteAccount => 'Delete Account';
@@ -582,13 +582,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get freezeInfo3 => 'AI automatically freezes high-risk transactions';
 
   @override
-  String get cardFrozenSnackbar => '❄️ Card Frozen';
+  String get cardFrozenSnackbar => 'Card Frozen';
 
   @override
-  String get cardUnfrozenSnackbar => '✅ Card Unfrozen';
+  String get cardUnfrozenSnackbar => 'Card Unfrozen';
+
+  @override
+  String get fullControl => 'Full Control';
+
+  @override
+  String get advancedAI => 'Advanced AI';
+
+  @override
+  String get freeze_detail_message => 'When you freeze your card, all purchases and instant withdrawals are stopped immediately to protect your money. You can unfreeze with one tap when you need to use it.\n\nRecurring scheduled payments are not affected by freezing.';
+
+  @override
+  String get full_control_detail_message => 'Full control of your card is in your hands.\n\n• Freeze or unfreeze it anytime\n• Do it from anywhere through the app\n• Absolute security with ease of use\n• Instant notifications for every change';
+
+  @override
+  String get advanced_ai_detail_message => 'Advanced AI system:\n\n• Analyzes your transaction patterns in real-time\n• Detects any unusual or high-risk activity\n• Automatically freezes your card to protect you from fraud\n• Learns from your financial habits to improve accuracy';
+
+  @override
+  String get securityControlCenter => 'Security Control Center';
+
+  @override
+  String get securityControlSubtitle => 'Advanced card protection features';
+
+  @override
+  String get cardStyle => 'Card Style';
 
   @override
   String get viewAll => 'View All';
+
+  @override
+  String get allTransactions => 'All Transactions';
 
   @override
   String get numTransactions => 'Transactions';
@@ -640,5 +667,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addTransaction => 'Add Transaction';
-
 }

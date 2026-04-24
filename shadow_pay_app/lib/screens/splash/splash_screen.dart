@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
 import 'package:shadow_pay_app/screens/Onboard/onboarding_screen.dart';
-import 'package:shadow_pay_app/screens/home/home_screen.dart';
+import 'package:shadow_pay_app/screens/main_screen.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/login/login_Screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -21,20 +21,17 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _slideAnimation;
   late Animation<double> _scaleAnimation;
 
-  // دالة واحدة للتحقق من حالة المستخدم والتوجيه
   Future<void> _checkUserStatusAndNavigate() async {
     try {
-      // 1. هل المستخدم مسجل دخوله؟
       final loggedIn = await SharedPrefService.isLoggedIn();
       
       if (loggedIn) {
-        // إذا كان مسجل دخول => اذهب للـ Home
         if (mounted) {
           Navigator.pushReplacement(
             context,
             PageRouteBuilder(
               pageBuilder: (context, animation, secondaryAnimation) => 
-                  const HomeScreen(),
+                  const MainScreen(),
               transitionsBuilder:
                   (context, animation, secondaryAnimation, child) {
                 const begin = Offset(1.0, 0.0);

@@ -5,28 +5,27 @@ class SharedPrefService {
   static const String _keyLoggedIn = 'is_logged_in';
 
 // ✅ مفاتيح جديدة
-static const String _keyIsCardFrozen = 'is_card_frozen';
+  static const String _keyIsCardFrozen = 'is_card_frozen';
 
 // ✅ جلب حالة البطاقة
-static Future<bool> isCardFrozen() async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getBool(_keyIsCardFrozen) ?? false;
-  
-}
+  static Future<bool> isCardFrozen() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyIsCardFrozen) ?? false;
+  }
 
 // ✅ تجميد البطاقة
-static Future<void> freezeCard() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setBool(_keyIsCardFrozen, true);
-}
+  static Future<void> freezeCard() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyIsCardFrozen, true);
+  }
 
 // ✅ إلغاء تجميد البطاقة
-static Future<void> unfreezeCard() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setBool(_keyIsCardFrozen, false);
-}
+  static Future<void> unfreezeCard() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyIsCardFrozen, false);
+  }
 
- // ✅ مفاتيح بيانات المستخدم
+  // ✅ مفاتيح بيانات المستخدم
   static const String _keyUserFullName = 'user_full_name';
   static const String _keyUserEmail = 'user_email';
   static const String _keyUserPhone = 'user_phone';
@@ -69,10 +68,8 @@ static Future<void> unfreezeCard() async {
     await prefs.clear();
   }
 
-
-
   // ========== ✅ دوال حفظ واسترجاع بيانات المستخدم ==========
-  
+
   // الاسم الكامل
   static Future<void> setUserFullName(String name) async {
     final prefs = await SharedPreferences.getInstance();
@@ -84,7 +81,7 @@ static Future<void> unfreezeCard() async {
     // هنستخدم Future عشان نجيبها بشكل غير متزامن
     return null; // هنستخدم الطريقة الـ async
   }
-  
+
   static Future<String?> getUserFullNameAsync() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyUserFullName);
@@ -101,7 +98,7 @@ static Future<void> unfreezeCard() async {
     return prefs.getString(_keyUserEmail);
   }
 
-  
+  // رقم الهاتف
   static Future<void> setUserPhone(String phone) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyUserPhone, phone);
@@ -112,7 +109,6 @@ static Future<void> unfreezeCard() async {
     return prefs.getString(_keyUserPhone);
   }
 
- 
   static Future<void> setUserCardNumber(String cardNumber) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyUserCardNumber, cardNumber);
@@ -145,7 +141,6 @@ static Future<void> unfreezeCard() async {
     return prefs.getString(_keyUserCardExpiry);
   }
 
- 
   static Future<Map<String, String?>> getAllUserData() async {
     final prefs = await SharedPreferences.getInstance();
     return {
@@ -156,8 +151,11 @@ static Future<void> unfreezeCard() async {
       'cardName': prefs.getString(_keyUserCardName),
       'cardExpiry': prefs.getString(_keyUserCardExpiry),
     };
+  }
 
- } 
+
+  static Future<void> init() async {}
+  //Tokens
 
    // ===== TOKEN MANAGEMENT =====
 static const String _tokenKey = 'auth_token';
@@ -171,10 +169,21 @@ static Future<String?> getToken() async {
   final prefs = await SharedPreferences.getInstance();
   return prefs.getString(_tokenKey);
 }
+  static Future<void> clearToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
+  }
 
-static Future<void> clearToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove(_tokenKey);
-}
+  //fatma
+  static const String _keyCardFrozen = 'card_frozen';
 
+  static Future<bool> getCardFrozenStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyCardFrozen) ?? false;
+  }
+
+  static Future<void> setCardFrozen(bool isFrozen) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyCardFrozen, isFrozen);
+  }
 }

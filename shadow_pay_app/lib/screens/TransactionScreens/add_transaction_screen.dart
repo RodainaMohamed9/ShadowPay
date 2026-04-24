@@ -1,11 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/core/enums/category.dart' as my_enum;
+import 'package:shadow_pay_app/theme/colors.dart';
+import 'package:shadow_pay_app/providers/theme_provider.dart';
+import 'package:shadow_pay_app/screens/main_screen.dart';
+
 
 class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+  final VoidCallback? onBack;
+
+  const AddTransactionScreen({super.key, this.onBack});
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
@@ -19,233 +26,181 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   int _hour = 12;
   my_enum.Category? _selectedCategory;
 
+void _handleBack() {
+  if (widget.onBack != null) {
+    widget.onBack!();
+  } else {
+    Navigator.pop(context);  
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final isRTL = Localizations.localeOf(context).languageCode == 'ar';
     
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    
+    final primaryColor = isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary;
+    final backgroundColor = isDarkMode ? AppColors.darkBackground : AppColors.lightBackground;
+    final surfaceColor = isDarkMode ? AppColors.darkSurface : AppColors.lightSurface;
+    final inputColor = isDarkMode ? AppColors.darkProgressBg : AppColors.lightProgressBg;
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+    final textSecondaryColor = isDarkMode ? Colors.white70 : Colors.grey[700];
+    final hintColor = isDarkMode ? Colors.white38 : Colors.grey.shade500;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF0D111F),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D111F),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Transform.scale(
-            scaleX: isRTL ? -1 : 1,
-            child: const Icon(Icons.arrow_back, color: Colors.white),
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Title فوق الـ box
-            Padding(
-              padding: const EdgeInsets.only(top: 24, bottom: 16),
-              child: Text(
-                localizations.add_transaction,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                ),
-                textAlign: TextAlign.center,
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(
+              (isDarkMode ? const Color(0xff1D293D) : Colors.grey.shade200).withOpacity(0.4),
+            ),
+            side: MaterialStateProperty.all(
+              BorderSide(
+color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,   
+            width: 1,
               ),
             ),
-            // Container بتاع الفورم
-            Center(
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                margin: const EdgeInsets.symmetric(horizontal: 24),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF141A2B),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 20,
-                      spreadRadius: 5,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
+          ),
+          iconSize: 25,
+          onPressed: _handleBack,
+          icon: Transform.scale(
+            scaleX: isRTL ? -1 : 1,
+            child: Icon(Icons.arrow_back, color: textSecondaryColor),
+          ),
+        ),
+        iconTheme: IconThemeData(color: textColor),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(
+                color: surfaceColor.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: primaryColor.withOpacity(0.2),
+                  width: 1.5,
                 ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // العنوان الداخلي (اتجاهه حسب اللغة)
-                      Align(
-                        alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Text(
-                          localizations.enter_transaction_details,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 25,
+                    spreadRadius: 5,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        localizations.enter_transaction_details,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                    ),
+                    const SizedBox(height: 32),
 
-                      /// 💰 Amount
-                      Align(
-                        alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Text(
-                          localizations.transaction_amount,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                    Text(
+                      localizations.transaction_amount,
+                      style: TextStyle(
+                        color: textSecondaryColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _amountController,
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
-                        textDirection: TextDirection.ltr, // الأرقام LTR
-                        textAlign: TextAlign.left,
-                        decoration: _inputDecoration(localizations.amount_hint).copyWith(
-                          prefixIcon: const Icon(
-                            Icons.attach_money,
-                            color: Color(0xFF00D8A2),
-                          ),
-                          suffixIcon: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 1,
-                                height: 30,
-                                color: Colors.white24,
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.remove, color: Colors.white70, size: 20),
-                                onPressed: () {
-                                  if (_amountController.text.isNotEmpty) {
-                                    double currentValue = double.tryParse(_amountController.text) ?? 0;
-                                    double newValue = currentValue - 1;
-                                    if (newValue > 0) {
-                                      _amountController.text = newValue.toStringAsFixed(2);
-                                    } else if (newValue == 0) {
-                                      _amountController.text = "0.01";
-                                    }
-                                  } else {
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _amountController,
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      style: TextStyle(color: textColor, fontSize: 16),
+                      textDirection: TextDirection.ltr,
+                      textAlign: TextAlign.left,
+                      decoration: _inputDecoration(
+                        localizations.amount_hint,
+                        hintColor,
+                        inputColor,
+                        primaryColor,
+                      ).copyWith(
+                        prefixIcon: Icon(Icons.attach_money, color: primaryColor),
+                        suffixIcon: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 1,
+                              height: 30,
+                              color: hintColor,
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.remove, color: textSecondaryColor, size: 20),
+                              onPressed: () {
+                                if (_amountController.text.isNotEmpty) {
+                                  double currentValue = double.tryParse(_amountController.text) ?? 0;
+                                  double newValue = currentValue - 1;
+                                  if (newValue > 0) {
+                                    _amountController.text = newValue.toStringAsFixed(2);
+                                  } else if (newValue == 0) {
                                     _amountController.text = "0.01";
                                   }
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.add, color: Colors.white70, size: 20),
-                                onPressed: () {
-                                  double currentValue = double.tryParse(_amountController.text) ?? 0;
-                                  double newValue = currentValue + 1;
-                                  _amountController.text = newValue.toStringAsFixed(2);
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                        ],
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return localizations.error_amount_empty;
-                          }
-                          if (double.tryParse(value) == null) {
-                            return localizations.error_amount_invalid;
-                          }
-                          if (double.parse(value) <= 0) {
-                            return localizations.error_amount_zero;
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-
-                      /// ⏰ Hour Slider
-                      Align(
-                        alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Text(
-                          localizations.transaction_hour,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text(
-                            "0",
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 12,
+                                } else {
+                                  _amountController.text = "0.01";
+                                }
+                              },
                             ),
-                          ),
-                          Text(
-                            "23",
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 12,
+                            IconButton(
+                              icon: Icon(Icons.add, color: textSecondaryColor, size: 20),
+                              onPressed: () {
+                                double currentValue = double.tryParse(_amountController.text) ?? 0;
+                                double newValue = currentValue + 1;
+                                _amountController.text = newValue.toStringAsFixed(2);
+                              },
                             ),
-                          ),
-                        ],
-                      ),
-                      SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          showValueIndicator: ShowValueIndicator.always,
-                          valueIndicatorColor: const Color(0xFF00D8A2),
-                          valueIndicatorTextStyle: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                          overlayColor: const Color(0xFF00D8A2).withOpacity(0.2),
-                          thumbColor: const Color(0xFF00D8A2),
-                          activeTrackColor: const Color(0xFF00D8A2),
-                          inactiveTrackColor: Colors.white24,
-                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
-                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 24),
-                        ),
-                        child: Slider(
-                          value: _hour.toDouble(),
-                          min: 0,
-                          max: 23,
-                          divisions: 23,
-                          label: _hour.toString(),
-                          onChanged: (value) {
-                            setState(() {
-                              _hour = value.toInt();
-                            });
-                          },
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return localizations.error_amount_empty;
+                        }
+                        if (double.tryParse(value) == null) {
+                          return localizations.error_amount_invalid;
+                        }
+                        if (double.parse(value) <= 0) {
+                          return localizations.error_amount_zero;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 24),
 
-                      /// 🏷 Category Dropdown
-                      Align(
-                        alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Text(
-                          localizations.transaction_category,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                    Text(
+                      localizations.transaction_hour,
+                      style: TextStyle(
+                        color: textSecondaryColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
-                      const SizedBox(height: 8),
+const SizedBox(height: 8),
+                      
+                      // 1. Category Dropdown (From Zeinab's Branch)
                       Container(
                         constraints: const BoxConstraints(maxHeight: 200),
                         child: Scrollbar(
@@ -285,137 +240,214 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-
-                      /// 📍 Zip Code
-                      Align(
-                        alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Text(
-                          localizations.zip_code,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _zipController,
-                        keyboardType: TextInputType.number,
-                        style: const TextStyle(color: Colors.white),
-                        textDirection: TextDirection.ltr,
-                        textAlign: TextAlign.left,
-                        decoration: _inputDecoration(localizations.zip_code_hint).copyWith(
-                          prefixIcon: const Icon(
-                            Icons.location_on,
-                            color: Color(0xFF00D8A2),
-                          ),
-                        ),
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
+                      
+                      const SizedBox(height: 16), // مسافة فاصلة بين العنصرين
+                      
+                      // 2. Transaction Hour Slider (From main Branch)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("00", style: TextStyle(color: hintColor, fontSize: 12)),
+                          Text("06", style: TextStyle(color: hintColor, fontSize: 12)),
+                          Text("12", style: TextStyle(color: hintColor, fontSize: 12)),
+                          Text("18", style: TextStyle(color: hintColor, fontSize: 12)),
+                          Text("23", style: TextStyle(color: hintColor, fontSize: 12)),
                         ],
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return null;
-                          }
-                          if (!RegExp(r'^\d+$').hasMatch(value)) {
-                            return localizations.error_zip_invalid;
-                          }
-                          return null;
+                      ),
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          showValueIndicator: ShowValueIndicator.always,
+                          valueIndicatorColor: primaryColor,
+                          valueIndicatorTextStyle: TextStyle(
+                            color: isDarkMode ? Colors.black : Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          // ... (هنا باقي كود السلايدر بتاعك زي ما هو تحت)
+                        ),
+                        overlayColor: primaryColor.withOpacity(0.2),
+                        thumbColor: primaryColor,
+                        activeTrackColor: primaryColor,
+                        inactiveTrackColor: hintColor,
+                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 14),
+                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
+                      ),
+                      child: Slider(
+                        value: _hour.toDouble(),
+                        min: 0,
+                        max: 23,
+                        divisions: 23,
+                        label: _hour.toString(),
+                        onChanged: (value) {
+                          setState(() {
+                            _hour = value.toInt();
+                          });
                         },
                       ),
-                      const SizedBox(height: 32),
+                    ),
+                    const SizedBox(height: 24),
 
-                      /// 🔘 Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00D8A2),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                    Text(
+                      localizations.transaction_category,
+                      style: TextStyle(
+                        color: textSecondaryColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      child: DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        dropdownColor: inputColor,
+                        value: _selectedCategory,
+                        style: TextStyle(color: textColor, fontSize: 14),
+                        decoration: _inputDecoration(
+                          localizations.category_hint,
+                          hintColor,
+                          inputColor,
+                          primaryColor,
+                        ).copyWith(
+                          prefixIcon: Icon(Icons.category, color: primaryColor),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        ),
+                        items: categories.map((cat) {
+                          return DropdownMenuItem(
+                            value: cat,
+                            child: Text(
+                              cat,
+                              style: TextStyle(fontSize: 14, color: textColor),
                             ),
-                            elevation: 5,
-                            shadowColor: const Color(0xFF00D8A2).withOpacity(0.5),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCategory = value;
+                          });
+                        },
+                        menuMaxHeight: 250,
+                        icon: Icon(Icons.arrow_drop_down, color: primaryColor, size: 28),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    Text(
+                      localizations.zip_code,
+                      style: TextStyle(
+                        color: textSecondaryColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _zipController,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(color: textColor, fontSize: 14),
+                      textDirection: TextDirection.ltr,
+                      textAlign: TextAlign.left,
+                      decoration: _inputDecoration(
+                        localizations.zip_code_hint,
+                        hintColor,
+                        inputColor,
+                        primaryColor,
+                      ).copyWith(
+                        prefixIcon: Icon(Icons.location_on, color: primaryColor),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return null;
+                        }
+                        if (!RegExp(r'^\d+$').hasMatch(value)) {
+                          return localizations.error_zip_invalid;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 32),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              if (_selectedCategory == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(localizations.error_category),
-                                    backgroundColor: Colors.red,
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
+                          elevation: 8,
+                          shadowColor: primaryColor.withOpacity(0.5),
+                        ),
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            if (_selectedCategory == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(localizations.error_category),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                );
-                                return;
-                              }
-                              
-                              // البيانات كلها بالإنجليزي للـ API
-                              print("Amount: ${_amountController.text}");
-                              print("Hour: $_hour");
-                              print("Category: $_selectedCategory");
-                              print("Zip: ${_zipController.text}");
+                                ),
+                              );
+                              return;
                             }
-                          },
-                          child: Text(
-                            localizations.analyze_transaction,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              letterSpacing: 1,
-                            ),
+                            
+                            print("Amount: ${_amountController.text}");
+                            print("Hour: $_hour");
+                            print("Category: $_selectedCategory");
+                            print("Zip: ${_zipController.text}");
+                          }
+                        },
+                        child: Text(
+                          localizations.analyze_transaction,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            letterSpacing: 1,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
 
-  InputDecoration _inputDecoration(String hint) {
+  InputDecoration _inputDecoration(String hint, Color hintColor, Color fillColor, Color primaryColor) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(color: Colors.white38, fontSize: 14),
+      hintStyle: TextStyle(color: hintColor, fontSize: 14),
       filled: true,
-      fillColor: const Color(0xFF1F2A44),
+      fillColor: fillColor,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(
-          color: Color(0xFF00D8A2),
-          width: 1.5,
-        ),
+        borderSide: BorderSide(color: primaryColor, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(
-          color: Colors.red,
-          width: 1.5,
-        ),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(
-          color: Colors.red,
-          width: 1.5,
-        ),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
       ),
       errorStyle: const TextStyle(color: Colors.red, fontSize: 12),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

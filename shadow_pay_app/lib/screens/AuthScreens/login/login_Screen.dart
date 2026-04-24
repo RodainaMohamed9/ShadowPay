@@ -1,41 +1,45 @@
-// lib/screens/login/login_Screen.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/widgets/language_dialog.dart';
-import 'package:provider/provider.dart';
-import 'package:shadow_pay_app/providers/language_provider.dart';
-import 'package:shadow_pay_app/screens/AuthScreens/Register/register_screen.dart';
-import '../../../services/shared_pref_service.dart'; 
-import '../../home/home_screen.dart';
+import 'package:shadow_pay_app/services/shared_pref_service.dart';
+import 'package:shadow_pay_app/screens/main_screen.dart';
 import '../ForgetPassword/forget_password_screen.dart';
 import 'package:shadow_pay_app/services/auth_service.dart';
+import 'package:shadow_pay_app/providers/language_provider.dart';
+import 'package:shadow_pay_app/providers/theme_provider.dart';
+import 'package:shadow_pay_app/screens/AuthScreens/Register/register_screen.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
-  
+
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
+  
+  // ==================== Variables ====================
+  
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  
   bool _obscurePassword = true;
   bool _isLoading = false;
   
-  // For field validation colors
   bool _emailValid = true;
   bool _passwordValid = true;
   
-  // Animation controllers for logo
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   bool _isHovered = false;
-  
-  // For Sign Up hover
   bool _isSignUpHovered = false;
 
+  // ==================== Init & Dispose ====================
+  
   @override
   void initState() {
     super.initState();
@@ -48,127 +52,176 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     );
   }
 
-  // Realistic email validation
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  // ==================== Helper Methods ====================
+  
+  void _onHover(bool isHovered) {
+    setState(() {
+      _isHovered = isHovered;
+    });
+    if (isHovered) {
+      _animationController.forward();
+    } else {
+      _animationController.reverse();
+    }
+  }
+
   bool isEmailValid(String email) {
     email = email.trim();
     if (email.isEmpty) return false;
     if (email.length < 5 || email.length > 50) return false;
     if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(email)) return false;
-    if (email.split('@').length != 2) return false; 
+    if (email.split('@').length != 2) return false;
     if (["mailinator.com", "tempmail.com"].contains(email.split('@')[1])) return false;
     return true;
   }
 
-  // Stronger password validation (length >= 6)
   bool isPasswordValid(String password) {
     if (password.isEmpty) return false;
     if (password.length < 6) return false;
     return true;
   }
 
-    // دالة تسجيل الدخول المعدلة
-    Future<void> _handleLogin() async {
-      setState(() {
-        _emailValid = isEmailValid(_emailController.text);
-        _passwordValid = isPasswordValid(_passwordController.text);
-      });
+  // ==================== Login Logic ====================
+  
+  Future<void> _handleLogin() async {
+    setState(() {
+      _emailValid = isEmailValid(_emailController.text);
+      _passwordValid = isPasswordValid(_passwordController.text);
+    });
 
-      if (_emailValid && _passwordValid) {
-        setState(() => _isLoading = true);
+    if (_emailValid && _passwordValid) {
+      setState(() => _isLoading = true);
 
-        try {
-          // ✅ استخدم ApiService.login
-          final result = await ApiService.login(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
+      try {
+        final result = await ApiService.login(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+
+        if (!mounted) return;
+
+        if (result['success'] == true) {
+          final token = result['token'];
+          await SharedPrefService.saveToken(token);
+          await SharedPrefService.setLoggedIn(true);
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Login successful! Welcome back."),
+                backgroundColor: context.primaryColor,
+              ),
+            );
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MainScreen()),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? "Invalid email or password"),
+              backgroundColor: context.errorColor,
+            ),
           );
-
-          if (!mounted) return;
-
-          if (result['success'] == true) {
-            // ✅ حفظ التوكن
-            final token = result['token'];
-            await SharedPrefService.saveToken(token);
-            await SharedPrefService.setLoggedIn(true);
-            
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Login successful! Welcome back."),
-                  backgroundColor: Color(0xFF00D8A2),
-                ),
-              );
-
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
-              );
-            }
-          } else {
-            // ❌ فشل تسجيل الدخول
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(result['message'] ?? "Invalid email or password"),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        } catch (e) {
-          print("Login error: $e");
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text("Login failed: $e"),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        } finally {
-          if (mounted) {
-            setState(() => _isLoading = false);
-          }
+        }
+      } catch (e) {
+        debugPrint("Login error: $e");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Login failed: $e"),
+              backgroundColor: context.errorColor,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
         }
       }
     }
+  }
 
+  // ==================== Build Method ====================
+  
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final isRTL = Localizations.localeOf(context).languageCode == 'ar';
     
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = context.isDarkMode;
+    
+    final theme = Theme.of(context);
+    final inputDecorationTheme = theme.inputDecorationTheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0D111F),
+      backgroundColor: context.backgroundColor,
       body: Center(
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Language Button
+              // ========== Theme & Language Buttons ==========
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1F2A44),
-                      borderRadius: BorderRadius.circular(12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: context.progressBgColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                          color: context.primaryColor,
+                        ),
+                        onPressed: () {
+                          themeProvider.toggleTheme();
+                        },
+                      ),
                     ),
-                    child: IconButton(
-                      icon: const Icon(Icons.language, color: Color(0xFF00D8A2)),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => const LanguageDialog(),
-                        );
-                      },
+                    const SizedBox(width: 12),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: context.progressBgColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.language,
+                          color: context.primaryColor,
+                        ),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => const LanguageDialog(),
+                          );
+                        },
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
               const SizedBox(height: 24),
-              
+
+              // ========== Logo ==========
               MouseRegion(
                 onEnter: (_) => _onHover(true),
                 onExit: (_) => _onHover(false),
@@ -181,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         decoration: BoxDecoration(
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.teal.withOpacity(0.3),
+                              color: context.primaryColor.withOpacity(0.3),
                               blurRadius: 25,
                               spreadRadius: 2,
                               offset: const Offset(0, 10),
@@ -201,17 +254,18 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
                               width: 80,
                               height: 80,
                               decoration: BoxDecoration(
                                 color: Colors.white10,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.payment,
                                 size: 40,
-                                color: Colors.white70,
+                                color: context.textPrimary,
                               ),
                             ),
                           ),
@@ -222,13 +276,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 ),
               ),
               const SizedBox(height: 24),
-              
-              // Login Container
+
+              // ========== Login Form Container ==========
               Container(
                 padding: const EdgeInsets.all(24),
                 margin: const EdgeInsets.symmetric(horizontal: 24),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF141A2B),
+                  color: context.surfaceColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -244,23 +298,18 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Title
                       Text(
                         localizations.loginTitle,
-                        style: const TextStyle(
+                        style: theme.textTheme.titleLarge?.copyWith(
                           fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: context.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      
-                      // Subtitle
                       Text(
                         localizations.welcomeMessage,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.white70,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: context.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -270,14 +319,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
                         child: Text(
                           localizations.emailLabel,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
+                            color: context.textPrimary,
                           ),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      
+
                       // Email Field
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
@@ -287,7 +336,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           boxShadow: !_emailValid
                               ? [
                                   BoxShadow(
-                                    color: Colors.red.withOpacity(0.3),
+                                    color: context.errorColor.withOpacity(0.3),
                                     blurRadius: 8,
                                     spreadRadius: 1,
                                     offset: const Offset(0, 2),
@@ -299,7 +348,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           textDirection: TextDirection.ltr,
-                          style: const TextStyle(color: Colors.white),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: context.textPrimary,
+                          ),
                           onChanged: (value) {
                             if (!_emailValid) {
                               setState(() {
@@ -309,44 +360,31 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           },
                           decoration: InputDecoration(
                             hintText: 'example@gmail.com',
-                            hintStyle: const TextStyle(color: Colors.white38),
+                            hintStyle: inputDecorationTheme.hintStyle,
                             filled: true,
-                            fillColor: !_emailValid 
-                                ? Colors.red.withOpacity(0.1)
-                                : const Color(0xFF1F2A44),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
+                            fillColor: !_emailValid
+                                ? context.errorColor.withOpacity(0.1)
+                                : inputDecorationTheme.fillColor,
+                            border: inputDecorationTheme.border,
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: !_emailValid 
-                                    ? Colors.red 
-                                    : Colors.transparent,
+                                color: !_emailValid ? context.errorColor : Colors.transparent,
                                 width: 1.5,
                               ),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: !_emailValid 
-                                    ? Colors.red 
-                                    : const Color(0xFF00D8A2),
-                                width: 1.5,
-                              ),
-                            ),
+                            focusedBorder: inputDecorationTheme.focusedBorder,
                             prefixIcon: Icon(
-                              Icons.email, 
-                              color: !_emailValid 
-                                  ? Colors.red 
-                                  : Colors.white70,
+                              Icons.email,
+                              color: !_emailValid
+                                  ? context.errorColor
+                                  : context.textSecondary.withOpacity(0.7),
                             ),
                           ),
                         ),
                       ),
-                      
-                      // Error message for email
+
+                      // Email Error Message
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         padding: EdgeInsets.only(
@@ -362,7 +400,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   Icon(
                                     Icons.error_outline,
                                     size: 16,
-                                    color: Colors.red.shade400,
+                                    color: context.errorColor,
                                   ),
                                   const SizedBox(width: 4),
                                   Flexible(
@@ -371,7 +409,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           ? localizations.emailRequired
                                           : localizations.emailInvalid,
                                       style: TextStyle(
-                                        color: Colors.red.shade400,
+                                        color: context.errorColor,
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -381,22 +419,21 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               )
                             : null,
                       ),
-                      
                       const SizedBox(height: 16),
 
                       // Password Field Label
                       Align(
                         alignment: isRTL ? Alignment.centerRight : Alignment.centerLeft,
                         child: Text(
-                         localizations.passwordLabel,
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          localizations.passwordLabel,
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
+                            color: context.textPrimary,
                           ),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      
+
                       // Password Field
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
@@ -406,7 +443,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           boxShadow: !_passwordValid
                               ? [
                                   BoxShadow(
-                                    color: Colors.red.withOpacity(0.3),
+                                    color: context.errorColor.withOpacity(0.3),
                                     blurRadius: 8,
                                     spreadRadius: 1,
                                     offset: const Offset(0, 2),
@@ -418,7 +455,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
-                          style: const TextStyle(color: Colors.white),
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: context.textPrimary,
+                          ),
                           onChanged: (value) {
                             if (!_passwordValid) {
                               setState(() {
@@ -428,45 +467,32 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           },
                           decoration: InputDecoration(
                             hintText: '********',
-                            hintStyle: const TextStyle(color: Colors.white38),
+                            hintStyle: inputDecorationTheme.hintStyle,
                             filled: true,
-                            fillColor: !_passwordValid 
-                                ? Colors.red.withOpacity(0.1)
-                                : const Color(0xFF1F2A44),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
+                            fillColor: !_passwordValid
+                                ? context.errorColor.withOpacity(0.1)
+                                : inputDecorationTheme.fillColor,
+                            border: inputDecorationTheme.border,
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(
-                                color: !_passwordValid 
-                                    ? Colors.red 
-                                    : Colors.transparent,
+                                color: !_passwordValid ? context.errorColor : Colors.transparent,
                                 width: 1.5,
                               ),
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(
-                                color: !_passwordValid 
-                                    ? Colors.red 
-                                    : const Color(0xFF00D8A2),
-                                width: 1.5,
-                              ),
-                            ),
+                            focusedBorder: inputDecorationTheme.focusedBorder,
                             prefixIcon: Icon(
-                              Icons.lock, 
-                              color: !_passwordValid 
-                                  ? Colors.red 
-                                  : Colors.white70,
+                              Icons.lock,
+                              color: !_passwordValid
+                                  ? context.errorColor
+                                  : context.textSecondary.withOpacity(0.7),
                             ),
                             suffixIcon: IconButton(
                               icon: Icon(
                                 _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                                color: !_passwordValid 
-                                    ? Colors.red 
-                                    : Colors.white70,
+                                color: !_passwordValid
+                                    ? context.errorColor
+                                    : context.textSecondary.withOpacity(0.7),
                               ),
                               onPressed: () {
                                 setState(() {
@@ -477,8 +503,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           ),
                         ),
                       ),
-                      
-                      // Error message for password
+
+                      // Password Error Message
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         padding: EdgeInsets.only(
@@ -494,7 +520,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   Icon(
                                     Icons.error_outline,
                                     size: 16,
-                                    color: Colors.red.shade400,
+                                    color: context.errorColor,
                                   ),
                                   const SizedBox(width: 4),
                                   Expanded(
@@ -503,7 +529,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           ? localizations.passwordRequired
                                           : localizations.passwordTooShort,
                                       style: TextStyle(
-                                        color: Colors.red.shade400,
+                                        color: context.errorColor,
                                         fontSize: 12,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -513,7 +539,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                               )
                             : null,
                       ),
-                      
                       const SizedBox(height: 12),
 
                       // Forgot Password
@@ -529,8 +554,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                             );
                           },
                           child: Text(
-                            localizations.forgotPassword, 
-                            style: const TextStyle(color: Color(0xFF00D8A2)),
+                            localizations.forgotPassword,
+                            style: TextStyle(
+                              color: context.primaryColor,
+                            ),
                           ),
                         ),
                       ),
@@ -541,21 +568,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _handleLogin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00D8A2),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                          style: theme.elevatedButtonTheme.style,
                           child: _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
                               : Text(
                                   localizations.loginButton,
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white,
                                   ),
                                 ),
                         ),
@@ -566,96 +588,52 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       MouseRegion(
                         onEnter: (_) => setState(() => _isSignUpHovered = true),
                         onExit: (_) => setState(() => _isSignUpHovered = false),
-                        child: Focus(
-                          onFocusChange: (hasFocus) {
-                            setState(() {});
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const RegisterScreen(),
+                              ),
+                            );
                           },
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const RegisterScreen(),
+                          style: TextButton.styleFrom(
+                            foregroundColor: _isSignUpHovered
+                                ? context.textPrimary
+                                : context.primaryColor,
+                            overlayColor: context.primaryColor.withOpacity(0.1),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isRTL ? Icons.arrow_back : Icons.arrow_forward,
+                                size: 18,
+                                color: _isSignUpHovered
+                                    ? context.textPrimary
+                                    : context.primaryColor,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                localizations.noAccount,
+                                style: TextStyle(
+                                  color: _isSignUpHovered
+                                      ? context.textPrimary
+                                      : context.textSecondary.withOpacity(0.7),
                                 ),
-                              );
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: _isSignUpHovered 
-                                  ? Colors.white 
-                                  : const Color(0xFF00D8A2),
-                              overlayColor: const Color(0xFF00D8A2).withOpacity(0.1),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20, 
-                                vertical: 12,
                               ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                              Text(
+                                localizations.signUp,
+                                style: TextStyle(
+                                  color: _isSignUpHovered
+                                      ? context.textPrimary
+                                      : context.primaryColor,
+                                  fontWeight: _isSignUpHovered
+                                      ? FontWeight.bold
+                                      : FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeInOut,
-                              decoration: BoxDecoration(
-                                border: _isSignUpHovered
-                                    ? Border(
-                                        bottom: BorderSide(
-                                          color: const Color(0xFF00D8A2),
-                                          width: 2,
-                                        ),
-                                      )
-                                    : null,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    curve: Curves.easeInOut,
-                                    transform: Matrix4.translationValues(
-                                      _isSignUpHovered 
-                                          ? (isRTL ? -5 : 5) 
-                                          : 0, 
-                                      0, 
-                                      0
-                                    ),
-                                    child: Icon(
-                                      isRTL ? Icons.arrow_back : Icons.arrow_forward,
-                                      size: 18,
-                                      color: _isSignUpHovered 
-                                          ? Colors.white 
-                                          : const Color(0xFF00D8A2),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    localizations.noAccount,
-                                    style: TextStyle(
-                                      color: _isSignUpHovered 
-                                          ? Colors.white 
-                                          : Colors.white70,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  Text(
-                                    localizations.signUp,
-                                    style: TextStyle(
-                                      color: _isSignUpHovered 
-                                          ? Colors.white 
-                                          : const Color(0xFF00D8A2),
-                                      fontSize: 14,
-                                      fontWeight: _isSignUpHovered 
-                                          ? FontWeight.bold 
-                                          : FontWeight.w600,
-                                      decoration: _isSignUpHovered
-                                          ? TextDecoration.underline
-                                          : TextDecoration.none,
-                                      decorationColor: const Color(0xFF00D8A2),
-                                      decorationThickness: 2,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            ],
                           ),
                         ),
                       ),
@@ -668,24 +646,5 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         ),
       ),
     );
-  }
-
-  void _onHover(bool isHovered) {
-    setState(() {
-      _isHovered = isHovered;
-    });
-    if (isHovered) {
-      _animationController.forward();
-    } else {
-      _animationController.reverse();
-    }
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _animationController.dispose();
-    super.dispose();
   }
 }

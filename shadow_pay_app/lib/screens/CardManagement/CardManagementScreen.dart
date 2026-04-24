@@ -1,8 +1,11 @@
-import 'dart:async';
-import 'package:flutter/material.dart';
 import 'dart:ui';
-import 'dart:math';
+import 'package:flutter/material.dart';
+import 'dart:math' as math;
+import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/theme/colors.dart';
+import 'package:shadow_pay_app/services/shared_pref_service.dart';
+import 'package:shadow_pay_app/providers/theme_provider.dart';
 
 class CardManagementScreen extends StatefulWidget {
   const CardManagementScreen({super.key});
@@ -14,1027 +17,1142 @@ class CardManagementScreen extends StatefulWidget {
 class _CardManagementScreenState extends State<CardManagementScreen>
     with TickerProviderStateMixin {
   bool isCardFrozen = false;
-  bool isHoveringFreeze = false;
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-  late AnimationController _shakeController;
-  late Animation<double> _shakeAnimation;
+  bool showSnowEffect = false;
+  late AnimationController _animationController;
   late AnimationController _snowController;
   late AnimationController _iceCrystalController;
-  late Animation<double> _iceCrystalScale;
-  late Animation<double> _iceCrystalOpacity;
-  late AnimationController _detailsGlowController;
-  late Animation<double> _detailsGlowAnimation;
-  late AnimationController _shieldRotateController;
-  late Animation<double> _shieldRotateAnimation;
-  
-  // Individual animations for each detail row
-  late AnimationController _row1Controller;
-  late Animation<double> _row1Slide;
-  late Animation<double> _row1Fade;
-  late AnimationController _row2Controller;
-  late Animation<double> _row2Slide;
-  late Animation<double> _row2Fade;
-  late AnimationController _row3Controller;
-  late Animation<double> _row3Slide;
-  late Animation<double> _row3Fade;
-  late AnimationController _row4Controller;
-  late Animation<double> _row4Slide;
-  late Animation<double> _row4Fade;
-  
-  // Animations for info section rows
-  late AnimationController _infoRow1Controller;
-  late Animation<double> _infoRow1Slide;
-  late Animation<double> _infoRow1Fade;
-  late AnimationController _infoRow2Controller;
-  late Animation<double> _infoRow2Slide;
-  late Animation<double> _infoRow2Fade;
-  late AnimationController _infoRow3Controller;
-  late Animation<double> _infoRow3Slide;
-  late Animation<double> _infoRow3Fade;
-  
-  Timer? _snowTimer;
-  List<Snowflake> snowflakes = [];
+  late AnimationController _alertController;
+  late AnimationController _cardTapController;
+  late AnimationController _flipController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _rotationAnimation;
+  late Animation<double> _iceRotationAnimation;
+  late Animation<double> _iceScaleAnimation;
+  late Animation<double> _icePulseAnimation;
+  late Animation<double> _cardTapScaleAnimation;
+  late Animation<double> _cardTapRotationAnimation;
+  late Animation<double> _flipAnimation;
+  late List<Snowflake> snowflakes = [];
 
-  final Color backgroundColor = const Color(0xFF0F172A);
+  bool isAlertExpanded = false;
+  bool _isFromUserAction = false;
 
   @override
   void initState() {
     super.initState();
-    
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-    _shakeController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+    _loadCardStatus();
+    _initAnimations();
+  }
+
+  void _initAnimations() {
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 700),
       vsync: this,
     );
-    _shakeAnimation = Tween<double>(begin: 0, end: 0.05).animate(
-      CurvedAnimation(parent: _shakeController, curve: Curves.elasticIn),
+
+    _snowController = AnimationController(
+      duration: const Duration(seconds: 8),
+      vsync: this,
     );
-    
-    // Ice crystal animation for card
+
     _iceCrystalController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _iceCrystalScale = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _iceCrystalController, curve: Curves.elasticOut),
-    );
-    _iceCrystalOpacity = Tween<double>(begin: 0, end: 0.8).animate(
-      CurvedAnimation(parent: _iceCrystalController, curve: Curves.easeInOut),
-    );
-    
-    // Details glow animation
-    _detailsGlowController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _detailsGlowAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _detailsGlowController, curve: Curves.easeInOut),
-    );
-    
-    // Shield rotate animation
-    _shieldRotateController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat();
-    _shieldRotateAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _shieldRotateController, curve: Curves.linear),
-    );
-    
-    // Initialize animations for each detail row
-    _row1Controller = AnimationController(
+
+    _alertController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    )..forward();
+
+    _cardTapController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    _row1Slide = Tween<double>(begin: 50, end: 0).animate(
-      CurvedAnimation(parent: _row1Controller, curve: Curves.easeOutBack),
-    );
-    _row1Fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _row1Controller, curve: Curves.easeOut),
-    );
-    
-    _row2Controller = AnimationController(
-      duration: const Duration(milliseconds: 450),
+
+    _flipController = AnimationController(
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _row2Slide = Tween<double>(begin: 50, end: 0).animate(
-      CurvedAnimation(parent: _row2Controller, curve: Curves.easeOutBack),
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.03).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
-    _row2Fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _row2Controller, curve: Curves.easeOut),
+
+    _rotationAnimation = Tween<double>(begin: 0, end: 0.08).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad),
     );
-    
-    _row3Controller = AnimationController(
-      duration: const Duration(milliseconds: 500),
-      vsync: this,
+
+    _iceRotationAnimation = Tween<double>(begin: 0, end: 2 * math.pi).animate(
+      CurvedAnimation(parent: _iceCrystalController, curve: Curves.linear),
     );
-    _row3Slide = Tween<double>(begin: 50, end: 0).animate(
-      CurvedAnimation(parent: _row3Controller, curve: Curves.easeOutBack),
+
+    _iceScaleAnimation = Tween<double>(begin: 0.85, end: 1.15).animate(
+      CurvedAnimation(
+          parent: _iceCrystalController, curve: Curves.easeInOutSine),
     );
-    _row3Fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _row3Controller, curve: Curves.easeOut),
+
+    _icePulseAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(
+          parent: _iceCrystalController, curve: Curves.easeInOutCubic),
     );
-    
-    _row4Controller = AnimationController(
-      duration: const Duration(milliseconds: 550),
-      vsync: this,
+
+    _cardTapScaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _cardTapController, curve: Curves.easeOutBack),
     );
-    _row4Slide = Tween<double>(begin: 50, end: 0).animate(
-      CurvedAnimation(parent: _row4Controller, curve: Curves.easeOutBack),
+
+    _cardTapRotationAnimation = Tween<double>(begin: 0, end: 0.05).animate(
+      CurvedAnimation(parent: _cardTapController, curve: Curves.easeOutQuad),
     );
-    _row4Fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _row4Controller, curve: Curves.easeOut),
+
+    _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _flipController, curve: Curves.easeInOutCubic),
     );
-    
-    // Initialize animations for info section rows
-    _infoRow1Controller = AnimationController(
-      duration: const Duration(milliseconds: 420),
-      vsync: this,
-    );
-    _infoRow1Slide = Tween<double>(begin: 50, end: 0).animate(
-      CurvedAnimation(parent: _infoRow1Controller, curve: Curves.easeOutBack),
-    );
-    _infoRow1Fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _infoRow1Controller, curve: Curves.easeOut),
-    );
-    
-    _infoRow2Controller = AnimationController(
-      duration: const Duration(milliseconds: 480),
-      vsync: this,
-    );
-    _infoRow2Slide = Tween<double>(begin: 50, end: 0).animate(
-      CurvedAnimation(parent: _infoRow2Controller, curve: Curves.easeOutBack),
-    );
-    _infoRow2Fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _infoRow2Controller, curve: Curves.easeOut),
-    );
-    
-    _infoRow3Controller = AnimationController(
-      duration: const Duration(milliseconds: 540),
-      vsync: this,
-    );
-    _infoRow3Slide = Tween<double>(begin: 50, end: 0).animate(
-      CurvedAnimation(parent: _infoRow3Controller, curve: Curves.easeOutBack),
-    );
-    _infoRow3Fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _infoRow3Controller, curve: Curves.easeOut),
-    );
-    
-    // Start animations on init
-    _row1Controller.forward();
-    _row2Controller.forward();
-    _row3Controller.forward();
-    _row4Controller.forward();
-    _infoRow1Controller.forward();
-    _infoRow2Controller.forward();
-    _infoRow3Controller.forward();
-    
-    _snowController = AnimationController(
-      duration: const Duration(milliseconds: 50),
-      vsync: this,
-    )..addListener(() {
-      if (showSnow && mounted) {
-        setState(() {
-          for (var snowflake in snowflakes) {
-            snowflake.y += snowflake.speed;
-            if (snowflake.y > 1.0) {
-              snowflake.y = 0;
-              snowflake.x = Random().nextDouble();
-            }
+
+    _flipController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) {
+            _flipController.reverse();
           }
         });
       }
     });
-    
-    // Initialize snowflakes
-    for (int i = 0; i < 60; i++) {
+
+    _snowController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        if (mounted) {
+          setState(() {
+            showSnowEffect = false;
+            snowflakes.clear();
+          });
+        }
+      }
+    });
+
+    _cardTapController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _cardTapController.reverse();
+      }
+    });
+  }
+
+  Future<void> _loadCardStatus() async {
+    final frozen = await SharedPrefService.getCardFrozenStatus();
+    setState(() {
+      isCardFrozen = frozen;
+    });
+  }
+
+  Future<void> _saveCardStatusToPreferences() async {
+    await SharedPrefService.setCardFrozen(isCardFrozen);
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  void toggleFreeze([AppLocalizations? loc]) {
+    _animationController.forward(from: 0);
+    setState(() {
+      isCardFrozen = !isCardFrozen;
+      if (isCardFrozen) {
+        showSnowEffect = true;
+        _generateSnowflakes();
+        _snowController.forward(from: 0);
+        _alertController.stop();
+      } else {
+        showSnowEffect = false;
+        _snowController.stop();
+        snowflakes.clear();
+        _alertController.forward(from: 0);
+      }
+    });
+
+    _saveCardStatusToPreferences();
+
+    if (loc != null && _isFromUserAction) {
+      _showSnackBar(
+        isCardFrozen ? loc.cardFrozenSnackbar : loc.cardUnfrozenSnackbar,
+      );
+      _isFromUserAction = false;
+    }
+
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (mounted) {
+        _animationController.reset();
+      }
+    });
+  }
+
+  void onCardTap() {
+    _cardTapController.forward(from: 0);
+    _flipController.forward(from: 0);
+  }
+
+  void _generateSnowflakes() {
+    snowflakes.clear();
+    for (int i = 0; i < 120; i++) {
       snowflakes.add(Snowflake(
-        x: Random().nextDouble(),
-        y: Random().nextDouble(),
-        speed: 0.003 + Random().nextDouble() * 0.005,
-        size: 3 + Random().nextDouble() * 5,
+        id: i,
+        startX: (i * 97) % 1.0,
+        startY: -((i * 43) % 0.8),
+        size: 2 + (i % 14).toDouble(),
+        speed: 0.7 + (i % 8) / 10,
+        opacity: 0.4 + (i % 10) / 10,
+        sway: (i % 15) / 15,
       ));
     }
   }
 
   @override
   void dispose() {
-    _pulseController.dispose();
-    _shakeController.dispose();
+    _animationController.dispose();
     _snowController.dispose();
     _iceCrystalController.dispose();
-    _detailsGlowController.dispose();
-    _shieldRotateController.dispose();
-    _row1Controller.dispose();
-    _row2Controller.dispose();
-    _row3Controller.dispose();
-    _row4Controller.dispose();
-    _infoRow1Controller.dispose();
-    _infoRow2Controller.dispose();
-    _infoRow3Controller.dispose();
-    _snowTimer?.cancel();
+    _alertController.dispose();
+    _cardTapController.dispose();
+    _flipController.dispose();
     super.dispose();
-  }
-
-  bool showSnow = false;
-
-  void toggleFreeze(AppLocalizations loc) {
-    setState(() {
-      isCardFrozen = !isCardFrozen;
-    });
-    
-    _shakeController.forward(from: 0).then((_) => _shakeController.reverse());
-    
-    // Reset animations
-    _row1Controller.reset();
-    _row2Controller.reset();
-    _row3Controller.reset();
-    _row4Controller.reset();
-    _infoRow1Controller.reset();
-    _infoRow2Controller.reset();
-    _infoRow3Controller.reset();
-    _row1Controller.forward();
-    _row2Controller.forward();
-    _row3Controller.forward();
-    _row4Controller.forward();
-    _infoRow1Controller.forward();
-    _infoRow2Controller.forward();
-    _infoRow3Controller.forward();
-    
-    if (isCardFrozen) {
-      _iceCrystalController.forward(from: 0);
-      _detailsGlowController.repeat(reverse: true);
-      setState(() {
-        showSnow = true;
-      });
-      _snowController.repeat();
-      
-      _snowTimer?.cancel();
-      _snowTimer = Timer(const Duration(seconds: 3), () {
-        if (mounted) {
-          setState(() {
-            showSnow = false;
-          });
-          _snowController.stop();
-        }
-      });
-    } else {
-      _snowController.stop();
-      setState(() {
-        showSnow = false;
-      });
-      _snowTimer?.cancel();
-      _iceCrystalController.reverse();
-      _detailsGlowController.stop();
-    }
-    
-    _showSnackBar(
-      isCardFrozen ? loc.cardFrozenSnackbar : loc.cardUnfrozenSnackbar,
-    );
-  }
-
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message, textAlign: TextAlign.center),
-        duration: const Duration(milliseconds: 800),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.grey[900],
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
     final isRTL = Localizations.localeOf(context).languageCode == 'ar';
-    
+    final isDarkMode = context.isDarkMode;
+
     return Directionality(
       textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
       child: Scaffold(
-        backgroundColor: backgroundColor,
+        backgroundColor: context.backgroundColor,
         body: Stack(
           children: [
-            SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  const SizedBox(height: 50),
-                  
-                  // Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          loc.cardManagement,
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          loc.cardManagementSubtitle,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[400],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      children: [
-                        // Status Card
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 500),
-                          curve: Curves.easeInOutCubic,
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: isCardFrozen
-                                  ? [
-                                      Colors.blue.withOpacity(0.08),
-                                      Colors.blue.withOpacity(0.04),
-                                    ]
-                                  : [
-                                      Colors.green.withOpacity(0.08),
-                                      Colors.green.withOpacity(0.04),
-                                    ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
+            SafeArea(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TweenAnimationBuilder(
+                        tween: Tween<double>(begin: -40, end: 0),
+                        duration: const Duration(milliseconds: 600),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, double value, child) {
+                          return Transform.translate(
+                            offset: Offset(0, value),
+                            child: Opacity(
+                              opacity: 1 - (value / -40),
+                              child: child,
                             ),
-                            borderRadius: BorderRadius.circular(24),
-                            border: Border.all(
-                              color: isCardFrozen
-                                  ? Colors.blue.withOpacity(0.2)
-                                  : Colors.green.withOpacity(0.2),
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              AnimatedBuilder(
-                                animation: _shieldRotateAnimation,
-                                builder: (context, child) {
-                                  return Transform.rotate(
-                                    angle: _shieldRotateAnimation.value * 2 * pi,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Icon(
-                                        isCardFrozen ? Icons.ac_unit : Icons.shield,
-                                        color: Colors.white,
-                                        size: 28,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      isCardFrozen ? loc.cardFrozen : loc.cardActive,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      isCardFrozen ? loc.cardFrozenDesc : loc.cardActiveDesc,
-                                      style: TextStyle(
-                                        color: Colors.white.withOpacity(0.8),
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            IconButton(
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                  (isDarkMode
+                                          ? const Color(0xff1D293D)
+                                          : Colors.grey.shade200)
+                                      .withOpacity(0.4),
+                                ),
+                                side: MaterialStateProperty.all(
+                                  BorderSide(
+                                    color:
+                                        context.textSecondary.withOpacity(0.4),
+                                    width: 1,
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // Credit Card
-                        RotationTransition(
-                          turns: _shakeAnimation,
-                          child: TweenAnimationBuilder(
-                            tween: Tween<double>(begin: 0, end: 1),
-                            duration: const Duration(milliseconds: 800),
-                            curve: Curves.elasticOut,
-                            builder: (context, value, child) {
-                              return Transform.scale(
-                                scale: 0.95 + (value * 0.05),
-                                child: Opacity(opacity: value, child: child),
-                              );
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(32),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.5),
-                                    blurRadius: 25,
-                                    offset: const Offset(0, 15),
-                                    spreadRadius: 3,
+                              iconSize: 25,
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              icon: Icon(Icons.arrow_back,
+                                  color: context.textSecondary),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    loc.cardManagement,
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      color: context.textPrimary,
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    loc.cardManagementSubtitle,
+                                    style: TextStyle(
+                                      color: context.textSecondary,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                 ],
                               ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(32),
-                                child: Stack(
-                                  alignment: Alignment.center,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: 1 + (_scaleAnimation.value - 1) * 0.2,
+                            child: Opacity(
+                              opacity: 1 - (_animationController.value * 0.05),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 500),
+                                padding: const EdgeInsets.all(18),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: isCardFrozen
+                                        ? Colors.blue.withOpacity(0.5)
+                                        : context.primaryColor.withOpacity(0.5),
+                                    width: 1.5,
+                                  ),
+                                  color: isCardFrozen
+                                      ? Colors.blue.withOpacity(0.12)
+                                      : context.primaryColor.withOpacity(0.12),
+                                ),
+                                child: Row(
                                   children: [
-                                    // Card background - Single color gradient
-                                    BackdropFilter(
-                                      filter: isCardFrozen
-                                          ? ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5)
-                                          : ImageFilter.blur(sigmaX: 0, sigmaY: 0),
-                                      child: Container(
-                                        padding: const EdgeInsets.all(24),
-                                        decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                            colors: isCardFrozen
-                                                ? [
-                                                    const Color(0xFF1B4D6E),
-                                                    const Color(0xFF0E3A5F),
-                                                  ]
-                                                : [
-                                                    const Color(0xFF00BBA7),
-                                                    const Color(0xFF009688),
-                                                  ],
-                                          ),
-                                          borderRadius: BorderRadius.circular(32),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: (isCardFrozen
-                                                      ? const Color(0xFF1B4D6E)
-                                                      : const Color(0xFF00BBA7))
-                                                  .withAlpha(64),
-                                              blurRadius: 30,
-                                              spreadRadius: 2,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      loc.availableBalance,
-                                                      style: TextStyle(
-                                                        color: Colors.white.withOpacity(0.9),
-                                                        fontSize: 12,
-                                                        letterSpacing: 0.5,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 6),
-                                                    const Text(
-                                                      "\$12,847.50",
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 32,
-                                                        fontWeight: FontWeight.bold,
-                                                        shadows: [
-                                                          Shadow(
-                                                            color: Colors.black38,
-                                                            blurRadius: 8,
-                                                            offset: Offset(0, 2),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                AnimatedBuilder(
-                                                  animation: _shieldRotateAnimation,
-                                                  builder: (context, child) {
-                                                    return Transform.rotate(
-                                                      angle: _shieldRotateAnimation.value * 2 * pi,
-                                                      child: Container(
-                                                        padding: const EdgeInsets.all(10),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.white.withOpacity(0.15),
-                                                          borderRadius: BorderRadius.circular(20),
-                                                          boxShadow: const [
-                                                            BoxShadow(
-                                                              color: Colors.black26,
-                                                              blurRadius: 8,
-                                                              offset: Offset(0, 4),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        child: Icon(
-                                                          isCardFrozen ? Icons.ac_unit : Icons.shield,
-                                                          color: Colors.white,
-                                                          size: 32,
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 45),
-                                            Column(
-                                              crossAxisAlignment: CrossAxisAlignment.end,
-                                              children: [
-                                                Text(
-                                                  loc.cardNumber,
-                                                  style: TextStyle(
-                                                    color: Colors.white.withOpacity(0.8),
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Text(
-                                                  loc.cardNumberMasked,
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 20,
-                                                    letterSpacing: 2.5,
-                                                    fontWeight: FontWeight.w600,
-                                                    shadows: const [
-                                                      Shadow(
-                                                        color: Colors.black26,
-                                                        blurRadius: 4,
-                                                        offset: Offset(0, 1),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 35),
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                                  children: [
-                                                    Text(
-                                                      loc.cardHolderName,
-                                                      style: TextStyle(
-                                                        color: Colors.white.withOpacity(0.8),
-                                                        fontSize: 11,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 6),
-                                                    Text(
-                                                      loc.cardHolderValue,
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 16,
-                                                        fontWeight: FontWeight.w600,
-                                                        shadows: const [
-                                                          Shadow(
-                                                            color: Colors.black26,
-                                                            blurRadius: 4,
-                                                            offset: Offset(0, 1),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                                  children: [
-                                                    Text(
-                                                      loc.expiryDate,
-                                                      style: TextStyle(
-                                                        color: Colors.white.withOpacity(0.8),
-                                                        fontSize: 11,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 6),
-                                                    Text(
-                                                      loc.expiryDateValue,
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 16,
-                                                        fontWeight: FontWeight.w600,
-                                                        shadows: const [
-                                                          Shadow(
-                                                            color: Colors.black26,
-                                                            blurRadius: 4,
-                                                            offset: Offset(0, 1),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
+                                    AnimatedSwitcher(
+                                      duration:
+                                          const Duration(milliseconds: 500),
+                                      transitionBuilder: (child, animation) {
+                                        return ScaleTransition(
+                                          scale: animation,
+                                          child: child,
+                                        );
+                                      },
+                                      child: Icon(
+                                        isCardFrozen
+                                            ? Icons.ac_unit
+                                            : Icons.shield,
+                                        key: ValueKey(isCardFrozen),
+                                        color: isCardFrozen
+                                            ? Colors.blue[300]
+                                            : context.primaryColor,
+                                        size: 35,
                                       ),
                                     ),
-                                    // Ice crystal in center
-                                    if (isCardFrozen)
-                                      AnimatedBuilder(
-                                        animation: _iceCrystalController,
-                                        builder: (context, child) {
-                                          return Opacity(
-                                            opacity: _iceCrystalOpacity.value,
-                                            child: Transform.rotate(
-                                              angle: _shieldRotateAnimation.value * 2 * pi,
-                                              child: Transform.scale(
-                                                scale: _iceCrystalScale.value,
-                                                child: const Icon(
-                                                  Icons.ac_unit,
-                                                  color: Colors.white,
-                                                  size: 85,
+                                    const SizedBox(width: 15),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          AnimatedSwitcher(
+                                            duration: const Duration(
+                                                milliseconds: 400),
+                                            transitionBuilder:
+                                                (child, animation) {
+                                              return FadeTransition(
+                                                opacity: animation,
+                                                child: SlideTransition(
+                                                  position: Tween<Offset>(
+                                                    begin:
+                                                        const Offset(0, -0.2),
+                                                    end: Offset.zero,
+                                                  ).animate(animation),
+                                                  child: child,
                                                 ),
+                                              );
+                                            },
+                                            child: Text(
+                                              isCardFrozen
+                                                  ? loc.cardFrozen
+                                                  : loc.cardActive,
+                                              key: ValueKey(isCardFrozen),
+                                              style: TextStyle(
+                                                color: context.textPrimary,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
                                               ),
                                             ),
-                                          );
-                                        },
+                                          ),
+                                          const SizedBox(height: 5),
+                                          AnimatedSwitcher(
+                                            duration: const Duration(
+                                                milliseconds: 400),
+                                            transitionBuilder:
+                                                (child, animation) {
+                                              return FadeTransition(
+                                                opacity: animation,
+                                                child: child,
+                                              );
+                                            },
+                                            child: Text(
+                                              isCardFrozen
+                                                  ? loc.cardFrozenDesc
+                                                  : loc.cardActiveDesc,
+                                              key: ValueKey(isCardFrozen),
+                                              style: TextStyle(
+                                                color: isCardFrozen
+                                                    ? Colors.blue[200]
+                                                    : context.primaryColor,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
+                                    )
                                   ],
                                 ),
                               ),
                             ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      SizedBox(
+                        height: 230,
+                        child: GestureDetector(
+                          onTap: onCardTap,
+                          child: AnimatedBuilder(
+                            animation: Listenable.merge([
+                              _cardTapController,
+                              _animationController,
+                            ]),
+                            builder: (context, child) {
+                              final tapScale = _cardTapScaleAnimation.value;
+                              final tapRotateX =
+                                  _cardTapRotationAnimation.value *
+                                      (isCardFrozen ? -1 : 1);
+                              final tapRotateY =
+                                  _cardTapRotationAnimation.value * 0.5;
+
+                              return Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.identity()
+                                  ..setEntry(3, 2, 0.001)
+                                  ..rotateX(tapRotateX)
+                                  ..rotateY(tapRotateY)
+                                  ..scale(tapScale),
+                                child: AnimatedBuilder(
+                                  animation: _flipAnimation,
+                                  builder: (context, child) {
+                                    final flipValue = _flipAnimation.value;
+                                    final isFront = flipValue <= 0.5;
+
+                                    return Transform(
+                                      alignment: Alignment.center,
+                                      transform: Matrix4.identity()
+                                        ..setEntry(3, 2, 0.001)
+                                        ..rotateY(math.pi * flipValue),
+                                      child: isFront
+                                          ? _buildCardFront(
+                                              loc, isCardFrozen, flipValue)
+                                          : Transform(
+                                              alignment: Alignment.center,
+                                              transform: Matrix4.identity()
+                                                ..rotateY(math.pi),
+                                              child: _buildCardBack(
+                                                  loc, isCardFrozen, flipValue),
+                                            ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
                           ),
                         ),
+                      ),
 
-                        const SizedBox(height: 24),
+                      const SizedBox(height: 25),
 
-                        // Card Details
-                        AnimatedBuilder(
-                          animation: _detailsGlowController,
-                          builder: (context, child) {
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeInOutCubic,
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    const Color(0xFF1A1F2E).withOpacity(0.6),
-                                    const Color(0xFF131826).withOpacity(0.6),
+                      TweenAnimationBuilder(
+                        tween: Tween<double>(begin: 0, end: 1),
+                        duration: const Duration(milliseconds: 700),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, double value, child) {
+                          return Opacity(
+                            opacity: value,
+                            child: Transform.translate(
+                              offset: Offset(0, 30 * (1 - value)),
+                              child: Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color:
+                                      (isDarkMode ? Colors.white : Colors.black)
+                                          .withOpacity(0.06),
+                                  border: Border.all(
+                                    color: (isDarkMode
+                                            ? Colors.white
+                                            : Colors.black)
+                                        .withOpacity(0.08),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    _row(loc.cardHolder, loc.cardHolderValue,
+                                        value),
+                                    const SizedBox(height: 8),
+                                    _row(
+                                        loc.cardType, loc.cardTypeValue, value),
+                                    const SizedBox(height: 8),
+                                    _row(loc.issueDate, loc.issueDateValue,
+                                        value),
+                                    const SizedBox(height: 8),
+                                    _row(loc.expiryDate, loc.expiryDateValue,
+                                        value),
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(28),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.05),
-                                  width: 1,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.15),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 5),
-                                  ),
-                                ],
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(14),
-                                        ),
-                                        child: Icon(
-                                          Icons.credit_card_outlined,
-                                          color: Colors.blue,
-                                          size: 22,
-                                        ),
-                                      ),
-                                      Text(
-                                        loc.cardDetails,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 24),
-                                  
-                                  // Animated Row 1
-                                  AnimatedBuilder(
-                                    animation: _row1Controller,
-                                    builder: (context, child) {
-                                      return Transform.translate(
-                                        offset: Offset(_row1Slide.value, 0),
-                                        child: Opacity(
-                                          opacity: _row1Fade.value,
-                                          child: _buildAnimatedDetailRow(
-                                            loc.cardHolderName,
-                                            loc.cardHolderValue,
-                                            Icons.person_outline,
-                                            _detailsGlowAnimation.value,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  
-                                  // Animated Row 2
-                                  AnimatedBuilder(
-                                    animation: _row2Controller,
-                                    builder: (context, child) {
-                                      return Transform.translate(
-                                        offset: Offset(_row2Slide.value, 0),
-                                        child: Opacity(
-                                          opacity: _row2Fade.value,
-                                          child: _buildAnimatedDetailRow(
-                                            loc.cardType,
-                                            loc.cardTypeValue,
-                                            Icons.credit_card,
-                                            _detailsGlowAnimation.value,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  
-                                  // Animated Row 3
-                                  AnimatedBuilder(
-                                    animation: _row3Controller,
-                                    builder: (context, child) {
-                                      return Transform.translate(
-                                        offset: Offset(_row3Slide.value, 0),
-                                        child: Opacity(
-                                          opacity: _row3Fade.value,
-                                          child: _buildAnimatedDetailRow(
-                                            loc.issueDate,
-                                            loc.issueDateValue,
-                                            Icons.calendar_today_outlined,
-                                            _detailsGlowAnimation.value,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  
-                                  // Animated Row 4
-                                  AnimatedBuilder(
-                                    animation: _row4Controller,
-                                    builder: (context, child) {
-                                      return Transform.translate(
-                                        offset: Offset(_row4Slide.value, 0),
-                                        child: Opacity(
-                                          opacity: _row4Fade.value,
-                                          child: _buildAnimatedDetailRow(
-                                            loc.expiryDate,
-                                            loc.expiryDateValue,
-                                            Icons.event_busy_outlined,
-                                            _detailsGlowAnimation.value,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
+                      ),
 
-                        const SizedBox(height: 24),
+                      const SizedBox(height: 25),
 
-                        // Freeze Button
-                        MouseRegion(
-                          onEnter: (_) => setState(() => isHoveringFreeze = true),
-                          onExit: (_) => setState(() => isHoveringFreeze = false),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            transform: Matrix4.translationValues(
-                                0, isHoveringFreeze ? -2 : 0, 0),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isCardFrozen
-                                    ? Colors.green.shade700
-                                    : Colors.red.shade700,
-                                minimumSize: const Size(double.infinity, 56),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                                elevation: isHoveringFreeze ? 8 : 4,
-                                shadowColor: isCardFrozen
-                                    ? Colors.green.withOpacity(0.5)
-                                    : Colors.red.withOpacity(0.5),
-                              ),
-                              onPressed: () => toggleFreeze(loc),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 300),
-                                    child: Icon(
-                                      isCardFrozen
-                                          ? Icons.lock_open
-                                          : Icons.lock_outline,
-                                      key: ValueKey(isCardFrozen),
-                                      color: Colors.white,
-                                      size: 24,
+                      GestureDetector(
+                        onTap: () {
+                          _isFromUserAction = true;
+                          _animationController.forward(from: 0);
+                          toggleFreeze(loc);
+                        },
+                        child: AnimatedBuilder(
+                          animation: _animationController,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: 1 + (_animationController.value * 0.02),
+                              child: Container(
+                                width: double.infinity,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 18),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: isCardFrozen
+                                      ? Colors.green.withOpacity(0.8)
+                                      : context.primaryColor,
+                                  border: Border.all(
+                                    color: isCardFrozen
+                                        ? Colors.green.withOpacity(0.8)
+                                        : context.primaryColor,
+                                    width: 1.2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: isCardFrozen
+                                          ? Colors.green.withOpacity(0.8)
+                                          : context.primaryColor,
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 300),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 400),
+                                    transitionBuilder: (child, animation) {
+                                      return ScaleTransition(
+                                        scale: animation,
+                                        child: FadeTransition(
+                                          opacity: animation,
+                                          child: child,
+                                        ),
+                                      );
+                                    },
                                     child: Text(
                                       isCardFrozen
                                           ? loc.unfreezeCard
                                           : loc.freezeCard,
                                       key: ValueKey(isCardFrozen),
                                       style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
                                         color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
                                       ),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      if (!isCardFrozen)
+                        AnimatedBuilder(
+                          animation: _alertController,
+                          builder: (context, child) {
+                            return TweenAnimationBuilder(
+                              tween: Tween<double>(begin: 0, end: 1),
+                              duration: const Duration(milliseconds: 600),
+                              curve: Curves.easeOutCubic,
+                              builder: (context, double value, child) {
+                                return Transform.translate(
+                                  offset: Offset(30 * (1 - value), 0),
+                                  child: Opacity(
+                                    opacity: value,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          isAlertExpanded = !isAlertExpanded;
+                                        });
+                                      },
+                                      child: AnimatedContainer(
+                                        duration:
+                                            const Duration(milliseconds: 500),
+                                        curve: Curves.easeOutCubic,
+                                        padding: const EdgeInsets.all(20),
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(24),
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                            colors: [
+                                              context.primaryColor
+                                                  .withOpacity(0.08),
+                                              context.primaryColor
+                                                  .withOpacity(0.04),
+                                            ],
+                                          ),
+                                          border: Border.all(
+                                            color: isAlertExpanded
+                                                ? context.primaryColor
+                                                    .withOpacity(0.5)
+                                                : context.primaryColor
+                                                    .withOpacity(0.2),
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(
+                                                    gradient: LinearGradient(
+                                                      colors: [
+                                                        context.primaryColor,
+                                                        context.primaryColor
+                                                            .withOpacity(0.7),
+                                                      ],
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: context
+                                                            .primaryColor
+                                                            .withOpacity(0.3),
+                                                        blurRadius: 10,
+                                                        offset:
+                                                            const Offset(0, 2),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: const Icon(
+                                                    Icons.shield,
+                                                    color: Colors.white,
+                                                    size: 24,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 16),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        loc.securityControlCenter,
+                                                        style: TextStyle(
+                                                          color: context
+                                                              .textPrimary,
+                                                          fontSize: 17,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          letterSpacing: -0.3,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(height: 4),
+                                                      Text(
+                                                        loc.securityControlSubtitle,
+                                                        style: TextStyle(
+                                                          color: context
+                                                              .textSecondary,
+                                                          fontSize: 12,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                AnimatedRotation(
+                                                  duration: const Duration(
+                                                      milliseconds: 400),
+                                                  turns: isAlertExpanded
+                                                      ? 0.5
+                                                      : 0.0,
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(6),
+                                                    decoration: BoxDecoration(
+                                                      color: context
+                                                          .primaryColor
+                                                          .withOpacity(0.2),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12),
+                                                    ),
+                                                    child: Icon(
+                                                      Icons
+                                                          .keyboard_arrow_down_rounded,
+                                                      color:
+                                                          context.primaryColor,
+                                                      size: 22,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            AnimatedCrossFade(
+                                              firstChild:
+                                                  const SizedBox.shrink(),
+                                              secondChild: Column(
+                                                children: [
+                                                  const SizedBox(height: 20),
+                                                  Container(
+                                                    height: 1,
+                                                    decoration: BoxDecoration(
+                                                      gradient: LinearGradient(
+                                                        colors: [
+                                                          Colors.transparent,
+                                                          context.primaryColor
+                                                              .withOpacity(0.3),
+                                                          Colors.transparent,
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 20),
+                                                  _buildSecurityFeature(
+                                                    icon: Icons.ac_unit,
+                                                    title: loc.aboutFreeze,
+                                                    description:
+                                                        loc.freezeInfo1,
+                                                    color: context.primaryColor,
+                                                  ),
+                                                  const SizedBox(height: 16),
+                                                  _buildSecurityFeature(
+                                                    icon: Icons.touch_app,
+                                                    title: loc.fullControl,
+                                                    description:
+                                                        loc.freezeInfo2,
+                                                    color: Colors.green[300]!,
+                                                  ),
+                                                  const SizedBox(height: 16),
+                                                  _buildSecurityFeature(
+                                                    icon: Icons.auto_awesome,
+                                                    title: loc.advancedAI,
+                                                    description:
+                                                        loc.freezeInfo3,
+                                                    color:
+                                                        const Color(0xFF3DB892),
+                                                  ),
+                                                ],
+                                              ),
+                                              crossFadeState: isAlertExpanded
+                                                  ? CrossFadeState.showSecond
+                                                  : CrossFadeState.showFirst,
+                                              duration: const Duration(
+                                                  milliseconds: 400),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         ),
 
-                        const SizedBox(height: 20),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
-                        // Info Section
-                        AnimatedBuilder(
-                          animation: _detailsGlowController,
-                          builder: (context, child) {
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeInOutCubic,
-                              padding: const EdgeInsets.all(24),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    const Color(0xFF1A1F2E).withOpacity(0.6),
-                                    const Color(0xFF131826).withOpacity(0.6),
+            if (showSnowEffect)
+              AnimatedBuilder(
+                animation: _snowController,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: SnowPainter(
+                      snowflakes: snowflakes,
+                      progress: _snowController.value,
+                    ),
+                    size: Size.infinite,
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardFront(
+      AppLocalizations loc, bool isCardFrozen, double flipValue) {
+    final textOpacity = flipValue <= 0.3
+        ? 1.0
+        : (1.0 - (flipValue - 0.3) / 0.2).clamp(0.0, 1.0);
+    final isDarkMode = context.isDarkMode;
+
+    return Container(
+      height: 230,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: isCardFrozen
+              ? [const Color(0xFF2A4A7A), const Color(0xFF3A6A9A)] 
+              : (isDarkMode
+                  ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
+                  : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)]),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color:
+                (isCardFrozen ? const Color(0xFF3A6A9A) : context.primaryColor)
+                    .withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          children: [
+            if (isCardFrozen) ...[
+              Positioned(
+                top: -50,
+                right: -50,
+                child: AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: 1 + (_animationController.value * 0.15),
+                      child: Container(
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue.withOpacity(0.3),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Positioned(
+                bottom: -40,
+                left: -40,
+                child: AnimatedBuilder(
+                  animation: _animationController,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: 1 + (_animationController.value * 0.15),
+                      child: Container(
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.cyan.withOpacity(0.2),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+            if (!isCardFrozen) ...[
+              Positioned(
+                top: 0,
+                right: 0,
+                child: CustomPaint(
+                  size: const Size(120, 120),
+                  painter: EgyptianVisaPattern(
+                    color: context.primaryColor.withOpacity(0.15),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                child: CustomPaint(
+                  size: const Size(100, 100),
+                  painter: EgyptianVisaPattern(
+                    color: context.primaryColor.withOpacity(0.1),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 15,
+                right: 20,
+                child: Container(
+                  width: 45,
+                  height: 45,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: context.primaryColor.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.landscape,
+                    color: context.primaryColor.withOpacity(0.4),
+                    size: 28,
+                  ),
+                ),
+              ),
+            ],
+            Opacity(
+              opacity: textOpacity,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              loc.availableBalance,
+                              style: TextStyle(
+                                  color: context.textSecondary, fontSize: 12),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              "\$12,847.50",
+                              style: TextStyle(
+                                color: context.textPrimary,
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox.shrink(),
+                      ],
+                    ),
+                    const Spacer(),
+                    if (!isCardFrozen)
+                      Row(
+                        children: [
+                          Text("****",
+                              style: TextStyle(
+                                  color: context.textPrimary.withOpacity(0.8),
+                                  fontSize: 18,
+                                  letterSpacing: 2,
+                                  fontWeight: FontWeight.w500)),
+                          const SizedBox(width: 8),
+                          Text("****",
+                              style: TextStyle(
+                                  color: context.textPrimary.withOpacity(0.8),
+                                  fontSize: 18,
+                                  letterSpacing: 2,
+                                  fontWeight: FontWeight.w500)),
+                          const SizedBox(width: 8),
+                          Text("****",
+                              style: TextStyle(
+                                  color: context.textPrimary.withOpacity(0.8),
+                                  fontSize: 18,
+                                  letterSpacing: 2,
+                                  fontWeight: FontWeight.w500)),
+                          const SizedBox(width: 8),
+                          Text("1234",
+                              style: TextStyle(
+                                  color: context.textPrimary,
+                                  fontSize: 20,
+                                  letterSpacing: 2.5,
+                                  fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    if (isCardFrozen)
+                      Text(loc.cardNumberMasked,
+                          style: TextStyle(
+                              color: context.textPrimary,
+                              fontSize: 20,
+                              letterSpacing: 2.5,
+                              fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 15),
+                    if (!isCardFrozen)
+                      Row(
+                        children: [
+                          Container(
+                            width: 35,
+                            height: 25,
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(
+                                  color: Colors.amber.withOpacity(0.5),
+                                  width: 1),
+                            ),
+                            child: const Icon(Icons.sim_card,
+                                color: Colors.amber, size: 16),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(loc.cardHolderValue.toUpperCase(),
+                                    style: TextStyle(
+                                        color: context.textPrimary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                        letterSpacing: 0.5)),
+                                const SizedBox(height: 2),
+                                Row(
+                                  children: [
+                                    Text(loc.expiryDateValue,
+                                        style: TextStyle(
+                                            color: context.textSecondary,
+                                            fontSize: 10)),
+                                    const SizedBox(width: 12),
                                   ],
                                 ),
-                                borderRadius: BorderRadius.circular(28),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.05),
-                                  width: 1,
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text("VISA",
+                                  style: TextStyle(
+                                      color:
+                                          context.primaryColor.withOpacity(0.7),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 1.5)),
+                              Container(
+                                width: 30,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(colors: [
+                                    Colors.amber.withOpacity(0.6),
+                                    Colors.orange.withOpacity(0.4)
+                                  ]),
+                                  borderRadius: BorderRadius.circular(3),
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.15),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 5),
-                                  ),
-                                ],
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                            ],
+                          ),
+                        ],
+                      ),
+                    if (isCardFrozen)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(loc.cardHolderValue,
+                              style: TextStyle(
+                                  color: context.textSecondary, fontSize: 12)),
+                          Text(loc.expiryDateValue,
+                              style: TextStyle(
+                                  color: context.textSecondary, fontSize: 12)),
+                          const Text("***",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 12)),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            if (isCardFrozen)
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      color: Colors.black.withOpacity(0.3),
+                      child: Center(
+                        child: AnimatedBuilder(
+                          animation: _iceCrystalController,
+                          builder: (context, child) {
+                            return Transform.scale(
+                              scale: _iceScaleAnimation.value,
+                              child: Stack(
+                                alignment: Alignment.center,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: Colors.blue.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(14),
-                                        ),
-                                        child: Icon(
-                                          Icons.info_outline,
-                                          color: Colors.blue,
-                                          size: 22,
-                                        ),
-                                      ),
-                                      Text(
-                                        loc.aboutFreeze,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
+                                  Transform.rotate(
+                                    angle: _iceRotationAnimation.value,
+                                    child: Container(
+                                      width: 100,
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: RadialGradient(
+                                          colors: [
+                                            Colors.blue.withOpacity(0.7),
+                                            Colors.blue.withOpacity(0.3),
+                                            Colors.transparent
+                                          ],
+                                          stops: const [0.3, 0.6, 1.0],
                                         ),
                                       ),
-                                    ],
+                                      child: const Icon(Icons.ac_unit,
+                                          color: Colors.blue, size: 70),
+                                    ),
                                   ),
-                                  const SizedBox(height: 24),
-                                  
-                                  // Animated Info Row 1
-                                  AnimatedBuilder(
-                                    animation: _infoRow1Controller,
-                                    builder: (context, child) {
-                                      return Transform.translate(
-                                        offset: Offset(_infoRow1Slide.value, 0),
-                                        child: Opacity(
-                                          opacity: _infoRow1Fade.value,
-                                          child: _buildAnimatedInfoRow(
-                                            Icons.block,
-                                            loc.freezeInfo1,
-                                            _detailsGlowAnimation.value,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  
-                                  // Animated Info Row 2
-                                  AnimatedBuilder(
-                                    animation: _infoRow2Controller,
-                                    builder: (context, child) {
-                                      return Transform.translate(
-                                        offset: Offset(_infoRow2Slide.value, 0),
-                                        child: Opacity(
-                                          opacity: _infoRow2Fade.value,
-                                          child: _buildAnimatedInfoRow(
-                                            Icons.lock_open,
-                                            loc.freezeInfo2,
-                                            _detailsGlowAnimation.value,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                  
-                                  // Animated Info Row 3
-                                  AnimatedBuilder(
-                                    animation: _infoRow3Controller,
-                                    builder: (context, child) {
-                                      return Transform.translate(
-                                        offset: Offset(_infoRow3Slide.value, 0),
-                                        child: Opacity(
-                                          opacity: _infoRow3Fade.value,
-                                          child: _buildAnimatedInfoRow(
-                                            Icons.auto_awesome,
-                                            loc.freezeInfo3,
-                                            _detailsGlowAnimation.value,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
+                                  for (int i = 0; i < 3; i++)
+                                    _buildIceRing(
+                                        i, _iceRotationAnimation.value),
+                                  for (int i = 0; i < 12; i++)
+                                    _buildFloatingIceParticle(
+                                        i, _icePulseAnimation.value),
                                 ],
                               ),
                             );
                           },
                         ),
-
-                        const SizedBox(height: 30),
-                      ],
+                      ),
                     ),
                   ),
-                ],
-              ),
-            ),
-            
-            // Snowflakes
-            if (showSnow)
-              IgnorePointer(
-                child: CustomPaint(
-                  painter: SnowPainter(snowflakes: snowflakes),
-                  size: Size.infinite,
                 ),
               ),
           ],
@@ -1043,126 +1161,346 @@ class _CardManagementScreenState extends State<CardManagementScreen>
     );
   }
 
-  Widget _buildAnimatedDetailRow(String label, String value, IconData icon, double glowValue) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.04),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              icon,
-              color: Colors.grey[400],
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Color(0xFF9CA3AF),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
+  Widget _buildCardBack(
+      AppLocalizations loc, bool isCardFrozen, double flipValue) {
+    final textOpacity =
+        flipValue >= 0.7 ? ((flipValue - 0.7) / 0.3).clamp(0.0, 1.0) : 0.0;
+    final isDarkMode = context.isDarkMode;
+
+    return Container(
+      height: 230,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: isCardFrozen
+              ? [const Color(0xFF800020), const Color(0xFF4A0020)]
+              : (isDarkMode
+                  ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
+                  : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)]),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+              color: (isCardFrozen
+                      ? const Color(0xFF800020)
+                      : context.primaryColor)
+                  .withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8)),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Stack(
+          children: [
+            Positioned(
+              top: -50,
+              left: -50,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: (isCardFrozen
+                          ? const Color(0xFF800020)
+                          : context.primaryColor)
+                      .withOpacity(0.15),
+                ),
+              ),
+            ),
+            Opacity(
+              opacity: textOpacity,
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                        width: double.infinity,
+                        height: 45,
+                        color: Colors.black.withOpacity(0.5),
+                        margin: const EdgeInsets.only(top: 10)),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("CVV",
+                                style: TextStyle(
+                                    color: context.textSecondary,
+                                    fontSize: 10)),
+                            const SizedBox(height: 5),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 8),
+                              decoration: BoxDecoration(
+                                  color:
+                                      (isDarkMode ? Colors.white : Colors.black)
+                                          .withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8)),
+                              child: Text("***",
+                                  style: TextStyle(
+                                      color: context.textPrimary,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 4)),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text("CARD TYPE",
+                                style: TextStyle(
+                                    color: context.textSecondary,
+                                    fontSize: 10)),
+                            const SizedBox(height: 5),
+                            Text("PREMIUM",
+                                style: TextStyle(
+                                    color: (isCardFrozen
+                                            ? const Color(0xFF800020)
+                                            : context.primaryColor)
+                                        .withOpacity(0.8),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 1)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("24/7 Support",
+                            style: TextStyle(
+                                color: context.textSecondary, fontSize: 10)),
+                        Text("www.shadowpay.com",
+                            style: TextStyle(
+                                color: context.textSecondary, fontSize: 10)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildAnimatedInfoRow(IconData icon, String text, double glowValue) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.04),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              icon,
-              color: Colors.grey[400],
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                height: 1.4,
+  Widget _buildIceRing(int index, double rotation) {
+    double size = 120 + (index * 15);
+    double opacity = 0.4 - (index * 0.1);
+    double speed = 1.0 - (index * 0.2);
+    return Transform.rotate(
+      angle: rotation * speed,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+                color: Colors.blue.withOpacity(opacity),
+                width: 2.0 - (index * 0.5))),
+        child: Center(
+            child: Container(
+                width: size - 20,
+                height: size - 20,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: Colors.cyan.withOpacity(opacity * 0.6),
+                        width: 1.0)))),
+      ),
+    );
+  }
+
+  Widget _buildFloatingIceParticle(int index, double pulseValue) {
+    double angle = (index * 30) * (math.pi / 180);
+    double radius = 70 + (pulseValue * 20);
+    double x = radius * math.cos(angle + pulseValue * 2);
+    double y = radius * math.sin(angle + pulseValue * 2);
+    return Positioned(
+      left: 100 + x,
+      top: 100 + y,
+      child: AnimatedBuilder(
+        animation: _iceCrystalController,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: 0.6 + (pulseValue * 0.4),
+            child: Transform.rotate(
+              angle: _iceRotationAnimation.value * (index + 1),
+              child: Container(
+                width: 8 + (index % 5).toDouble(),
+                height: 8 + (index % 5).toDouble(),
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue.withOpacity(0.6 + (pulseValue * 0.3)),
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.blue.withOpacity(0.4),
+                          blurRadius: 6,
+                          spreadRadius: 2)
+                    ]),
               ),
-              textAlign: TextAlign.end,
             ),
-          ),
-        ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSecurityFeature(
+      {required IconData icon,
+      required String title,
+      required String description,
+      required Color color}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12)),
+            child: Icon(icon, color: color, size: 20)),
+        const SizedBox(width: 12),
+        Expanded(
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title,
+              style: TextStyle(
+                  color: context.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600)),
+          const SizedBox(height: 4),
+          Text(description,
+              style: TextStyle(
+                  color: context.textSecondary, fontSize: 12, height: 1.4)),
+        ])),
+      ],
+    );
+  }
+
+  Widget _row(String title, String value, double animationValue) {
+    return Transform.translate(
+      offset: Offset(30 * (1 - animationValue), 0),
+      child: Opacity(
+        opacity: animationValue,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(title,
+                style: TextStyle(color: context.textSecondary, fontSize: 14)),
+            Text(value,
+                style: TextStyle(
+                    color: context.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14)),
+          ],
+        ),
       ),
     );
   }
 }
 
+class EgyptianVisaPattern extends CustomPainter {
+  final Color color;
+  EgyptianVisaPattern({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    final path = Path();
+    for (int i = 0; i < 3; i++) {
+      final startX = size.width * (0.2 + i * 0.3);
+      final startY = size.height * 0.8;
+      path.moveTo(startX, startY);
+      path.lineTo(startX + 12, startY - 20);
+      path.lineTo(startX - 12, startY - 20);
+      path.close();
+    }
+    canvas.drawPath(path, paint);
+    for (int i = 0; i < 3; i++) {
+      final linePaint = Paint()
+        ..color = color
+        ..strokeWidth = 1
+        ..style = PaintingStyle.stroke;
+      canvas.drawLine(Offset(size.width * 0.15, size.height * (0.4 + i * 0.15)),
+          Offset(size.width * 0.85, size.height * (0.4 + i * 0.15)), linePaint);
+    }
+    for (int i = 0; i < 5; i++) {
+      canvas.drawCircle(
+          Offset(size.width * (0.15 + i * 0.175), size.height * 0.6),
+          2.5,
+          paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class Snowflake {
-  double x;
-  double y;
-  double speed;
-  double size;
-  
-  Snowflake({
-    required this.x,
-    required this.y,
-    required this.speed,
-    required this.size,
-  });
+  final int id;
+  final double startX, startY, size, speed, opacity, sway;
+  Snowflake(
+      {required this.id,
+      required this.startX,
+      required this.startY,
+      required this.size,
+      required this.speed,
+      required this.opacity,
+      required this.sway});
 }
 
 class SnowPainter extends CustomPainter {
   final List<Snowflake> snowflakes;
-  
-  SnowPainter({required this.snowflakes});
-  
+  final double progress;
+  SnowPainter({required this.snowflakes, required this.progress});
+
   @override
   void paint(Canvas canvas, Size size) {
     for (var snowflake in snowflakes) {
+      double y = snowflake.startY + (progress * snowflake.speed);
+      if (y > 1.2) continue;
+      double swayOffset =
+          math.sin(progress * 2 * math.pi * 0.6 + snowflake.id) *
+              snowflake.sway;
+      double x = snowflake.startX + swayOffset;
+      if (x < 0) x += 1.0;
+      if (x > 1.0) x -= 1.0;
       final paint = Paint()
-        ..color = Colors.white.withOpacity(0.35)
-        ..style = PaintingStyle.fill;
-      
+        ..color =
+            Colors.white.withOpacity(snowflake.opacity * (1 - progress * 0.2))
+        ..style = PaintingStyle.fill
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1.5);
       canvas.drawCircle(
-        Offset(snowflake.x * size.width, snowflake.y * size.height),
-        snowflake.size,
-        paint,
-      );
+          Offset(x * size.width, y * size.height), snowflake.size, paint);
+      final highlightPaint = Paint()
+        ..color = Colors.white.withOpacity(snowflake.opacity * 0.6)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(x * size.width - 1, y * size.height - 1),
+          snowflake.size * 0.4, highlightPaint);
+      if (snowflake.size > 6) {
+        final glowPaint = Paint()
+          ..color = Colors.blue.withOpacity(0.15)
+          ..style = PaintingStyle.fill
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+        canvas.drawCircle(Offset(x * size.width, y * size.height),
+            snowflake.size * 1.3, glowPaint);
+      }
     }
   }
-  
+
   @override
-  bool shouldRepaint(SnowPainter oldDelegate) => true;
+  bool shouldRepaint(SnowPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
