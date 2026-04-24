@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/core/enums/category.dart' as my_enum;
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
 import 'package:shadow_pay_app/screens/main_screen.dart';
@@ -22,24 +24,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
 
   int _hour = 12;
-  String? _selectedCategory;
-
-  final List<String> categories = [
-    "entertainment",
-    "food_dining",
-    "gas_transport",
-    "grocery_net",
-    "grocery_pos",
-    "health_fitness",
-    "home",
-    "kids_pets",
-    "misc_net",
-    "misc_pos",
-    "personal_care",
-    "shopping_net",
-    "shopping_pos",
-    "travel",
-  ];
+  my_enum.Category? _selectedCategory;
 
 void _handleBack() {
   if (widget.onBack != null) {
@@ -213,26 +198,71 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("00", style: TextStyle(color: hintColor, fontSize: 12)),
-                        Text("06", style: TextStyle(color: hintColor, fontSize: 12)),
-                        Text("12", style: TextStyle(color: hintColor, fontSize: 12)),
-                        Text("18", style: TextStyle(color: hintColor, fontSize: 12)),
-                        Text("23", style: TextStyle(color: hintColor, fontSize: 12)),
-                      ],
-                    ),
-                    SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        showValueIndicator: ShowValueIndicator.always,
-                        valueIndicatorColor: primaryColor,
-                        valueIndicatorTextStyle: TextStyle(
-                          color: isDarkMode ? Colors.black : Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+const SizedBox(height: 8),
+                      
+                      // 1. Category Dropdown (From Zeinab's Branch)
+                      Container(
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        child: Scrollbar(
+                          thumbVisibility: true,
+                          thickness: 6,
+                          radius: const Radius.circular(10),
+                          child: DropdownButtonFormField<my_enum.Category>(
+                            isExpanded: true,
+                            dropdownColor: const Color(0xFF1F2A44),
+                            value: _selectedCategory,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: _inputDecoration(localizations.category_hint).copyWith(
+                              prefixIcon: const Icon(
+                                Icons.category,
+                                color: Color(0xFF00D8A2),
+                              ),
+                            ),
+                            items: my_enum.Category.values.map((cat) {
+                              return DropdownMenuItem(
+                                value: cat,
+                                child: Text(
+                                  cat.displayName,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedCategory = value;
+                              });
+                            },
+                            menuMaxHeight: 200,
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: Color(0xFF00D8A2),
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16), // مسافة فاصلة بين العنصرين
+                      
+                      // 2. Transaction Hour Slider (From main Branch)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("00", style: TextStyle(color: hintColor, fontSize: 12)),
+                          Text("06", style: TextStyle(color: hintColor, fontSize: 12)),
+                          Text("12", style: TextStyle(color: hintColor, fontSize: 12)),
+                          Text("18", style: TextStyle(color: hintColor, fontSize: 12)),
+                          Text("23", style: TextStyle(color: hintColor, fontSize: 12)),
+                        ],
+                      ),
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          showValueIndicator: ShowValueIndicator.always,
+                          valueIndicatorColor: primaryColor,
+                          valueIndicatorTextStyle: TextStyle(
+                            color: isDarkMode ? Colors.black : Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          // ... (هنا باقي كود السلايدر بتاعك زي ما هو تحت)
                         ),
                         overlayColor: primaryColor.withOpacity(0.2),
                         thumbColor: primaryColor,
@@ -423,4 +453,6 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
+  
 }
+
