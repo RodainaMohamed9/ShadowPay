@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   static const String baseUrl = 'https://jackeline-cibarious-supergallantly.ngrok-free.dev';
@@ -152,6 +153,7 @@ class ApiService {
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
+          await saveToken(data['token']); // ✅ خزني الـ token هنا
           return {
             'success': true,
             'token': data['token'],
@@ -382,6 +384,23 @@ class ApiService {
       }
     }
 
+  // ===== TOKEN MANAGEMENT =====
+static const String _tokenKey = 'auth_token';
+
+static Future<void> saveToken(String token) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString(_tokenKey, token);
+}
+
+static Future<String?> getToken() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString(_tokenKey);
+}
+
+static Future<void> clearToken() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove(_tokenKey);
+}
 }
 class VerifyOtpResponse {
   final bool success;

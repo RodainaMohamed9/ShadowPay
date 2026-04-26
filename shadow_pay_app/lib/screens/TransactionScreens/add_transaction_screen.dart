@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/core/enums/category.dart' as my_enum;
 import 'package:shadow_pay_app/theme/colors.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -23,24 +25,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
 
   int _hour = 12;
-  String? _selectedCategory;
-
-  final List<String> categories = [
-    "entertainment",
-    "food_dining",
-    "gas_transport",
-    "grocery_net",
-    "grocery_pos",
-    "health_fitness",
-    "home",
-    "kids_pets",
-    "misc_net",
-    "misc_pos",
-    "personal_care",
-    "shopping_net",
-    "shopping_pos",
-    "travel",
-  ];
+  my_enum.Category? _selectedCategory;
 
   void _handleBack() {
     widget.onBack?.call();
@@ -226,7 +211,56 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Hour Slider
+                    // Category Dropdown (from first version - using enum)
+                    Text(
+                      localizations.transaction_category,
+                      style: TextStyle(color: textSecondaryColor, fontSize: 14, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        thickness: 6,
+                        radius: const Radius.circular(10),
+                        child: DropdownButtonFormField<my_enum.Category>(
+                          isExpanded: true,
+                          dropdownColor: inputColor,
+                          value: _selectedCategory,
+                          style: TextStyle(color: textColor, fontSize: 14),
+                          decoration: _inputDecoration(
+                            localizations.category_hint,
+                            hintColor,
+                            inputColor,
+                            primaryColor,
+                          ).copyWith(
+                            prefixIcon: Icon(Icons.category, color: primaryColor),
+                          ),
+                          items: my_enum.Category.values.map((cat) {
+                            return DropdownMenuItem(
+                              value: cat,
+                              child: Text(
+                                cat.displayName,
+                                style: TextStyle(fontSize: 14, color: textColor),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedCategory = value;
+                            });
+                          },
+                          menuMaxHeight: 200,
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Hour Slider (from first version - cleaner structure)
                     Text(
                       localizations.transaction_hour,
                       style: TextStyle(color: textSecondaryColor, fontSize: 14, fontWeight: FontWeight.w500),
@@ -265,41 +299,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         divisions: 23,
                         label: _hour.toString(),
                         onChanged: (value) => setState(() => _hour = value.toInt()),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // Category Dropdown
-                    Text(
-                      localizations.transaction_category,
-                      style: TextStyle(color: textSecondaryColor, fontSize: 14, fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      constraints: const BoxConstraints(maxHeight: 200),
-                      child: DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        dropdownColor: inputColor,
-                        value: _selectedCategory,
-                        style: TextStyle(color: textColor, fontSize: 14),
-                        decoration: _inputDecoration(
-                          localizations.category_hint,
-                          hintColor,
-                          inputColor,
-                          primaryColor,
-                        ).copyWith(
-                          prefixIcon: Icon(Icons.category, color: primaryColor),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        ),
-                        items: categories.map((cat) {
-                          return DropdownMenuItem(
-                            value: cat,
-                            child: Text(cat, style: TextStyle(fontSize: 14, color: textColor)),
-                          );
-                        }).toList(),
-                        onChanged: (value) => setState(() => _selectedCategory = value),
-                        menuMaxHeight: 250,
-                        icon: Icon(Icons.arrow_drop_down, color: primaryColor, size: 28),
                       ),
                     ),
                     const SizedBox(height: 24),
