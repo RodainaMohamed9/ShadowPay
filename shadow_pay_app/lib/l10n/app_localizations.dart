@@ -788,7 +788,7 @@ abstract class AppLocalizations {
   /// No description provided for @safe.
   ///
   /// In en, this message translates to:
-  /// **'Safe'**
+  /// **'Safe Transaction'**
   String get safe;
 
   /// No description provided for @risk.
@@ -1414,6 +1414,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add Transaction'**
   String get addTransaction;
+
+  /// No description provided for @risk_analysis_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk Analysis'**
+  String get risk_analysis_title;
+
+  /// No description provided for @transaction_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Details'**
+  String get transaction_details;
+
+  /// No description provided for @detection_mode_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Detection Mode'**
+  String get detection_mode_label;
+
+  /// No description provided for @detection_mode_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Your transaction was analyzed using security standards'**
+  String get detection_mode_description;
+
+  /// No description provided for @amount_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amount_label;
+
+  /// No description provided for @hour_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Hour'**
+  String get hour_label;
+
+  /// No description provided for @category_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category_label;
+
+  /// No description provided for @zip_code_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Zip Code'**
+  String get zip_code_label;
+
+  /// No description provided for @back_to_home.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Home'**
+  String get back_to_home;
+
+  /// No description provided for @high_risk.
+  ///
+  /// In en, this message translates to:
+  /// **'High Risk'**
+  String get high_risk;
+
+  /// No description provided for @medium_risk.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium Risk'**
+  String get medium_risk;
+
+  /// No description provided for @low_risk.
+  ///
+  /// In en, this message translates to:
+  /// **'Low Risk'**
+  String get low_risk;
+
+  /// No description provided for @fraudulent.
+  ///
+  /// In en, this message translates to:
+  /// **'Fraudulent Transaction'**
+  String get fraudulent;
+
+  /// No description provided for @passwordLowercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain at least one lowercase letter'**
+  String get passwordLowercase;
+
+  /// No description provided for @passwordUppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain at least one uppercase letter'**
+  String get passwordUppercase;
+
+  /// No description provided for @passwordNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain at least one number'**
+  String get passwordNumber;
+
+  /// No description provided for @passwordSpecialChar.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain at least one special character (@\$!%*?&)'**
+  String get passwordSpecialChar;
+
+  /// No description provided for @passwordComplexity.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters and contain uppercase, lowercase, number and special character'**
+  String get passwordComplexity;
+
+  /// No description provided for @this_month.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month'**
+  String get this_month;
+
+  /// No description provided for @saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
+
+  /// No description provided for @settings_privacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings & Privacy'**
+  String get settings_privacy;
+
+  /// No description provided for @logout_dialog_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Out'**
+  String get logout_dialog_title;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

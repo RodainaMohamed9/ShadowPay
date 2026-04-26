@@ -354,7 +354,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recentActivity => 'Recent Activity';
 
   @override
-  String get safe => 'Safe';
+  String get safe => 'Safe Transaction';
 
   @override
   String get risk => 'Risk';
@@ -667,4 +667,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addTransaction => 'Add Transaction';
+
+  @override
+  String get risk_analysis_title => 'Risk Analysis';
+
+  @override
+  String get transaction_details => 'Transaction Details';
+
+  @override
+  String get detection_mode_label => 'Detection Mode';
+
+  @override
+  String get detection_mode_description => 'Your transaction was analyzed using security standards';
+
+  @override
+  String get amount_label => 'Amount';
+
+  @override
+  String get hour_label => 'Hour';
+
+  @override
+  String get category_label => 'Category';
+
+  @override
+  String get zip_code_label => 'Zip Code';
+
+  @override
+  String get back_to_home => 'Back to Home';
+
+  @override
+  String get high_risk => 'High Risk';
+
+  @override
+  String get medium_risk => 'Medium Risk';
+
+  @override
+  String get low_risk => 'Low Risk';
+
+  @override
+  String get fraudulent => 'Fraudulent Transaction';
+
+  @override
+  String get passwordLowercase => 'Password must contain at least one lowercase letter';
+
+  @override
+  String get passwordUppercase => 'Password must contain at least one uppercase letter';
+
+  @override
+  String get passwordNumber => 'Password must contain at least one number';
+
+  @override
+  String get passwordSpecialChar => 'Password must contain at least one special character (@\$!%*?&)';
+
+  @override
+  String get passwordComplexity => 'Password must be at least 8 characters and contain uppercase, lowercase, number and special character';
+
+  @override
+  String get this_month => 'This Month';
+
+  @override
+  String get saved => 'Saved';
+
+  @override
+  String get settings_privacy => 'Settings & Privacy';
+
+  @override
+  String get logout_dialog_title => 'Log Out';
 }

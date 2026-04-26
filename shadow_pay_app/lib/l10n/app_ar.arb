@@ -216,5 +216,31 @@
   "transactions": "المعاملات",
   "noTransactionsYet": "لا توجد معاملات بعد!!",
   "startAddingTransactions": "ابدأ بإضافة معاملاتك الأولى",
-  "addTransaction": "إضافة معاملة"
+  "addTransaction": "إضافة معاملة",
+
+  "risk_analysis_title": "تحليل المخاطر",
+  "transaction_details": "تفاصيل المعاملة",
+  "detection_mode_label": "طريقة التحليل",
+  "detection_mode_description": "تم تحليل معاملتك بناءً على معايير الأمان العامة",
+  "amount_label": "المبلغ",
+  "hour_label": "الساعة",
+  "category_label": "الفئة",
+  "zip_code_label": "الرمز البريدي",
+  "back_to_home": "العودة للرئيسية",
+  "high_risk": "خطر مرتفع",
+  "medium_risk": "خطر متوسط",
+  "low_risk": "خطر منخفض",
+  "fraudulent": "معاملة احتيالية",
+  "safe": "معاملة آمنة",
+    "passwordLowercase": "كلمة المرور يجب أن تحتوي على حرف صغير على الأقل",
+  "passwordUppercase": "كلمة المرور يجب أن تحتوي على حرف كبير على الأقل",
+  "passwordNumber": "كلمة المرور يجب أن تحتوي على رقم على الأقل",
+  "passwordSpecialChar": "كلمة المرور يجب أن تحتوي على رمز خاص على الأقل (@$!%*?&)",
+  "passwordComplexity": "كلمة المرور يجب أن تكون 8 أحرف على الأقل وتحتوي على حرف كبير وصغير ورقم ورمز خاص",
+    "transactions": "المعاملات",
+  "this_month": "هذا الشهر",
+  "saved": "المدخرات",
+  "settings_privacy": "الإعدادات والخصوصية",
+  "logout_dialog_title": "تسجيل الخروج"
+
 }

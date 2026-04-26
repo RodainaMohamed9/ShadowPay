@@ -92,13 +92,16 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
             ),
           ),
           iconSize: 25,
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const MainScreen()),
-              (route) => false,
-            );
-          },
+  onPressed: () {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
+    }
+  },
           icon: Transform.scale(
             scaleX: isRTL ? -1 : 1,
             child: Icon(Icons.arrow_back, color: context.textSecondary),
@@ -234,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                           child: Row(
                             children: [
                               _StatCard(
-                                label: "Transactions",
+                                label: localizations.transactions,
                                 value: "128",
                                 icon: Icons.receipt_long_outlined,
                                 isDarkMode: isDarkMode,
@@ -242,7 +245,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                               ),
                               const SizedBox(width: 12),
                               _StatCard(
-                                label: "This Month",
+                                label: localizations.this_month,
                                 value: "\$3.2k",
                                 icon: Icons.trending_up_rounded,
                                 isDarkMode: isDarkMode,
@@ -250,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                               ),
                               const SizedBox(width: 12),
                               _StatCard(
-                                label: "Saved",
+                                label: localizations.saved,
                                 value: "\$840",
                                 icon: Icons.savings_outlined,
                                 isDarkMode: isDarkMode,
@@ -309,7 +312,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Settings & Privacy",
+                                localizations.settings_privacy,
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -413,6 +416,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
     
     return GestureDetector(
       onTap: _hideLogoutDialog,
+      
       child: Container(
         color: Colors.black.withOpacity(0.7),
         child: Center(
@@ -425,6 +429,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
               border: Border.all(
                 color: context.primaryColor.withOpacity(0.25),
                 width: 1,
+                
               ),
               boxShadow: [
                 BoxShadow(
@@ -466,7 +471,7 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  loc.logoutDialogTitle,
+                  loc.logout_dialog_title,
                   style: TextStyle(
                     color: context.textPrimary,
                     fontSize: 24,
@@ -509,12 +514,12 @@ class _ProfileScreenState extends State<ProfileScreen> with TickerProviderStateM
                       child: GestureDetector(
                         onTap: () {
                           _hideLogoutDialog();
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (context) => const LoginScreen()),
-                            (route) => false,
-                          );
-                        },
+                         Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginScreen()),
+                          (route) => false,
+                        );
+                      },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(

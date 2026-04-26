@@ -120,11 +120,18 @@ class _ReportScreenState extends State<ReportScreen> {
               ),
             ),
           ),
-          iconSize: 25,
-          onPressed: () => Navigator.pop(context),
-          icon: Icon(Icons.arrow_back, color: context.textSecondary),
-        ),
+iconSize: 25,
+onPressed: () {
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (context) => const MainScreen()),
+    (route) => false,
+  );
+},
+icon: Icon(Icons.arrow_back, color: context.textSecondary),
       ),
+    ),
+
       body: Container(
         width: double.infinity,
         height: double.infinity,
