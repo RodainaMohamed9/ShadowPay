@@ -13,7 +13,7 @@ using shadowpay_api.Services;
 
 namespace shadowpay_api.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TransactionController : ControllerBase
@@ -32,7 +32,7 @@ namespace shadowpay_api.Controllers
 
             if (string.IsNullOrEmpty(currentUserId))
                 return Unauthorized();
-
+            
             IEnumerable<Transaction> transactions = await _db.Transactions.Where(t => t.UserId == currentUserId).ToListAsync();
             return Ok(transactions);
         }
@@ -53,12 +53,10 @@ namespace shadowpay_api.Controllers
                 return BadRequest("Category is Invalid");
             }
 
-            //var currentUserId = _currentUser.UserId;
+            var currentUserId = _currentUser.UserId;
 
-            //if (string.IsNullOrEmpty(currentUserId))
-            //    return Unauthorized();
-
-            var currentUserId = "1c1c57c6-c375-4cb8-bd9a-1d0f84055c6d"; 
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized();
 
             string finalRiskLevel = "Unknown";
             double finalRiskScore = 0;
@@ -104,7 +102,6 @@ namespace shadowpay_api.Controllers
                 MerchantCategory = transaction.MerchantCategory,
                 ZipCode = transaction.ZipCode,
                 TransactionHour = transaction.TransactionHour,
-                //UserId = _currentUser.UserId,
                 UserId = currentUserId,
 
                 RiskLevel = finalRiskLevel,

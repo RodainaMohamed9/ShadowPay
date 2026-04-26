@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -17,17 +17,15 @@ namespace shadowpay_api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddScoped<EmailService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             builder.Services.AddMemoryCache();
             builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddControllers().AddJsonOptions(x => 
+            builder.Services.AddControllers().AddJsonOptions(x =>
                 x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -35,6 +33,14 @@ namespace shadowpay_api
                 builder.Configuration.GetConnectionString("MyConnection")
                 ));
 
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+            })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+            var key = Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]);
 
             builder.Services.AddAuthentication(options =>
             {
@@ -43,27 +49,20 @@ namespace shadowpay_api
             })
             .AddJwtBearer(options =>
             {
-                var key = Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]);
-
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
                     ValidIssuer = builder.Configuration["JWT:Issuer"],
+                    ValidateAudience = true,
                     ValidAudience = builder.Configuration["JWT:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
                 };
             });
-
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-            {
-                options.SignIn.RequireConfirmedAccount = false;
-            })
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
 
             builder.Services.AddCors(options =>
             {
@@ -74,8 +73,6 @@ namespace shadowpay_api
                         .AllowAnyHeader());
             });
 
-
-            //jwt -> swagger
             builder.Services.AddSwaggerGen(options =>
             {
                 options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
@@ -89,25 +86,23 @@ namespace shadowpay_api
                 });
 
                 options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
+                    {
+                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                        {
+                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                            {
+                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
             });
-
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -115,29 +110,10 @@ namespace shadowpay_api
             }
 
             app.UseHttpsRedirection();
-
-            app.UseRouting();
-
             app.UseCors("AllowAll");
-
-            app.Use(async (context, next) =>
-            {
-                if (context.Request.Method == "OPTIONS")
-                {
-                    context.Response.StatusCode = 200;
-                    return;
-                }
-                await next();
-            });
-
-            app.UseCors(builder => builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
 
             app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 
