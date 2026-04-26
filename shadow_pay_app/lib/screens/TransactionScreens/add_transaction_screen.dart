@@ -198,7 +198,8 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
-const SizedBox(height: 8),
+                    ),
+                    const SizedBox(height: 8),
                       
                       // 1. Category Dropdown (From Zeinab's Branch)
                       Container(
@@ -212,7 +213,12 @@ const SizedBox(height: 8),
                             dropdownColor: const Color(0xFF1F2A44),
                             value: _selectedCategory,
                             style: const TextStyle(color: Colors.white),
-                            decoration: _inputDecoration(localizations.category_hint).copyWith(
+                            decoration: _inputDecoration(
+                                localizations.category_hint,
+                                hintColor,
+                                inputColor,
+                                primaryColor,
+                              ).copyWith(
                               prefixIcon: const Icon(
                                 Icons.category,
                                 color: Color(0xFF00D8A2),
@@ -282,51 +288,6 @@ const SizedBox(height: 8),
                             _hour = value.toInt();
                           });
                         },
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    Text(
-                      localizations.transaction_category,
-                      style: TextStyle(
-                        color: textSecondaryColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      constraints: const BoxConstraints(maxHeight: 200),
-                      child: DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        dropdownColor: inputColor,
-                        value: _selectedCategory,
-                        style: TextStyle(color: textColor, fontSize: 14),
-                        decoration: _inputDecoration(
-                          localizations.category_hint,
-                          hintColor,
-                          inputColor,
-                          primaryColor,
-                        ).copyWith(
-                          prefixIcon: Icon(Icons.category, color: primaryColor),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        ),
-                        items: categories.map((cat) {
-                          return DropdownMenuItem(
-                            value: cat,
-                            child: Text(
-                              cat,
-                              style: TextStyle(fontSize: 14, color: textColor),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedCategory = value;
-                          });
-                        },
-                        menuMaxHeight: 250,
-                        icon: Icon(Icons.arrow_drop_down, color: primaryColor, size: 28),
                       ),
                     ),
                     const SizedBox(height: 24),
