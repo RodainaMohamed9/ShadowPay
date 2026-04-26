@@ -82,7 +82,7 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   void _handleFreeze() {
-    widget.onNavigate(1); // CardManagementScreen
+    widget.onNavigate(1);
   }
 
   @override
@@ -123,7 +123,7 @@ class _HomeContentState extends State<HomeContent> {
                       QuickActions(
                         onAddTap: () => widget.onNavigate(4),     // AddTransactionScreen
                         onReportTap: () => widget.onNavigate(2),  // ReportScreen
-                        onDetailsTap: () => widget.onNavigate(5), // CardDetailsScreen
+                        onDetailsTap: () => widget.onNavigate(1), // CardDetailsScreen
                         onFreezeTap: _handleFreeze,               // CardManagementScreen
                         onManageTap: _handleFreeze,
                         isCardFrozen: isCardFrozen,

@@ -1,18 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/core/enums/category.dart' as my_enum;
 import 'package:shadow_pay_app/theme/colors.dart';
-import 'package:shadow_pay_app/providers/theme_provider.dart';
-import 'package:shadow_pay_app/screens/main_screen.dart';
-
 
 class AddTransactionScreen extends StatefulWidget {
   final VoidCallback? onBack;
+  final Function(Map<String, dynamic>)? onAnalyze;
 
-  const AddTransactionScreen({super.key, this.onBack});
+  const AddTransactionScreen({
+    super.key,
+    this.onBack,
+    this.onAnalyze,
+  });
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
@@ -26,21 +27,50 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   int _hour = 12;
   my_enum.Category? _selectedCategory;
 
-void _handleBack() {
-  if (widget.onBack != null) {
-    widget.onBack!();
-  } else {
-    Navigator.pop(context);  
+  void _handleBack() {
+    widget.onBack?.call();
+    Navigator.pop(context);
   }
-}
+
+  void _analyzeAndNavigate() {
+    if (_formKey.currentState!.validate()) {
+      if (_selectedCategory == null) {
+        final localizations = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(localizations.error_category),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+        return;
+      }
+
+      final Map<String, dynamic> transactionData = {
+        'amount': double.parse(_amountController.text),
+        'hour': _hour,
+        'category': _selectedCategory!,
+        'zipCode': _zipController.text.isEmpty ? 0 : int.parse(_zipController.text),
+      };
+
+      if (widget.onAnalyze != null) {
+        widget.onAnalyze!(transactionData);
+      } else {
+        Navigator.pop(context);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final isRTL = Localizations.localeOf(context).languageCode == 'ar';
-    
+
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
+
     final primaryColor = isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary;
     final backgroundColor = isDarkMode ? AppColors.darkBackground : AppColors.lightBackground;
     final surfaceColor = isDarkMode ? AppColors.darkSurface : AppColors.lightSurface;
@@ -48,7 +78,7 @@ void _handleBack() {
     final textColor = isDarkMode ? Colors.white : Colors.black87;
     final textSecondaryColor = isDarkMode ? Colors.white70 : Colors.grey[700];
     final hintColor = isDarkMode ? Colors.white38 : Colors.grey.shade500;
-    
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -61,8 +91,8 @@ void _handleBack() {
             ),
             side: MaterialStateProperty.all(
               BorderSide(
-color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,   
-            width: 1,
+                color: textSecondaryColor?.withOpacity(0.5) ?? Colors.transparent,
+                width: 1,
               ),
             ),
           ),
@@ -116,6 +146,7 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
                     ),
                     const SizedBox(height: 32),
 
+                    // Amount Field
                     Text(
                       localizations.transaction_amount,
                       style: TextStyle(
@@ -141,11 +172,7 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
                         suffixIcon: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              width: 1,
-                              height: 30,
-                              color: hintColor,
-                            ),
+                            Container(width: 1, height: 30, color: hintColor),
                             IconButton(
                               icon: Icon(Icons.remove, color: textSecondaryColor, size: 20),
                               onPressed: () {
@@ -154,7 +181,7 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
                                   double newValue = currentValue - 1;
                                   if (newValue > 0) {
                                     _amountController.text = newValue.toStringAsFixed(2);
-                                  } else if (newValue == 0) {
+                                  } else {
                                     _amountController.text = "0.01";
                                   }
                                 } else {
@@ -166,8 +193,7 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
                               icon: Icon(Icons.add, color: textSecondaryColor, size: 20),
                               onPressed: () {
                                 double currentValue = double.tryParse(_amountController.text) ?? 0;
-                                double newValue = currentValue + 1;
-                                _amountController.text = newValue.toStringAsFixed(2);
+                                _amountController.text = (currentValue + 1).toStringAsFixed(2);
                               },
                             ),
                           ],
@@ -177,98 +203,87 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
                         FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return localizations.error_amount_empty;
-                        }
-                        if (double.tryParse(value) == null) {
-                          return localizations.error_amount_invalid;
-                        }
-                        if (double.parse(value) <= 0) {
-                          return localizations.error_amount_zero;
-                        }
+                        if (value == null || value.isEmpty) return localizations.error_amount_empty;
+                        if (double.tryParse(value) == null) return localizations.error_amount_invalid;
+                        if (double.parse(value) <= 0) return localizations.error_amount_zero;
                         return null;
                       },
                     ),
                     const SizedBox(height: 24),
 
+                    // Category Dropdown (from first version - using enum)
                     Text(
-                      localizations.transaction_hour,
-                      style: TextStyle(
-                        color: textSecondaryColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      localizations.transaction_category,
+                      style: TextStyle(color: textSecondaryColor, fontSize: 14, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 8),
-                      
-                      // 1. Category Dropdown (From Zeinab's Branch)
-                      Container(
-                        constraints: const BoxConstraints(maxHeight: 200),
-                        child: Scrollbar(
-                          thumbVisibility: true,
-                          thickness: 6,
-                          radius: const Radius.circular(10),
-                          child: DropdownButtonFormField<my_enum.Category>(
-                            isExpanded: true,
-                            dropdownColor: const Color(0xFF1F2A44),
-                            value: _selectedCategory,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: _inputDecoration(
-                                localizations.category_hint,
-                                hintColor,
-                                inputColor,
-                                primaryColor,
-                              ).copyWith(
-                              prefixIcon: const Icon(
-                                Icons.category,
-                                color: Color(0xFF00D8A2),
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 200),
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        thickness: 6,
+                        radius: const Radius.circular(10),
+                        child: DropdownButtonFormField<my_enum.Category>(
+                          isExpanded: true,
+                          dropdownColor: inputColor,
+                          value: _selectedCategory,
+                          style: TextStyle(color: textColor, fontSize: 14),
+                          decoration: _inputDecoration(
+                            localizations.category_hint,
+                            hintColor,
+                            inputColor,
+                            primaryColor,
+                          ).copyWith(
+                            prefixIcon: Icon(Icons.category, color: primaryColor),
+                          ),
+                          items: my_enum.Category.values.map((cat) {
+                            return DropdownMenuItem(
+                              value: cat,
+                              child: Text(
+                                cat.displayName,
+                                style: TextStyle(fontSize: 14, color: textColor),
                               ),
-                            ),
-                            items: my_enum.Category.values.map((cat) {
-                              return DropdownMenuItem(
-                                value: cat,
-                                child: Text(
-                                  cat.displayName,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedCategory = value;
-                              });
-                            },
-                            menuMaxHeight: 200,
-                            icon: const Icon(
-                              Icons.arrow_drop_down,
-                              color: Color(0xFF00D8A2),
-                            ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedCategory = value;
+                            });
+                          },
+                          menuMaxHeight: 200,
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: primaryColor,
                           ),
                         ),
                       ),
-                      
-                      const SizedBox(height: 16), // مسافة فاصلة بين العنصرين
-                      
-                      // 2. Transaction Hour Slider (From main Branch)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("00", style: TextStyle(color: hintColor, fontSize: 12)),
-                          Text("06", style: TextStyle(color: hintColor, fontSize: 12)),
-                          Text("12", style: TextStyle(color: hintColor, fontSize: 12)),
-                          Text("18", style: TextStyle(color: hintColor, fontSize: 12)),
-                          Text("23", style: TextStyle(color: hintColor, fontSize: 12)),
-                        ],
-                      ),
-                      SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          showValueIndicator: ShowValueIndicator.always,
-                          valueIndicatorColor: primaryColor,
-                          valueIndicatorTextStyle: TextStyle(
-                            color: isDarkMode ? Colors.black : Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          // ... (هنا باقي كود السلايدر بتاعك زي ما هو تحت)
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Hour Slider (from first version - cleaner structure)
+                    Text(
+                      localizations.transaction_hour,
+                      style: TextStyle(color: textSecondaryColor, fontSize: 14, fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("00", style: TextStyle(color: hintColor, fontSize: 12)),
+                        Text("06", style: TextStyle(color: hintColor, fontSize: 12)),
+                        Text("12", style: TextStyle(color: hintColor, fontSize: 12)),
+                        Text("18", style: TextStyle(color: hintColor, fontSize: 12)),
+                        Text("23", style: TextStyle(color: hintColor, fontSize: 12)),
+                      ],
+                    ),
+                    SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        showValueIndicator: ShowValueIndicator.always,
+                        valueIndicatorColor: primaryColor,
+                        valueIndicatorTextStyle: TextStyle(
+                          color: isDarkMode ? Colors.black : Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
                         overlayColor: primaryColor.withOpacity(0.2),
                         thumbColor: primaryColor,
@@ -283,22 +298,15 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
                         max: 23,
                         divisions: 23,
                         label: _hour.toString(),
-                        onChanged: (value) {
-                          setState(() {
-                            _hour = value.toInt();
-                          });
-                        },
+                        onChanged: (value) => setState(() => _hour = value.toInt()),
                       ),
                     ),
                     const SizedBox(height: 24),
 
+                    // Zip Code Field
                     Text(
                       localizations.zip_code,
-                      style: TextStyle(
-                        color: textSecondaryColor,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: TextStyle(color: textSecondaryColor, fontSize: 14, fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
@@ -316,55 +324,27 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
                         prefixIcon: Icon(Icons.location_on, color: primaryColor),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return null;
-                        }
-                        if (!RegExp(r'^\d+$').hasMatch(value)) {
-                          return localizations.error_zip_invalid;
-                        }
+                        if (value == null || value.isEmpty) return null;
+                        if (!RegExp(r'^\d+$').hasMatch(value)) return localizations.error_zip_invalid;
                         return null;
                       },
                     ),
                     const SizedBox(height: 32),
 
+                    // Analyze Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                           padding: const EdgeInsets.symmetric(vertical: 18),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           elevation: 8,
                           shadowColor: primaryColor.withOpacity(0.5),
                         ),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            if (_selectedCategory == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(localizations.error_category),
-                                  backgroundColor: Colors.red,
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            
-                            print("Amount: ${_amountController.text}");
-                            print("Hour: $_hour");
-                            print("Category: $_selectedCategory");
-                            print("Zip: ${_zipController.text}");
-                          }
-                        },
+                        onPressed: _analyzeAndNavigate,
                         child: Text(
                           localizations.analyze_transaction,
                           style: const TextStyle(
@@ -394,10 +374,7 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
       hintStyle: TextStyle(color: hintColor, fontSize: 14),
       filled: true,
       fillColor: fillColor,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: primaryColor, width: 1.5),
@@ -414,6 +391,4 @@ color: textSecondaryColor?.withValues(alpha: 0.5) ?? Colors.transparent,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
-  
 }
-

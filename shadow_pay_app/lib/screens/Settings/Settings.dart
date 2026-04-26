@@ -685,7 +685,6 @@ class _SettingsScreenState extends State<SettingsPage>
           scale: scale,
           child: Row(
             children: [
-              // ✅ الـ leading الجديد (circle و transparent)
               IconButton(
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all(
@@ -699,13 +698,16 @@ class _SettingsScreenState extends State<SettingsPage>
                   ),
                 ),
                 iconSize: 25,
-                onPressed: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MainScreen()),
-                    (route) => false,
-                  );
-                },
+  onPressed: () {
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
+    }
+  },
                 icon: Icon(Icons.arrow_back, color: context.textSecondary),
               ),
               const SizedBox(width: 16),

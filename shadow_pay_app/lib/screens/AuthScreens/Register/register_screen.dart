@@ -161,14 +161,37 @@ class _RegisterScreenState extends State<RegisterScreen>
   String? _validatePassword(String? value) {
     if (currentStep != 1) return null;
     final loc = AppLocalizations.of(context)!;
+
     if (value == null || value.isEmpty) {
       fieldErrors['password'] = true;
       return loc.requiredField;
     }
+
     if (value.length < 8) {
       fieldErrors['password'] = true;
       return loc.passwordShort;
     }
+
+    if (!RegExp(r'(?=.*[a-z])').hasMatch(value)) {
+      fieldErrors['password'] = true;
+      return loc.passwordLowercase;
+    }
+
+    if (!RegExp(r'(?=.*[A-Z])').hasMatch(value)) {
+      fieldErrors['password'] = true;
+      return loc.passwordUppercase; 
+    }
+
+    if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
+      fieldErrors['password'] = true;
+      return loc.passwordNumber; 
+    }
+
+    if (!RegExp(r'(?=.*[@$!%*?&])').hasMatch(value)) {
+      fieldErrors['password'] = true;
+      return loc.passwordSpecialChar;
+    }
+
     fieldErrors['password'] = false;
     return null;
   }
@@ -399,7 +422,9 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   Color _getLabelColor(String fieldName) {
-    return fieldErrors[fieldName] == true ? context.errorColor : context.textSecondary;
+    return fieldErrors[fieldName] == true
+        ? context.errorColor
+        : context.textSecondary;
   }
 
   @override
@@ -717,7 +742,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                                       keyboardType: TextInputType.number,
                                       maxLength: 19,
                                       isDarkMode: isDarkMode,
-                                      hasError: fieldErrors['cardNumber'] == true,
+                                      hasError:
+                                          fieldErrors['cardNumber'] == true,
                                     ),
                                     const SizedBox(height: 15),
                                     _buildField(
@@ -728,7 +754,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                                       onChanged: (value) => setState(() {}),
                                       keyboardType: TextInputType.number,
                                       maxLength: 5,
-                                      inputFormatters: [_ExpiryDateFormatterRegister()],
+                                      inputFormatters: [
+                                        _ExpiryDateFormatterRegister()
+                                      ],
                                       isDarkMode: isDarkMode,
                                       hasError: fieldErrors['expiry'] == true,
                                     ),
@@ -810,7 +838,8 @@ class _RegisterScreenState extends State<RegisterScreen>
                                         child: ElevatedButton(
                                           onPressed: loading ? null : nextStep,
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: context.primaryColor,
+                                            backgroundColor:
+                                                context.primaryColor,
                                             foregroundColor: Colors.white,
                                             minimumSize:
                                                 const Size(double.infinity, 55),
@@ -862,8 +891,9 @@ class _RegisterScreenState extends State<RegisterScreen>
                                   end: Alignment.bottomRight,
                                 ),
                                 border: Border.all(
-                                  color: (isDarkMode ? Colors.white : Colors.black)
-                                      .withOpacity(0.2),
+                                  color:
+                                      (isDarkMode ? Colors.white : Colors.black)
+                                          .withOpacity(0.2),
                                   width: 1,
                                 ),
                               ),
@@ -945,15 +975,11 @@ class _RegisterScreenState extends State<RegisterScreen>
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(
-            color: hasError 
-                ? context.errorColor 
-                : context.hintColor,
+            color: hasError ? context.errorColor : context.hintColor,
           ),
           prefixIcon: Icon(
-            icon, 
-            color: hasError 
-                ? context.errorColor 
-                : context.textSecondary,
+            icon,
+            color: hasError ? context.errorColor : context.textSecondary,
           ),
           suffixIcon: suffix,
           filled: true,
@@ -968,9 +994,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: isDarkMode 
-                  ? Colors.transparent 
-                  : Colors.grey.shade300,
+              color: isDarkMode ? Colors.transparent : Colors.grey.shade300,
             ),
           ),
           focusedBorder: OutlineInputBorder(
@@ -1062,7 +1086,8 @@ class RegisterLogoWidget extends StatelessWidget {
 class StepProgressRegister extends StatelessWidget {
   final int currentStep;
   final bool isDarkMode;
-  const StepProgressRegister({super.key, required this.currentStep, required this.isDarkMode});
+  const StepProgressRegister(
+      {super.key, required this.currentStep, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -1098,7 +1123,8 @@ class StepProgressRegister extends StatelessWidget {
 class GlassCardRegister extends StatelessWidget {
   final Widget child;
   final bool isDarkMode;
-  const GlassCardRegister({super.key, required this.child, required this.isDarkMode});
+  const GlassCardRegister(
+      {super.key, required this.child, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -1109,13 +1135,13 @@ class GlassCardRegister extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: isDarkMode 
-                ? Colors.white.withOpacity(0.05) 
+            color: isDarkMode
+                ? Colors.white.withOpacity(0.05)
                 : Colors.white.withOpacity(0.7),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: isDarkMode 
-                  ? Colors.white.withOpacity(0.1) 
+              color: isDarkMode
+                  ? Colors.white.withOpacity(0.1)
                   : Colors.white.withOpacity(0.5),
             ),
           ),
@@ -1185,9 +1211,7 @@ class _CreditCardPreviewRegisterState extends State<CreditCardPreviewRegister> {
         ),
         boxShadow: [
           BoxShadow(
-            color: (widget.hasError
-                    ? Colors.red
-                    : context.primaryColor)
+            color: (widget.hasError ? Colors.red : context.primaryColor)
                 .withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),

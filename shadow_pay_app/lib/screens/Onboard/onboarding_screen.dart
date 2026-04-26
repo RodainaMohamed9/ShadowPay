@@ -4,7 +4,7 @@ import 'first_screen.dart';
 import 'second_screen.dart';
 import 'third_screen.dart';
 import '../../services/shared_pref_service.dart';
-import '../AuthScreens/login/login_Screen.dart'; // مهم: نوجه للـ Login مش للـ Home
+import '../AuthScreens/login/login_Screen.dart'; 
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -18,11 +18,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int currentPage = 0;
 
   Future<void> _finishOnboarding() async {
-    // حفظ أن المستخدم شاهد Onboarding
     await SharedPrefService.setOnboardingSeen();
     
     if (mounted) {
-      // التوجه لصفحة Login (مش Home)
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -87,7 +85,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ],
                         ),
                         TextButton(
-                          onPressed: _finishOnboarding, // Skip = إنهاء Onboarding
+                          onPressed: _finishOnboarding,
                           child: const Text(
                             'Skip',
                             style: TextStyle(color: Colors.white),
@@ -117,7 +115,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                         const Spacer(),
                         TextButton(
-                          onPressed: _skipToEnd, // Skip للصفحة الأخيرة
+                          onPressed: _skipToEnd,
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.grey,
                           ),
@@ -131,6 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Expanded(
               child: PageView(
                 controller: _controller,
+                physics: const NeverScrollableScrollPhysics(), // ⭐ منع التمرير
                 onPageChanged: (index) {
                   setState(() {
                     currentPage = index;

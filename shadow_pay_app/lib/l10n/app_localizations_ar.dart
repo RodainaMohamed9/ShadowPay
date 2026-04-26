@@ -354,7 +354,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recentActivity => 'النشاط الأخير';
 
   @override
-  String get safe => 'آمن';
+  String get safe => 'معاملة آمنة';
 
   @override
   String get risk => 'خطر';
@@ -667,4 +667,70 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get addTransaction => 'إضافة معاملة';
+
+  @override
+  String get risk_analysis_title => 'تحليل المخاطر';
+
+  @override
+  String get transaction_details => 'تفاصيل المعاملة';
+
+  @override
+  String get detection_mode_label => 'طريقة التحليل';
+
+  @override
+  String get detection_mode_description => 'تم تحليل معاملتك بناءً على معايير الأمان العامة';
+
+  @override
+  String get amount_label => 'المبلغ';
+
+  @override
+  String get hour_label => 'الساعة';
+
+  @override
+  String get category_label => 'الفئة';
+
+  @override
+  String get zip_code_label => 'الرمز البريدي';
+
+  @override
+  String get back_to_home => 'العودة للرئيسية';
+
+  @override
+  String get high_risk => 'خطر مرتفع';
+
+  @override
+  String get medium_risk => 'خطر متوسط';
+
+  @override
+  String get low_risk => 'خطر منخفض';
+
+  @override
+  String get fraudulent => 'معاملة احتيالية';
+
+  @override
+  String get passwordLowercase => 'كلمة المرور يجب أن تحتوي على حرف صغير على الأقل';
+
+  @override
+  String get passwordUppercase => 'كلمة المرور يجب أن تحتوي على حرف كبير على الأقل';
+
+  @override
+  String get passwordNumber => 'كلمة المرور يجب أن تحتوي على رقم على الأقل';
+
+  @override
+  String get passwordSpecialChar => 'كلمة المرور يجب أن تحتوي على رمز خاص على الأقل (@\$!%*?&)';
+
+  @override
+  String get passwordComplexity => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل وتحتوي على حرف كبير وصغير ورقم ورمز خاص';
+
+  @override
+  String get this_month => 'هذا الشهر';
+
+  @override
+  String get saved => 'المدخرات';
+
+  @override
+  String get settings_privacy => 'الإعدادات والخصوصية';
+
+  @override
+  String get logout_dialog_title => 'تسجيل الخروج';
 }
