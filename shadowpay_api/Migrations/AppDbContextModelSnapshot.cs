@@ -235,6 +235,38 @@ namespace shadowpay_api.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("shadowpay_api.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiredDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("RevokedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens", (string)null);
+                });
+
             modelBuilder.Entity("shadowpay_api.Models.Transaction", b =>
                 {
                     b.Property<int>("Id")
@@ -327,6 +359,17 @@ namespace shadowpay_api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("shadowpay_api.Models.RefreshToken", b =>
+                {
+                    b.HasOne("shadowpay_api.Models.ApplicationUser", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("shadowpay_api.Models.Transaction", b =>
                 {
                     b.HasOne("shadowpay_api.Models.ApplicationUser", "User")
@@ -340,6 +383,8 @@ namespace shadowpay_api.Migrations
 
             modelBuilder.Entity("shadowpay_api.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("RefreshTokens");
+
                     b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
