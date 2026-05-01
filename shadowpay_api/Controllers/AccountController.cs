@@ -4,10 +4,14 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
+using shadowpay_api.Data;
+using shadowpay_api.Migrations;
 using shadowpay_api.Models;
 using shadowpay_api.ModelVM.AccountVM;
+using shadowpay_api.Services.Implements;
 
 namespace shadowpay_api.Controllers
 {
@@ -21,6 +25,8 @@ namespace shadowpay_api.Controllers
         private readonly IConfiguration configuration;
         private readonly EmailService emailService;
         private readonly IMemoryCache memoryCache;
+        private readonly TokenService tokenService;
+        private readonly AppDbContext _db;
 
 
         public AccountController(
@@ -28,13 +34,19 @@ namespace shadowpay_api.Controllers
             SignInManager<ApplicationUser> signInManager,
             IConfiguration configuration,
             EmailService emailService,
-            IMemoryCache memoryCache)
+            IMemoryCache memoryCache,
+            TokenService tokenService,
+            AppDbContext _db
+
+            )
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.configuration = configuration;
             this.emailService = emailService;
             this.memoryCache = memoryCache;
+            this.tokenService = tokenService;
+            this._db = _db;
         }
 
         [HttpPost("register")]
@@ -109,38 +121,24 @@ namespace shadowpay_api.Controllers
             var user = await userManager.FindByEmailAsync(model.Email);
 
             if (user == null)
-                return Unauthorized(new { message = "This email is not Exist" });
+                return Unauthorized(new { message = "Invalid email or password" });
 
             var result = await signInManager.CheckPasswordSignInAsync(user, model.Password, false);
 
             if (!result.Succeeded)
-                return Unauthorized(new { message = "Password is Invalid" });
+                return Unauthorized(new { message = "Invalid email or password" });
 
-            var authClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            };
-
-            var authSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(configuration["JWT:Key"])
-            );
-
-            var token = new JwtSecurityToken(
-                issuer: configuration["JWT:Issuer"],
-                audience: configuration["JWT:Audience"],
-                expires: DateTime.Now.AddMinutes(
-                    double.Parse(configuration["JWT:DurationInMinutes"])
-                ),
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-            );
+            var token = await tokenService.CreateTokens(user);
+            
 
             return Ok(new
             {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                expiration = token.ValidTo
+
+                AccessToken = token.AccessToken,
+                AccessTokenExpiration = token.AccessTokenExpiration,
+
+                RefreshToken = token.RefreshToken,
+                RefreshTokenExpiration = token.RefreshTokenExpiration
             });
         }
 
