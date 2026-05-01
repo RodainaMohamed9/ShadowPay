@@ -18,6 +18,7 @@ namespace shadowpay_api
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddScoped<EmailService>();
+            builder.Services.AddScoped<TokenService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             builder.Services.AddMemoryCache();

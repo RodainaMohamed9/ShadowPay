@@ -40,6 +40,8 @@ namespace shadowpay_api.Controllers
                 CardNumberHash = user.CardNumberHash,
                 CardHolderName = user.CardHolderName,
                 ExprDate = user.ExprDate,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
             };
             return Ok(profileData);
         }
