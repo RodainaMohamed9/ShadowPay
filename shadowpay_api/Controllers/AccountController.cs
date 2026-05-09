@@ -27,6 +27,7 @@ namespace shadowpay_api.Controllers
         private readonly IMemoryCache memoryCache;
         private readonly TokenService tokenService;
         private readonly AppDbContext _db;
+        private readonly BankService bankService;
 
 
         public AccountController(
@@ -36,7 +37,8 @@ namespace shadowpay_api.Controllers
             EmailService emailService,
             IMemoryCache memoryCache,
             TokenService tokenService,
-            AppDbContext _db
+            AppDbContext _db,
+            BankService bankService
 
             )
         {
@@ -47,6 +49,7 @@ namespace shadowpay_api.Controllers
             this.memoryCache = memoryCache;
             this.tokenService = tokenService;
             this._db = _db;
+            this.bankService = bankService;
         }
 
         [HttpPost("register")]
@@ -75,6 +78,59 @@ namespace shadowpay_api.Controllers
                     {
                         success = false,
                         errors = new[] { "Email already exists. Please use a different email." }
+                    });
+                }
+                var checkCard = await bankService.JavaIntegrationService(model);
+
+                if (checkCard.isExist)
+                {
+                    if (checkCard.isBlocked)
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            errors = new[] { "sorry, This card is blocked" }
+                        });
+                    }
+                    else if (!checkCard.isActive)
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            errors = new[] { "sorry, This card is not active" }
+                        });
+                    }
+                    else if (checkCard.isExpired)
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            errors = new[] { "This card is expired" }
+                        });
+                    }
+                    else if (!checkCard.isPhoneMatched)
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            errors = new[] { "Phone number does not match bank records" }
+                        });
+                    }
+                    else if (!checkCard.isExpiryMatched)
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            errors = new[] { "Expiry date does not match our records" }
+                        });
+                    }
+                }
+                else
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        errors = new[] { "This card does not exist" }
                     });
                 }
 

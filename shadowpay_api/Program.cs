@@ -20,12 +20,14 @@ namespace shadowpay_api
             builder.Services.AddScoped<EmailService>();
             builder.Services.AddScoped<TokenService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+            builder.Services.AddScoped<BankService>();
 
             builder.Services.AddMemoryCache();
             builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddControllers().AddJsonOptions(x =>
-                x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+            builder.Services.AddControllers();
+                //.AddJsonOptions(x =>
+                //x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
