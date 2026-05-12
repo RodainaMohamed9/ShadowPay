@@ -70,7 +70,7 @@ namespace shadowpay_api.Controllers
                     user_id = currentUserId,
                     amount = transaction.Amount,
                     hour = transaction.TransactionHour,
-                    category = transaction.MerchantCategory.ToString(),
+                    category = GetMlCategoryString(transaction.MerchantCategory),
                     zip_code = transaction.ZipCode,
 
                 };
@@ -124,7 +124,29 @@ namespace shadowpay_api.Controllers
                     transaction_count = stats
                 }
                 );
-        } 
+        }
+
+        private string GetMlCategoryString(Category category)
+        {
+            return category switch
+            {
+                Category.Entertainment => "entertainment",
+                Category.FoodDining => "food_dining",
+                Category.GasTransport => "gas_transport",
+                Category.GroceryNet => "grocery_net",
+                Category.GroceryPos => "grocery_pos",
+                Category.HealthFitness => "health_fitness",
+                Category.Home => "home",
+                Category.KidsPets => "kids_pets",
+                Category.MiscNet => "misc_net",
+                Category.MiscPos => "misc_pos",
+                Category.PersonalCare => "personal_care",
+                Category.ShoppingNet => "shopping_net",
+                Category.ShoppingPos => "shopping_pos",
+                Category.Travel => "travel",
+                _ => "misc_net" 
+            };
+        }
 
     }
 }
