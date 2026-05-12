@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shadow_pay_app/core/enums/category.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 
@@ -6,7 +7,7 @@ class RiskAnalysisScreen extends StatelessWidget {
   final VoidCallback? onBack;
   final double amount;
   final int hour;
-  final String category;
+  final int category;
   final int zipCode;
   final double riskScore;
   final String riskLevel;
@@ -18,7 +19,7 @@ class RiskAnalysisScreen extends StatelessWidget {
     this.onBack,
     this.amount = 0.0,
     this.hour = 0,
-    this.category = "grocery_pos",
+    this.category = 0,
     this.zipCode = 0,
     this.riskScore = 0.0,
     this.riskLevel = "Low Risk",
@@ -204,7 +205,13 @@ class RiskAnalysisScreen extends StatelessWidget {
                   _divider(isDarkMode),
                   _detailRow(localizations.hour_label, "${hour.toString().padLeft(2, '0')}:00", textColor, textSecondaryColor),
                   _divider(isDarkMode),
-                  _detailRow(localizations.category_label, category.replaceAll('_', ' '), textColor, textSecondaryColor),
+                  _detailRow(
+                    localizations.category_label,
+                    idToCategory(category)
+                        .displayName(localizations),
+                    textColor,
+                    textSecondaryColor,
+                  ),
                   _divider(isDarkMode),
                   _detailRow(localizations.zip_code_label, zipCode.toString(), textColor, textSecondaryColor),
                 ],
