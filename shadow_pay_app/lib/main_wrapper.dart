@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/screens/main_screen.dart';
 import 'package:shadow_pay_app/screens/profile/profile_screen.dart';
 import 'package:shadow_pay_app/screens/CardManagement/CardManagementScreen.dart';
 import 'package:shadow_pay_app/screens/report/report_screen.dart';
-import 'package:shadow_pay_app/providers/theme_provider.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 
 class MainWrapper extends StatefulWidget {

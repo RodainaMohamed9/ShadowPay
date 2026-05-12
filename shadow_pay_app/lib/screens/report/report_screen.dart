@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
-import 'package:shadow_pay_app/providers/theme_provider.dart';
 import 'package:shadow_pay_app/screens/main_screen.dart';
 
 class ReportScreen extends StatefulWidget {
