@@ -1,6 +1,11 @@
 // lib/screens/main_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:shadow_pay_app/core/enums/category.dart';
+import 'package:shadow_pay_app/database/models/transaction_model.dart';
+import 'package:shadow_pay_app/logic/transaction/cubit/transaction_cubit.dart';
+import 'package:shadow_pay_app/logic/transaction/cubit/transaction_state.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
 import 'package:shadow_pay_app/screens/home/home_screen.dart';
 import 'package:shadow_pay_app/screens/CardManagement/CardManagementScreen.dart';
@@ -21,17 +26,15 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   bool _showRiskScreen = false;
 
-  // بيانات التحليل
-  Map<String, dynamic> _riskData = {
-    'amount': 0.0,
-    'hour': 0,
-    'category': 'grocery_pos',
-    'zipCode': 0,
-    'riskScore': 0.0,
-    'riskLevel': 'Low Risk',
-    'isFraud': false,
-    'detectionMode': 'General',
-  };
+  TransactionModel? _analyzedTransaction;
+  void _showRiskAnalysis(Map<String, dynamic> data) {
+  context.read<TransactionCubit>().addTransaction(
+    amount: data['amount'] as double,
+    transactionHour: data['hour'] as int,
+    category: idToCategory(data['category'] as int),
+    zipCode: data['zipCode'] as int,
+  );
+}
 
   late final List<Widget> _screens;
 
@@ -62,13 +65,6 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
-  void _showRiskAnalysis(Map<String, dynamic> riskData) {
-    setState(() {
-      _riskData = riskData;
-      _showRiskScreen = true;
-    });
-  }
-
   void _closeRiskScreen() {
     setState(() {
       _showRiskScreen = false;
@@ -77,38 +73,64 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+Widget build(BuildContext context) {
+  final themeProvider = Provider.of<ThemeProvider>(context);
+  final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
+  final showBottomNav = _currentIndex >= 0 && _currentIndex <= 4 && !_showRiskScreen;
 
-    final showBottomNav =
-        _currentIndex >= 0 && _currentIndex <= 4 && !_showRiskScreen;
+  return BlocConsumer<TransactionCubit, TransactionState>(
+    listener: (context, state) {
+      if (state is TransactionFailureState) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(state.errorMessage), backgroundColor: Colors.red),
+        );
+      } else if (state is TransactionAddedSuccessState) {
+        setState(() {
+          _analyzedTransaction = state.transaction;
+          _showRiskScreen = true; 
+        });
+      }
+    },
+    builder: (context, state) {
+      return Scaffold(
+        body: Stack(
+          children: [
+            _showRiskScreen && _analyzedTransaction != null
+                ? RiskAnalysisScreen(
+                    onBack: _closeRiskScreen,
+                    amount: _analyzedTransaction!.amount,
+                    hour: _analyzedTransaction!.transactionHour,
+                    category: categoryToId(_analyzedTransaction!.merchantCategory),
+                    zipCode: _analyzedTransaction!.zipCode,
+                    riskScore: _analyzedTransaction!.riskScore,
+                    riskLevel: _analyzedTransaction!.riskLevel,
+                    isFraud: _analyzedTransaction!.isFraud,
+                    detectionMode: 'AI Microservice', 
+                  )
+                : _screens[_currentIndex],
 
-    return Scaffold(
-      body: _showRiskScreen
-          ? RiskAnalysisScreen(
-              onBack: _closeRiskScreen,
-              amount: _riskData['amount'] as double,
-              hour: _riskData['hour'] as int,
-              category: _riskData['category'] as String,
-              zipCode: _riskData['zipCode'] as int,
-              riskScore: _riskData['riskScore'] as double,
-              riskLevel: _riskData['riskLevel'] as String,
-              isFraud: _riskData['isFraud'] as bool,
-              detectionMode: _riskData['detectionMode'] as String,
-            )
-          : _screens[_currentIndex],
-      bottomNavigationBar: showBottomNav
-          ? BottomNavBar(
-              currentIndex: _currentIndex,
-              isDarkMode: isDarkMode,
-              onTap: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-            )
-          : null,
-    );
-  }
+            if (state is TransactionLoadingState)
+              Container(
+                color: Colors.black.withOpacity(0.4),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+          ],
+        ),
+        bottomNavigationBar: showBottomNav
+            ? BottomNavBar(
+                currentIndex: _currentIndex,
+                isDarkMode: isDarkMode,
+                onTap: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+              )
+            : null,
+      );
+    },
+  );
+}
 }

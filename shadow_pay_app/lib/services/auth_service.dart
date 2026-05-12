@@ -1,12 +1,11 @@
-import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shadow_pay_app/services/tokens/api_service.dart'; 
+import 'package:shadow_pay_app/services/tokens/token_storage.dart';
 
-class ApiService {
-  static const String baseUrl = 'https://jackeline-cibarious-supergallantly.ngrok-free.dev';
+class AuthService {
 
-  //Register
+  // ===== REGISTER =====
   static Future<bool> registerUser({
     required BuildContext context,
     required String fullName,
@@ -18,13 +17,11 @@ class ApiService {
     required String cardHolderName,
     required DateTime exprDate,
   }) async {
-    final url = Uri.parse('$baseUrl/api/Account/register');
-
     try {
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
+      final dioClient = DioClient().dio;
+      final response = await dioClient.post(
+        '/Account/register',
+        data: {
           "fullName": fullName,
           "email": email,
           "password": password,
@@ -33,55 +30,20 @@ class ApiService {
           "cardNumberHash": cardNumberHash,
           "cardHolderName": cardHolderName,
           "exprDate": exprDate.toIso8601String(),
-        }),
+        },
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
-      dynamic data;
-      try {
-        data = jsonDecode(response.body);
-      } catch (e) {
-        print('Failed to parse JSON: $e');
-        if (context.mounted) {
-          _showErrorDialog(context, ["Server error. Please try again."]);
-        }
-        return false;
-      }
-
       if (response.statusCode == 200 || response.statusCode == 201) {
-        if (context.mounted) {
-        }
         return true;
       }
-      
-      List<String> errors = [];
-      
-      if (data != null) {
-        if (data['errors'] != null) {
-          if (data['errors'] is List) {
-            errors = List<String>.from(data['errors']);
-          } else if (data['errors'] is String) {
-            errors.add(data['errors']);
-          }
-        } else if (data['message'] != null) {
-          errors.add(data['message']);
-        }
-      }
-      
-      if (errors.isEmpty) {
-        errors.add("Registration failed. Please try again.");
-      }
-      
-      if (context.mounted) {
-        _showErrorDialog(context, errors);
-      }
-      
       return false;
-      
+    } on DioException catch (e) {
+      final errorData = _handleDioErrorResponse(e.response?.data, defaultMessage: "Registration failed.");
+      if (context.mounted) {
+        _showErrorDialog(context, [errorData['message']]);
+      }
+      return false;
     } catch (e) {
-      print("Network error: $e");
       if (context.mounted) {
         _showErrorDialog(context, ["Network error. Please check your connection."]);
       }
@@ -89,25 +51,146 @@ class ApiService {
     }
   }
 
-  static void _showSuccessDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text("Success", style: TextStyle(color: Colors.teal)),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text("OK", style: TextStyle(color: Colors.teal)),
-          ),
-        ],
-      ),
-    );
+// ===== LOGIN =====
+  static Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final dioClient = DioClient().dio;
+      final response = await dioClient.post('/Account/login', data: {
+        "email": email,
+        "password": password,
+      });
+
+      final data = response.data;
+      
+      final accessToken = data['accessToken'];
+      final refreshToken = data['refreshToken'];
+
+      if (accessToken != null && refreshToken != null) {
+        await TokenStorage.saveAccessToken(accessToken);
+        await TokenStorage.saveRefreshToken(refreshToken);
+      }
+
+      return {
+        'success': true,
+        'token': accessToken, 
+      };
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        return {'success': false, 'message': 'Invalid email or password'};
+      }
+      return _handleDioErrorResponse(e.response?.data, defaultMessage: 'Server error during login');
+    } catch (e) {
+      return {'success': false, 'message': 'Network error: $e'};
+    }
   }
 
+  // ===== SEND OTP =====
+  static Future<Map<String, dynamic>> sendOtp({
+    required String email,
+    required String purpose,
+  }) async {
+    try {
+      final dioClient = DioClient().dio;
+      final response = await dioClient.post('/Account/send-otp', data: {
+        "email": email,
+        "purpose": purpose,
+      });
+
+      return {
+        'success': response.data['success'] ?? true,
+        'message': response.data['message'] ?? 'OTP sent successfully',
+      };
+    } on DioException catch (e) {
+      return _handleDioErrorResponse(e.response?.data, defaultMessage: 'Failed to send OTP');
+    } catch (e) {
+      return {'success': false, 'message': 'Network error: $e'};
+    }
+  }
+
+  // ===== VERIFY OTP =====
+  static Future<VerifyOtpResponse> verifyOtp({
+    required String email,
+    required String otp,
+    required String purpose,
+  }) async {
+    try {
+      final dioClient = DioClient().dio;
+      final response = await dioClient.post('/Account/verify-otp', data: {
+        "email": email,
+        "otp": otp,
+        "purpose": purpose,
+      });
+
+      return VerifyOtpResponse(
+        success: response.data['success'] ?? false,
+        message: response.data['message'] ?? 'OTP verified successfully',
+      );
+    } on DioException catch (e) {
+      final errorData = _handleDioErrorResponse(e.response?.data, defaultMessage: 'Invalid or expired OTP');
+      return VerifyOtpResponse(success: false, message: errorData['message']);
+    } catch (e) {
+      return VerifyOtpResponse(success: false, message: 'Network error: $e');
+    }
+  }
+
+  // ===== RESET PASSWORD =====
+  static Future<Map<String, dynamic>> resetPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      final dioClient = DioClient().dio;
+      final response = await dioClient.post('/Account/reset-password', data: {
+        "email": email,
+        "otp": otp,
+        "newPassword": newPassword,
+        "confirmPassword": confirmPassword,
+      });
+
+      return {
+        'success': true,
+        'message': response.data['message'] ?? 'Password reset successfully',
+      };
+    } on DioException catch (e) {
+      return _handleDioErrorResponse(e.response?.data, defaultMessage: 'Failed to reset password');
+    } catch (e) {
+      return {'success': false, 'message': 'An unexpected error occurred'};
+    }
+  }
+
+  // ===== LOGOUT =====
+  static Future<void> logout() async {
+    await TokenStorage.deleteTokens();
+  }
+
+  static Map<String, dynamic> _handleDioErrorResponse(dynamic data, {String defaultMessage = 'An error occurred'}) {
+    String errorMessage = defaultMessage;
+    if (data is Map) {
+      if (data['errors'] != null) {
+        if (data['errors'] is List) {
+          errorMessage = (data['errors'] as List).join('\n');
+        } else if (data['errors'] is String) {
+          errorMessage = data['errors'];
+        }
+      } else if (data['message'] != null) {
+        errorMessage = data['message'];
+      }
+    } else if (data is String) {
+      errorMessage = data;
+    }
+
+    return {
+      'success': false,
+      'message': errorMessage,
+    };
+  }
+
+  // ===== DIALOGS =====
   static void _showErrorDialog(BuildContext context, List<String> errors) {
     showDialog(
       context: context,
@@ -116,295 +199,21 @@ class ApiService {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: errors.map((error) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Text("• $error"),
-          )).toList(),
+          children: errors.map((error) => Text("• $error")).toList(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("OK", style: TextStyle(color: Colors.teal)),
+            child: const Text("OK"),
           ),
         ],
       ),
     );
   }
-
-  //Login
-    static Future<Map<String, dynamic>> login({
-      required String email,
-      required String password,
-    }) async {
-      final url = Uri.parse('$baseUrl/api/Account/login'); 
-
-      try {
-        final response = await http.post(
-          url,
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode({
-            "email": email,
-            "password": password,
-          }),
-        );
-
-        print('Login response status: ${response.statusCode}');
-        print('Login response body: ${response.body}');
-
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          await saveToken(data['token']); // ✅ خزني الـ token هنا
-          return {
-            'success': true,
-            'token': data['token'],
-            'expiration': data['expiration'],
-          };
-        } else if (response.statusCode == 401) {
-          return {
-            'success': false,
-            'message': 'Invalid email or password',
-          };
-        } else {
-          return {
-            'success': false,
-            'message': 'Server error: ${response.statusCode}',
-          };
-        }
-      } catch (e) {
-        print("Login error: $e");
-        return {
-          'success': false,
-          'message': 'Network error: $e',
-        };
-      }
-    }
-
-    // ===== SEND OTP =====
-    static Future<Map<String, dynamic>> sendOtp({
-      required String email,
-      required String purpose, // "register" or "forgot"
-    }) async {
-      final url = Uri.parse('$baseUrl/api/Account/send-otp');
-
-      try {
-        final response = await http.post(
-          url,
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode({
-            "email": email,
-            "purpose": purpose,
-          }),
-        );
-
-        print('Send OTP response status: ${response.statusCode}');
-        print('Send OTP response body: ${response.body}');
-
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          return {
-            'success': data['success'] ?? true,
-            'message': data['message'] ?? 'OTP sent successfully',
-          };
-        } else {
-          dynamic data;
-          try {
-            data = jsonDecode(response.body);
-          } catch (e) {
-            return {
-              'success': false,
-              'message': 'Server error: ${response.statusCode}',
-            };
-          }
-
-          String errorMessage = 'Failed to send OTP';
-          if (data is Map) {
-            if (data['message'] != null) {
-              errorMessage = data['message'];
-            } else if (data['errors'] != null) {
-              if (data['errors'] is List) {
-                errorMessage = (data['errors'] as List).join('\n');
-              } else {
-                errorMessage = data['errors'].toString();
-              }
-            }
-          } else if (data is String) {
-            errorMessage = data;
-          }
-
-          return {
-            'success': false,
-            'message': errorMessage,
-          };
-        }
-      } catch (e) {
-        print("Send OTP error: $e");
-        return {
-          'success': false,
-          'message': 'Network error: $e',
-        };
-      }
-    }
-
-
-    // ===== VERIFY OTP =====
-    static Future<VerifyOtpResponse> verifyOtp({
-      required String email,
-      required String otp,
-      required String purpose, // "register" or "forgot"
-    }) async {
-      final url = Uri.parse('$baseUrl/api/Account/verify-otp');
-
-      try {
-        final response = await http.post(
-          url,
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode({
-            "email": email,
-            "otp": otp,
-            "purpose": purpose,
-          }),
-        );
-
-        print('Verify OTP response status: ${response.statusCode}');
-        print('Verify OTP response body: ${response.body}');
-
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          return VerifyOtpResponse(
-            success: data['success'] ?? false,
-            message: data['message'] ?? 'OTP verified successfully',
-          );
-        } else {
-          // محاولة تحليل الخطأ
-          dynamic data;
-          try {
-            data = jsonDecode(response.body);
-          } catch (e) {
-            return VerifyOtpResponse(
-              success: false,
-              message: 'Server error: ${response.statusCode}',
-            );
-          }
-
-          String errorMessage = 'Invalid or expired OTP';
-          if (data is Map) {
-            if (data['message'] != null) {
-              errorMessage = data['message'];
-            } else if (data['errors'] != null) {
-              if (data['errors'] is List) {
-                errorMessage = (data['errors'] as List).join('\n');
-              } else {
-                errorMessage = data['errors'].toString();
-              }
-            }
-          } else if (data is String) {
-            errorMessage = data;
-          }
-
-          return VerifyOtpResponse(
-            success: false,
-            message: errorMessage,
-          );
-        }
-      } catch (e) {
-        print("Verify OTP error: $e");
-        return VerifyOtpResponse(
-          success: false,
-          message: 'Network error: $e',
-        );
-      }
-    }
-
-    //RESET PASSWORD
-    static Future<Map<String, dynamic>> resetPassword({
-      required String email,
-      required String otp,
-      required String newPassword,
-      required String confirmPassword,
-    }) async {
-      final url = Uri.parse('$baseUrl/api/Account/reset-password');
-
-      try {
-        final response = await http.post(
-          url,
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode({
-            "email": email,
-            "otp": otp,
-            "newPassword": newPassword,
-            "confirmPassword": confirmPassword,
-          }),
-        );
-
-        print('Reset password response status: ${response.statusCode}');
-        print('Reset password response body: ${response.body}');
-
-        if (response.statusCode == 200) {
-          return {
-            'success': true,
-            'message': response.body, 
-          };
-        } else {
-          dynamic data;
-          try {
-            data = jsonDecode(response.body);
-          } catch (e) {
-            return {
-              'success': false,
-              'message': response.body,
-            };
-          }
-
-          String errorMessage = 'Failed to reset password';
-          if (data is Map) {
-            if (data['errors'] != null) {
-              if (data['errors'] is List) {
-                errorMessage = (data['errors'] as List).join('\n');
-              } else if (data['errors'] is String) {
-                errorMessage = data['errors'];
-              }
-            } else if (data['message'] != null) {
-              errorMessage = data['message'];
-            }
-          } else if (data is String) {
-            errorMessage = data;
-          }
-
-          return {
-            'success': false,
-            'message': errorMessage,
-          };
-        }
-      } catch (e) {
-        print("Reset password error: $e");
-        return {
-          'success': false,
-          'message': 'Network error: $e',
-        };
-      }
-    }
-
-  // ===== TOKEN MANAGEMENT =====
-static const String _tokenKey = 'auth_token';
-
-static Future<void> saveToken(String token) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString(_tokenKey, token);
 }
 
-static Future<String?> getToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getString(_tokenKey);
-}
-
-static Future<void> clearToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove(_tokenKey);
-}
-}
 class VerifyOtpResponse {
   final bool success;
   final String message;
-
   VerifyOtpResponse({required this.success, required this.message});
 }

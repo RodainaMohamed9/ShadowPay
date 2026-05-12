@@ -1,8 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
-import 'package:shadow_pay_app/core/enums/category.dart' as my_enum;
+import 'package:shadow_pay_app/core/enums/category.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 
 class AddTransactionScreen extends StatefulWidget {
@@ -25,7 +24,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
 
   int _hour = 12;
-  my_enum.Category? _selectedCategory;
+  Category? _selectedCategory;
 
   void _handleBack() {
     widget.onBack?.call();
@@ -52,7 +51,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       final Map<String, dynamic> transactionData = {
         'amount': double.parse(_amountController.text),
         'hour': _hour,
-        'category': _selectedCategory!,
+        'category': categoryToId(_selectedCategory!),
         'zipCode': _zipController.text.isEmpty ? 0 : int.parse(_zipController.text),
       };
 
@@ -223,7 +222,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         thumbVisibility: true,
                         thickness: 6,
                         radius: const Radius.circular(10),
-                        child: DropdownButtonFormField<my_enum.Category>(
+                        child: DropdownButtonFormField<Category>(
                           isExpanded: true,
                           dropdownColor: inputColor,
                           value: _selectedCategory,
@@ -236,11 +235,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                           ).copyWith(
                             prefixIcon: Icon(Icons.category, color: primaryColor),
                           ),
-                          items: my_enum.Category.values.map((cat) {
+                          items: Category.values.map((cat) {
                             return DropdownMenuItem(
                               value: cat,
                               child: Text(
-                                cat.displayName,
+                                cat.displayName(localizations),
                                 style: TextStyle(fontSize: 14, color: textColor),
                               ),
                             );

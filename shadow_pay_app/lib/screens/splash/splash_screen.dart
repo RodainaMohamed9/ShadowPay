@@ -1,7 +1,6 @@
 // lib/screens/splash/splash_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
 import 'package:shadow_pay_app/screens/Onboard/onboarding_screen.dart';
 import 'package:shadow_pay_app/screens/main_screen.dart';
