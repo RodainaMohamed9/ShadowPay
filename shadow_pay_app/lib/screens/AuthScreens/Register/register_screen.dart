@@ -1,13 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/login/login_screen.dart';
 import 'package:shadow_pay_app/services/auth_service.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/ForgetPassword/otp_screen.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
-import 'package:shadow_pay_app/providers/theme_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -373,7 +371,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         2000 + int.parse(parts[1]),
         int.parse(parts[0]),
       );
-      bool success = await ApiService.registerUser(
+      bool success = await AuthService.registerUser(
         context: context,
         fullName: fullNameController.text.trim(),
         email: emailController.text.trim(),

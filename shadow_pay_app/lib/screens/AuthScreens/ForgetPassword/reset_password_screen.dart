@@ -1,13 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shadow_pay_app/screens/home/home_screen.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/login/login_screen.dart';
-import 'package:shadow_pay_app/services/shared_pref_service.dart';
 import 'package:shadow_pay_app/services/auth_service.dart';
-import 'package:shadow_pay_app/providers/theme_provider.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
@@ -53,7 +49,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     setState(() => isLoading = true);
 
     try {
-      final result = await ApiService.resetPassword(
+      final result = await AuthService.resetPassword(
         email: widget.email,
         otp: widget.otp ?? '',
         newPassword: passwordController.text,

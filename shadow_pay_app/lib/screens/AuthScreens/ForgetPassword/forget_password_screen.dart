@@ -44,7 +44,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() => isLoading = true);
 
     try {
-      final result = await ApiService.sendOtp(
+      final result = await AuthService.sendOtp(
         email: emailController.text.trim(),
         purpose: "forgot",
       );
