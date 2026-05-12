@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shadow_pay_app/database/models/transaction_model.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/logic/transaction/cubit/transaction_cubit.dart';
+import 'package:shadow_pay_app/logic/transaction/cubit/transaction_state.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/screens/TransactionScreens/transaction_list.dart';
+import 'package:shadow_pay_app/core/enums/category.dart'; 
 
-class RecentActivity extends StatelessWidget {
+class RecentActivity extends StatefulWidget {
   final bool isDarkMode;
 
   const RecentActivity({
@@ -11,33 +16,22 @@ class RecentActivity extends StatelessWidget {
     required this.isDarkMode,
   });
 
-  final List<Map<String, dynamic>> activities = const [
-    {
-      'title': 'Apple Store',
-      'time': 'Today • 09:42 AM',
-      'amount': '-\$249.00',
-      'status': 'SAFE',
-      'statusColor': 0xFF00D8A2,
-    },
-    {
-      'title': 'SkyJet Travel',
-      'time': 'Today • 01:14 PM',
-      'amount': '-\$870.00',
-      'status': 'RISK',
-      'statusColor': 0xFFFF9800,
-    },
-    {
-      'title': 'Nova Market',
-      'time': 'Blocked • 11:57 PM',
-      'amount': '-\$1,920.00',
-      'status': 'BLOCKED',
-      'statusColor': 0xFFF44336,
-    },
-  ];
+  @override
+  State<RecentActivity> createState() => _RecentActivityState();
+}
+
+class _RecentActivityState extends State<RecentActivity> {
+  
+  @override
+  void initState() {
+    super.initState();
+    context.read<TransactionCubit>().getTransactions();
+  }
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+    final primaryColor = widget.isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,7 +42,7 @@ class RecentActivity extends StatelessWidget {
             Text(
               loc.recentActivity,
               style: TextStyle(
-                color: isDarkMode ? Colors.white : Colors.black87,
+                color: widget.isDarkMode ? Colors.white : Colors.black87,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -58,45 +52,69 @@ class RecentActivity extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TransactionList(),
+                    builder: (context) => const TransactionList(),
                   ),
                 );
               },
               child: Text(
                 loc.viewAll,
                 style: TextStyle(
-                  color: isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary,
+                  color: primaryColor,
                 ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 16),
-        ...activities.map((activity) => _buildActivityItem(activity, loc)),
+        
+        BlocBuilder<TransactionCubit, TransactionState>(
+          builder: (context, state) {
+            if (state is TransactionLoadingState) {
+              return Center(child: CircularProgressIndicator(color: primaryColor));
+            } else if (state is TransactionFailureState) {
+              return Center(child: Text(state.errorMessage, style: TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black87)));
+            } else if (state is TransactionSuccessState) {
+              
+              final recentTransactions = state.transactions.reversed.take(3).toList();
+
+              if (recentTransactions.isEmpty) {
+                return Center(
+                  child: Text(
+                    loc.noTransactionsYet,
+                    style: TextStyle(color: widget.isDarkMode ? Colors.white54 : Colors.grey[600]),
+                  ),
+                );
+              }
+
+              return Column(
+                children: recentTransactions
+                    .map((transaction) => _buildActivityItem(transaction, loc))
+                    .toList(),
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ],
     );
   }
 
-  Widget _buildActivityItem(Map<String, dynamic> activity, AppLocalizations loc) {
-    String statusText = '';
-    if (activity['status'] == 'SAFE') {
-      statusText = loc.safe;
-    } else if (activity['status'] == 'RISK') {
-      statusText = loc.risk;
-    } else if (activity['status'] == 'BLOCKED') {
-      statusText = loc.blocked;
-    } else {
-      statusText = activity['status'];
-    }
+  Widget _buildActivityItem(TransactionModel transaction, AppLocalizations loc) {
+    final riskEnum = RiskLevel.fromString(transaction.riskLevel);
+    final statusColor = riskEnum.color;
+    final statusText = _getStatusTranslation(riskEnum, loc);
+
+    final categoryIcon = transaction.merchantCategory.icon;
+    final categoryName = transaction.merchantCategory.displayName(loc);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDarkMode ? const Color(0xFF1A1F2E) : Colors.grey.shade100,
+        color: widget.isDarkMode ? const Color(0xFF1A1F2E) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: (isDarkMode ? Colors.white : Colors.black).withOpacity(0.05),
+          color: (widget.isDarkMode ? Colors.white : Colors.black).withOpacity(0.05),
           width: 1,
         ),
       ),
@@ -106,12 +124,12 @@ class RecentActivity extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Color(activity['statusColor']).withOpacity(0.1),
+              color: statusColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
-              _getIconForTitle(activity['title']),
-              color: Color(activity['statusColor']),
+              categoryIcon,
+              color: statusColor,
               size: 22,
             ),
           ),
@@ -121,18 +139,18 @@ class RecentActivity extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  activity['title'],
+                  categoryName,
                   style: TextStyle(
-                    color: isDarkMode ? Colors.white : Colors.black87,
+                    color: widget.isDarkMode ? Colors.white : Colors.black87,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  activity['time'],
+                  "Hour: ${transaction.transactionHour}:00",
                   style: TextStyle(
-                    color: isDarkMode ? Colors.white54 : Colors.grey[600],
+                    color: widget.isDarkMode ? Colors.white54 : Colors.grey[600],
                     fontSize: 12,
                   ),
                 ),
@@ -143,9 +161,9 @@ class RecentActivity extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                activity['amount'],
+                "\$${transaction.amount.toStringAsFixed(2)}",
                 style: TextStyle(
-                  color: isDarkMode ? Colors.white : Colors.black87,
+                  color: widget.isDarkMode ? Colors.white : Colors.black87,
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),
@@ -154,13 +172,13 @@ class RecentActivity extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Color(activity['statusColor']).withOpacity(0.2),
+                  color: statusColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   statusText,
                   style: TextStyle(
-                    color: Color(activity['statusColor']),
+                    color: statusColor,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -173,16 +191,16 @@ class RecentActivity extends StatelessWidget {
     );
   }
 
-  IconData _getIconForTitle(String title) {
-    switch (title) {
-      case 'Apple Store':
-        return Icons.shopping_bag_outlined;
-      case 'SkyJet Travel':
-        return Icons.flight_takeoff;
-      case 'Nova Market':
-        return Icons.shopping_cart_outlined;
+  String _getStatusTranslation(RiskLevel riskEnum, AppLocalizations loc) {
+    switch (riskEnum) {
+      case RiskLevel.lowRisk:
+        return loc.safe;
+      case RiskLevel.mediumRisk:
+        return loc.warning;
+      case RiskLevel.highRisk:
+        return loc.fraud;
       default:
-        return Icons.payment;
+        return loc.unknown;
     }
   }
 }
