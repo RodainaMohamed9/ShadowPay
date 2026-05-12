@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/logic/profile/cubit/profile_cubit.dart';
+import 'package:shadow_pay_app/logic/transaction/cubit/transaction_cubit.dart';
 import 'package:shadow_pay_app/screens/splash/splash_screen.dart';
-import 'package:shadow_pay_app/screens/Onboard/onboarding_screen.dart';
-import 'package:shadow_pay_app/screens/AuthScreens/ForgetPassword/otp_screen.dart';
-import 'package:shadow_pay_app/screens/AuthScreens/login/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/providers/language_provider.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
-import 'package:shadow_pay_app/screens/main_screen.dart';  // ⭐ استورد MainScreen
-import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/theme/app_theme_config.dart';
-import 'package:shadow_pay_app/services/shared_pref_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
@@ -37,34 +34,47 @@ class _MyAppState extends State<MyApp> {
       ],
       child: Consumer2<LanguageProvider, ThemeProvider>(
         builder: (context, languageProvider, themeProvider, child) {
-          return MaterialApp(
-            title: 'Shadow Pay',
-            debugShowCheckedModeBanner: false,
-            locale: languageProvider.locale,
-            supportedLocales: const [
-              Locale('en'),
-              Locale('ar'),
+          
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (context) => ProfileCubit(),
+              ),
+              BlocProvider(
+                create: (context) => TransactionCubit(),
+              ),
             ],
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            localeResolutionCallback: (locale, supportedLocales) {
-              if (locale == null) return supportedLocales.first;
-              for (var supportedLocale in supportedLocales) {
-                if (supportedLocale.languageCode == locale.languageCode) {
-                  return supportedLocale;
+            child: MaterialApp(
+              title: 'Shadow Pay',
+              debugShowCheckedModeBanner: false,
+              locale: languageProvider.locale,
+              supportedLocales: const [
+                Locale('en'),
+                Locale('ar'),
+              ],
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              localeResolutionCallback: (locale, supportedLocales) {
+                if (locale == null) return supportedLocales.first;
+                for (var supportedLocale in supportedLocales) {
+                  if (supportedLocale.languageCode == locale.languageCode) {
+                    return supportedLocale;
+                  }
                 }
-              }
-              return supportedLocales.first;
-            },
-            theme: AppThemes.lightTheme,
-            darkTheme: AppThemes.darkTheme,
-            themeMode: themeProvider.themeMode,
-            home: const MainScreen(),  
+                return supportedLocales.first;
+              },
+              theme: AppThemes.lightTheme,
+              darkTheme: AppThemes.darkTheme,
+              themeMode: themeProvider.themeMode,
+              
+              home: const SplashScreen(), 
+            ),
           );
+          
         },
       ),
     );

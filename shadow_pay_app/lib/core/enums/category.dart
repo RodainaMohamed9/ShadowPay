@@ -1,55 +1,87 @@
-enum Category {
-  entertainment,
-  foodDining,
-  gasTransport,
-  groceryNet,
-  groceryPos,
-  healthFitness,
-  home,
-  kidsPets,
-  miscNet,
-  miscPos,
-  personalCare,
-  shoppingNet,
-  shoppingPos,
-  travel,
+import 'package:flutter/material.dart';
+import 'package:shadow_pay_app/l10n/app_localizations.dart';
+
+enum RiskLevel {
+  lowRisk(Color(0xFF00D8A2), "Low Risk"),
+  mediumRisk(Color(0xFFFF9800), "Medium Risk"),
+  highRisk(Color(0xFFF44336), "High Risk"),
+  unknown(Color(0xFFAAAAAA), "Unknown");
+
+  final Color color;
+  final String backendValue;
+  
+  const RiskLevel(this.color, this.backendValue);
+
+  static RiskLevel fromString(String? value) {
+    if (value == null) return RiskLevel.unknown;
+    if (value.contains("Low")) return RiskLevel.lowRisk;
+    if (value.contains("Medium")) return RiskLevel.mediumRisk;
+    if (value.contains("High")) return RiskLevel.highRisk;
+    return RiskLevel.unknown;
+  }
 }
 
-int categoryToId(Category c) => c.index + 1;
+enum Category {
+  entertainment(Icons.movie),
+  foodDining(Icons.restaurant),
+  gasTransport(Icons.local_gas_station),
+  groceryNet(Icons.shopping_cart),
+  groceryPos(Icons.shopping_cart),
+  healthFitness(Icons.fitness_center),
+  home(Icons.home),
+  kidsPets(Icons.pets),
+  miscNet(Icons.category),
+  miscPos(Icons.category),
+  personalCare(Icons.spa),
+  shoppingNet(Icons.shopping_bag),
+  shoppingPos(Icons.shopping_bag),
+  travel(Icons.flight);
 
-Category idToCategory(int id) => Category.values[id - 1];
+  final IconData icon;
+
+  const Category(this.icon);
+}
+
+int categoryToId(Category c) => c.index;
+
+Category idToCategory(int id) {
+  if (id >= 0 && id < Category.values.length) {
+    return Category.values[id];
+  }
+  return Category.miscNet;
+}
 
 extension CategoryDisplay on Category {
-  String get displayName {
+  String displayName(AppLocalizations loc) {
     switch (this) {
       case Category.entertainment:
-        return "Entertainment";
+        return loc.entertainment;
       case Category.foodDining:
-        return "Food & Dining";
+        return loc.foodDining;
       case Category.gasTransport:
-        return "Gas & Transport";
+        return loc.gasTransport;
       case Category.groceryNet:
-        return "Grocery (Online)";
+        return loc.groceryNet;
       case Category.groceryPos:
-        return "Grocery (Store)";
+        return loc.groceryPos;
       case Category.healthFitness:
-        return "Health & Fitness";
+        return loc.healthFitness;
       case Category.home:
-        return "Home";
+        return loc.home;
       case Category.kidsPets:
-        return "Kids & Pets";
+        return loc.kidsPets;
       case Category.miscNet:
-        return "Misc (Online)";
+        return loc.miscNet;
       case Category.miscPos:
-        return "Misc (Store)";
+        return loc.miscPos;
       case Category.personalCare:
-        return "Personal Care";
+        return loc.personalCare;
       case Category.shoppingNet:
-        return "Shopping (Online)";
+        return loc.shoppingNet;
       case Category.shoppingPos:
-        return "Shopping (Store)";
+        return loc.shoppingPos;
       case Category.travel:
-        return "Travel";
+        return loc.travel;
     }
   }
 }

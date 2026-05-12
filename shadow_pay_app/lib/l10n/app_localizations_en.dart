@@ -733,4 +733,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logout_dialog_title => 'Log Out';
+
+  @override
+  String get entertainment => 'Entertainment';
+
+  @override
+  String get foodDining => 'Food & Dining';
+
+  @override
+  String get gasTransport => 'Gas & Transport';
+
+  @override
+  String get groceryNet => 'Grocery (Online)';
+
+  @override
+  String get groceryPos => 'Grocery (Store)';
+
+  @override
+  String get healthFitness => 'Health & Fitness';
+
+  @override
+  String get kidsPets => 'Kids & Pets';
+
+  @override
+  String get miscNet => 'Misc (Online)';
+
+  @override
+  String get miscPos => 'Misc (Store)';
+
+  @override
+  String get personalCare => 'Personal Care';
+
+  @override
+  String get shoppingNet => 'Shopping (Online)';
+
+  @override
+  String get shoppingPos => 'Shopping (Store)';
+
+  @override
+  String get travel => 'Travel';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get noTransactionsFound => 'No transactions found';
+
+  @override
+  String get unknown => 'unknown';
 }
