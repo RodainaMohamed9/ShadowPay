@@ -241,6 +241,24 @@
   "this_month": "هذا الشهر",
   "saved": "المدخرات",
   "settings_privacy": "الإعدادات والخصوصية",
-  "logout_dialog_title": "تسجيل الخروج"
+  "logout_dialog_title": "تسجيل الخروج",
+  "entertainment": "ترفيه",
+  "foodDining": "طعام ومطاعم",
+  "gasTransport": "وقود ومواصلات",
+  "groceryNet": "بقالة (أونلاين)",
+  "groceryPos": "بقالة (في المتجر)",
+  "healthFitness": "صحة ولياقة",
+  "home": "المنزل",
+  "kidsPets": "أطفال وحيوانات أليفة",
+  "miscNet": "متنوعة (أونلاين)",
+  "miscPos": "متنوعة (في المتجر)",
+  "personalCare": "عناية شخصية",
+  "shoppingNet": "تسوق (أونلاين)",
+  "shoppingPos": "تسوق (في المتجر)",
+  "travel": "سفر",
+  "retry": "إعادة المحاولة",
+  "noTransactionsFound": "لا توجد معاملات",
+  "unknown": "غير معرف"
+
 
 }

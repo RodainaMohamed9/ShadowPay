@@ -242,5 +242,22 @@
   "this_month": "This Month",
   "saved": "Saved",
   "settings_privacy": "Settings & Privacy",
-  "logout_dialog_title": "Log Out"
+  "logout_dialog_title": "Log Out",
+  "entertainment": "Entertainment",
+  "foodDining": "Food & Dining",
+  "gasTransport": "Gas & Transport",
+  "groceryNet": "Grocery (Online)",
+  "groceryPos": "Grocery (Store)",
+  "healthFitness": "Health & Fitness",
+  "home": "Home",
+  "kidsPets": "Kids & Pets",
+  "miscNet": "Misc (Online)",
+  "miscPos": "Misc (Store)",
+  "personalCare": "Personal Care",
+  "shoppingNet": "Shopping (Online)",
+  "shoppingPos": "Shopping (Store)",
+  "travel": "Travel",
+  "retry": "Retry",
+  "noTransactionsFound": "No transactions found",
+  "unknown": "unknown"
 }

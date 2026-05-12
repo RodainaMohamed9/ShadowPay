@@ -1546,6 +1546,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Log Out'**
   String get logout_dialog_title;
+
+  /// No description provided for @entertainment.
+  ///
+  /// In en, this message translates to:
+  /// **'Entertainment'**
+  String get entertainment;
+
+  /// No description provided for @foodDining.
+  ///
+  /// In en, this message translates to:
+  /// **'Food & Dining'**
+  String get foodDining;
+
+  /// No description provided for @gasTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas & Transport'**
+  String get gasTransport;
+
+  /// No description provided for @groceryNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Grocery (Online)'**
+  String get groceryNet;
+
+  /// No description provided for @groceryPos.
+  ///
+  /// In en, this message translates to:
+  /// **'Grocery (Store)'**
+  String get groceryPos;
+
+  /// No description provided for @healthFitness.
+  ///
+  /// In en, this message translates to:
+  /// **'Health & Fitness'**
+  String get healthFitness;
+
+  /// No description provided for @kidsPets.
+  ///
+  /// In en, this message translates to:
+  /// **'Kids & Pets'**
+  String get kidsPets;
+
+  /// No description provided for @miscNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Misc (Online)'**
+  String get miscNet;
+
+  /// No description provided for @miscPos.
+  ///
+  /// In en, this message translates to:
+  /// **'Misc (Store)'**
+  String get miscPos;
+
+  /// No description provided for @personalCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Care'**
+  String get personalCare;
+
+  /// No description provided for @shoppingNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping (Online)'**
+  String get shoppingNet;
+
+  /// No description provided for @shoppingPos.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping (Store)'**
+  String get shoppingPos;
+
+  /// No description provided for @travel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get travel;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @noTransactionsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No transactions found'**
+  String get noTransactionsFound;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'unknown'**
+  String get unknown;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

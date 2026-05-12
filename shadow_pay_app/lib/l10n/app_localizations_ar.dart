@@ -24,7 +24,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get password => 'كلمة المرور';
 
   @override
-  String get home => 'الرئيسية';
+  String get home => 'المنزل';
 
   @override
   String get freeze_card => 'تجميد البطاقة';
@@ -733,4 +733,52 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get logout_dialog_title => 'تسجيل الخروج';
+
+  @override
+  String get entertainment => 'ترفيه';
+
+  @override
+  String get foodDining => 'طعام ومطاعم';
+
+  @override
+  String get gasTransport => 'وقود ومواصلات';
+
+  @override
+  String get groceryNet => 'بقالة (أونلاين)';
+
+  @override
+  String get groceryPos => 'بقالة (في المتجر)';
+
+  @override
+  String get healthFitness => 'صحة ولياقة';
+
+  @override
+  String get kidsPets => 'أطفال وحيوانات أليفة';
+
+  @override
+  String get miscNet => 'متنوعة (أونلاين)';
+
+  @override
+  String get miscPos => 'متنوعة (في المتجر)';
+
+  @override
+  String get personalCare => 'عناية شخصية';
+
+  @override
+  String get shoppingNet => 'تسوق (أونلاين)';
+
+  @override
+  String get shoppingPos => 'تسوق (في المتجر)';
+
+  @override
+  String get travel => 'سفر';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get noTransactionsFound => 'لا توجد معاملات';
+
+  @override
+  String get unknown => 'غير معرف';
 }
