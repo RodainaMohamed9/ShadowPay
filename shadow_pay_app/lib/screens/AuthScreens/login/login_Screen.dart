@@ -6,7 +6,6 @@ import 'package:shadow_pay_app/services/shared_pref_service.dart';
 import 'package:shadow_pay_app/screens/main_screen.dart';
 import '../ForgetPassword/forget_password_screen.dart';
 import 'package:shadow_pay_app/services/auth_service.dart';
-import 'package:shadow_pay_app/providers/language_provider.dart';
 import 'package:shadow_pay_app/providers/theme_provider.dart';
 import 'package:shadow_pay_app/screens/AuthScreens/Register/register_screen.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
@@ -101,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen>
       setState(() => _isLoading = true);
 
       try {
-        final result = await ApiService.login(
+        final result = await AuthService.login(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
