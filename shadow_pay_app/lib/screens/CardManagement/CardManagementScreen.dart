@@ -1,11 +1,12 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math' as math;
-import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import 'package:shadow_pay_app/logic/profile/cubit/profile_cubit.dart';
+import 'package:shadow_pay_app/logic/profile/cubit/profile_state.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
-import 'package:shadow_pay_app/providers/theme_provider.dart';
 
 class CardManagementScreen extends StatefulWidget {
   const CardManagementScreen({super.key});
@@ -42,6 +43,12 @@ class _CardManagementScreenState extends State<CardManagementScreen>
     super.initState();
     _loadCardStatus();
     _initAnimations();
+    context.read<ProfileCubit>().getProfile();
+  }
+  String _formatCardNumber(String number) {
+    if (number.isEmpty) return '•••• •••• •••• 4829';
+    final last4 = number.length >= 4 ? number.substring(number.length - 4) : number;
+    return '•••• •••• •••• $last4';
   }
 
   void _initAnimations() {
@@ -170,7 +177,7 @@ class _CardManagementScreenState extends State<CardManagementScreen>
         _alertController.forward(from: 0);
       }
     });
-
+    
     _saveCardStatusToPreferences();
 
     if (loc != null && _isFromUserAction) {
@@ -503,21 +510,39 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                     width: 1,
                                   ),
                                 ),
-                                child: Column(
-                                  children: [
-                                    _row(loc.cardHolder, loc.cardHolderValue,
-                                        value),
-                                    const SizedBox(height: 8),
-                                    _row(
-                                        loc.cardType, loc.cardTypeValue, value),
-                                    const SizedBox(height: 8),
-                                    _row(loc.issueDate, loc.issueDateValue,
-                                        value),
-                                    const SizedBox(height: 8),
-                                    _row(loc.expiryDate, loc.expiryDateValue,
-                                        value),
-                                  ],
-                                ),
+                                child: BlocBuilder<ProfileCubit, ProfileState>(builder: (context, state){
+                                  String cardHolder = loc.cardHolderValue;
+                                  String cardType = loc.cardTypeValue; 
+                                  String issueDate = loc.issueDateValue;
+                                  String expiryDate = loc.expiryDateValue;
+
+                                  if (state is ProfileSuccessState && state.profile != null) {
+                                    cardHolder = state.profile!.cardHolderName.toUpperCase();
+                                    if (state.profile!.cardNumberHash.startsWith('4')) {
+                                      cardType = 'Visa';
+                                    } else if (state.profile!.cardNumberHash.startsWith('5')) {
+                                      cardType = 'MasterCard';
+                                    } else if (state.profile!.cardNumberHash.startsWith('3')) {
+                                      cardType = 'American Express';
+                                    } else {
+                                      cardType = 'Unknown';
+                                    }
+                                    issueDate = "${state.profile!.exprDate.month.toString().padLeft(2, '0')}/${state.profile!.exprDate.year}";
+                                    expiryDate = state.profile!.formattedExpiry;
+                                  }
+
+                                  return Column(
+                                      children: [
+                                        _row(loc.cardHolder, cardHolder, value),
+                                        const SizedBox(height: 8),
+                                        _row(loc.cardType, cardType, value),
+                                        const SizedBox(height: 8),
+                                        _row(loc.issueDate, issueDate, value),
+                                        const SizedBox(height: 8),
+                                        _row(loc.expiryDate, expiryDate, value),
+                                      ],
+                                    );
+                                }),
                               ),
                             ),
                           );
@@ -832,332 +857,332 @@ class _CardManagementScreenState extends State<CardManagementScreen>
         : (1.0 - (flipValue - 0.3) / 0.2).clamp(0.0, 1.0);
     final isDarkMode = context.isDarkMode;
 
-    return Container(
-      height: 230,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          colors: isCardFrozen
-              ? [const Color(0xFF2A4A7A), const Color(0xFF3A6A9A)] 
-              : (isDarkMode
-                  ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
-                  : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)]),
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color:
-                (isCardFrozen ? const Color(0xFF3A6A9A) : context.primaryColor)
-                    .withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+    return BlocBuilder<ProfileCubit, ProfileState>(
+      builder: (context, state) {
+        if (state is ProfileLoadingState) {
+        return Center(
+          child: CircularProgressIndicator(
+            color: isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary,
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Stack(
-          children: [
-            if (isCardFrozen) ...[
-              Positioned(
-                top: -50,
-                right: -50,
-                child: AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: 1 + (_animationController.value * 0.15),
-                      child: Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.blue.withOpacity(0.3),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Positioned(
-                bottom: -40,
-                left: -40,
-                child: AnimatedBuilder(
-                  animation: _animationController,
-                  builder: (context, child) {
-                    return Transform.scale(
-                      scale: 1 + (_animationController.value * 0.15),
-                      child: Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.cyan.withOpacity(0.2),
-                        ),
-                      ),
-                    );
-                  },
-                ),
+        );
+      } else if (state is ProfileFailureState) {
+        return Center(
+          child: Text(state.errorMessage),
+        );
+      }
+        if(state is ProfileSuccessState){
+          return Container(
+          height: 230,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              colors: isCardFrozen
+                  ? [const Color(0xFF2A4A7A), const Color(0xFF3A6A9A)] 
+                  : (isDarkMode
+                      ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
+                      : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)]),
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color:
+                    (isCardFrozen ? const Color(0xFF3A6A9A) : context.primaryColor)
+                        .withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
               ),
             ],
-            if (!isCardFrozen) ...[
-              Positioned(
-                top: 0,
-                right: 0,
-                child: CustomPaint(
-                  size: const Size(120, 120),
-                  painter: EgyptianVisaPattern(
-                    color: context.primaryColor.withOpacity(0.15),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                child: CustomPaint(
-                  size: const Size(100, 100),
-                  painter: EgyptianVisaPattern(
-                    color: context.primaryColor.withOpacity(0.1),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 15,
-                right: 20,
-                child: Container(
-                  width: 45,
-                  height: 45,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: context.primaryColor.withOpacity(0.3),
-                      width: 1,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              children: [
+                if (isCardFrozen) ...[
+                  Positioned(
+                    top: -50,
+                    right: -50,
+                    child: AnimatedBuilder(
+                      animation: _animationController,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: 1 + (_animationController.value * 0.15),
+                          child: Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.blue.withOpacity(0.3),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  child: Icon(
-                    Icons.landscape,
-                    color: context.primaryColor.withOpacity(0.4),
-                    size: 28,
+                  Positioned(
+                    bottom: -40,
+                    left: -40,
+                    child: AnimatedBuilder(
+                      animation: _animationController,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: 1 + (_animationController.value * 0.15),
+                          child: Container(
+                            width: 150,
+                            height: 150,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.cyan.withOpacity(0.2),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ),
-            ],
-            Opacity(
-              opacity: textOpacity,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ],
+                if (!isCardFrozen) ...[
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: CustomPaint(
+                      size: const Size(120, 120),
+                      painter: EgyptianVisaPattern(
+                        color: context.primaryColor.withOpacity(0.15),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    child: CustomPaint(
+                      size: const Size(100, 100),
+                      painter: EgyptianVisaPattern(
+                        color: context.primaryColor.withOpacity(0.1),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 15,
+                    right: 20,
+                    child: Container(
+                      width: 45,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: context.primaryColor.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.landscape,
+                        color: context.primaryColor.withOpacity(0.4),
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                ],
+                Opacity(
+                  opacity: textOpacity,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              loc.availableBalance,
-                              style: TextStyle(
-                                  color: context.textSecondary, fontSize: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  loc.availableBalance,
+                                  style: TextStyle(
+                                      color: context.textSecondary, fontSize: 12),
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  "\$12,847.50",
+                                  style: TextStyle(
+                                    color: context.textPrimary,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 5),
-                            Text(
-                              "\$12,847.50",
-                              style: TextStyle(
-                                color: context.textPrimary,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
+                            const SizedBox.shrink(),
                           ],
                         ),
-                        const SizedBox.shrink(),
-                      ],
-                    ),
-                    const Spacer(),
-                    if (!isCardFrozen)
-                      Row(
-                        children: [
-                          Text("****",
-                              style: TextStyle(
-                                  color: context.textPrimary.withOpacity(0.8),
-                                  fontSize: 18,
-                                  letterSpacing: 2,
-                                  fontWeight: FontWeight.w500)),
-                          const SizedBox(width: 8),
-                          Text("****",
-                              style: TextStyle(
-                                  color: context.textPrimary.withOpacity(0.8),
-                                  fontSize: 18,
-                                  letterSpacing: 2,
-                                  fontWeight: FontWeight.w500)),
-                          const SizedBox(width: 8),
-                          Text("****",
-                              style: TextStyle(
-                                  color: context.textPrimary.withOpacity(0.8),
-                                  fontSize: 18,
-                                  letterSpacing: 2,
-                                  fontWeight: FontWeight.w500)),
-                          const SizedBox(width: 8),
-                          Text("1234",
+                        const Spacer(),
+                        if (!isCardFrozen)
+                            Text(
+                        _formatCardNumber(state.profile?.cardNumberHash.toString() ?? "**** **** **** 1234"),
+                        style: TextStyle(
+                          color: context.textPrimary,
+                          fontSize: 18,
+                          letterSpacing: 2.5,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                        if (isCardFrozen)
+                          Text(state.profile?.cardNumberHash.toString() ?? "**** **** **** 1234",
                               style: TextStyle(
                                   color: context.textPrimary,
                                   fontSize: 20,
                                   letterSpacing: 2.5,
-                                  fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    if (isCardFrozen)
-                      Text(loc.cardNumberMasked,
-                          style: TextStyle(
-                              color: context.textPrimary,
-                              fontSize: 20,
-                              letterSpacing: 2.5,
-                              fontWeight: FontWeight.w500)),
-                    const SizedBox(height: 15),
-                    if (!isCardFrozen)
-                      Row(
-                        children: [
-                          Container(
-                            width: 35,
-                            height: 25,
-                            decoration: BoxDecoration(
-                              color: Colors.amber.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(5),
-                              border: Border.all(
-                                  color: Colors.amber.withOpacity(0.5),
-                                  width: 1),
-                            ),
-                            child: const Icon(Icons.sim_card,
-                                color: Colors.amber, size: 16),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(loc.cardHolderValue.toUpperCase(),
-                                    style: TextStyle(
-                                        color: context.textPrimary,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                        letterSpacing: 0.5)),
-                                const SizedBox(height: 2),
-                                Row(
+                                  fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 15),
+                        if (!isCardFrozen)
+                          Row(
+                            children: [
+                              Container(
+                                width: 35,
+                                height: 25,
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(
+                                      color: Colors.amber.withOpacity(0.5),
+                                      width: 1),
+                                ),
+                                child: const Icon(Icons.sim_card,
+                                    color: Colors.amber, size: 16),
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(loc.expiryDateValue,
+                                    Text(state.profile?.cardHolderName.toUpperCase() ?? "Card Holder",
                                         style: TextStyle(
-                                            color: context.textSecondary,
-                                            fontSize: 10)),
-                                    const SizedBox(width: 12),
+                                            color: context.textPrimary,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                            letterSpacing: 0.5)),
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      children: [
+                                        Text(state.profile?.formattedExpiry ?? "12/24",
+                                            style: TextStyle(
+                                                color: context.textSecondary,
+                                                fontSize: 10)),
+                                        const SizedBox(width: 12),
+                                      ],
+                                    ),
                                   ],
                                 ),
-                              ],
-                            ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text("VISA",
-                                  style: TextStyle(
-                                      color:
-                                          context.primaryColor.withOpacity(0.7),
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 1.5)),
-                              Container(
-                                width: 30,
-                                height: 20,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(colors: [
-                                    Colors.amber.withOpacity(0.6),
-                                    Colors.orange.withOpacity(0.4)
-                                  ]),
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text("VISA",
+                                      style: TextStyle(
+                                          color:
+                                              context.primaryColor.withOpacity(0.7),
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1.5)),
+                                  Container(
+                                    width: 30,
+                                    height: 20,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(colors: [
+                                        Colors.amber.withOpacity(0.6),
+                                        Colors.orange.withOpacity(0.4)
+                                      ]),
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                    if (isCardFrozen)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(loc.cardHolderValue,
-                              style: TextStyle(
-                                  color: context.textSecondary, fontSize: 12)),
-                          Text(loc.expiryDateValue,
-                              style: TextStyle(
-                                  color: context.textSecondary, fontSize: 12)),
-                          const Text("***",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 12)),
-                        ],
-                      ),
-                  ],
+                        if (isCardFrozen)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(state.profile?.cardHolderName.toUpperCase() ?? "Card Holder",
+                                  style: TextStyle(
+                                      color: context.textSecondary, fontSize: 12)),
+                              Text(state.profile?.formattedExpiry ?? "12/24",
+                                  style: TextStyle(
+                                      color: context.textSecondary, fontSize: 12)),
+                              const Text("***",
+                                  style:
+                                      TextStyle(color: Colors.white, fontSize: 12)),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            if (isCardFrozen)
-              Positioned.fill(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 500),
-                      color: Colors.black.withOpacity(0.3),
-                      child: Center(
-                        child: AnimatedBuilder(
-                          animation: _iceCrystalController,
-                          builder: (context, child) {
-                            return Transform.scale(
-                              scale: _iceScaleAnimation.value,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Transform.rotate(
-                                    angle: _iceRotationAnimation.value,
-                                    child: Container(
-                                      width: 100,
-                                      height: 100,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: RadialGradient(
-                                          colors: [
-                                            Colors.blue.withOpacity(0.7),
-                                            Colors.blue.withOpacity(0.3),
-                                            Colors.transparent
-                                          ],
-                                          stops: const [0.3, 0.6, 1.0],
+                if (isCardFrozen)
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 500),
+                          color: Colors.black.withOpacity(0.3),
+                          child: Center(
+                            child: AnimatedBuilder(
+                              animation: _iceCrystalController,
+                              builder: (context, child) {
+                                return Transform.scale(
+                                  scale: _iceScaleAnimation.value,
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Transform.rotate(
+                                        angle: _iceRotationAnimation.value,
+                                        child: Container(
+                                          width: 100,
+                                          height: 100,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: RadialGradient(
+                                              colors: [
+                                                Colors.blue.withOpacity(0.7),
+                                                Colors.blue.withOpacity(0.3),
+                                                Colors.transparent
+                                              ],
+                                              stops: const [0.3, 0.6, 1.0],
+                                            ),
+                                          ),
+                                          child: const Icon(Icons.ac_unit,
+                                              color: Colors.blue, size: 70),
                                         ),
                                       ),
-                                      child: const Icon(Icons.ac_unit,
-                                          color: Colors.blue, size: 70),
-                                    ),
+                                      for (int i = 0; i < 3; i++)
+                                        _buildIceRing(
+                                            i, _iceRotationAnimation.value),
+                                      for (int i = 0; i < 12; i++)
+                                        _buildFloatingIceParticle(
+                                            i, _icePulseAnimation.value),
+                                    ],
                                   ),
-                                  for (int i = 0; i < 3; i++)
-                                    _buildIceRing(
-                                        i, _iceRotationAnimation.value),
-                                  for (int i = 0; i < 12; i++)
-                                    _buildFloatingIceParticle(
-                                        i, _icePulseAnimation.value),
-                                ],
-                              ),
-                            );
-                          },
+                                );
+                              },
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
-          ],
-        ),
-      ),
+              ],
+            ),
+          ),
+        );
+        }
+        else {
+        return Center(
+          child: Text("No data available"),
+        );
+      }
+      }
     );
   }
 
