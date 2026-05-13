@@ -19,4 +19,16 @@ class ProfileCubit extends Cubit<ProfileState> {
       emit(ProfileFailureState(errorMessage: e.toString()));
     }
   }
+
+  Future<bool> toggleFreezeStatus() async {
+    try {
+      final success = await ProfileService.toggleCardFreezeStatus();
+      if (success) {
+        await getProfile();
+      }
+      return success;
+    } catch (e) {
+      return false;
+    }
+  }
 }

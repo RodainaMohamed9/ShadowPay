@@ -78,8 +78,8 @@ class _HomeContentState extends State<HomeContent> {
           children: [
             WelcomeHeader(
               userName: state.profile?.fullName ?? "User",
-              // isFrozen: isCardFrozen,
-              // onManageTap: isCardFrozen ? _handleFreeze : null,
+              isFrozen: state.profile?.isFrozen ?? false,
+              onManageTap: state.profile?.isFrozen ?? false ? _handleFreeze : null,
               isDarkMode: isDarkMode,
             ),
             Expanded(
@@ -97,9 +97,9 @@ class _HomeContentState extends State<HomeContent> {
                           state.profile?.cardHolderName ?? "Card Holder",
                       expiry:
                           state.profile?.formattedExpiry ?? "12/24",                      // balance: cardBalance,
-                      // isFrozen: isCardFrozen,
+                      isFrozen: state.profile?.isFrozen ?? false,
                       isDarkMode: isDarkMode,
-                      balance: 0.0,
+                      balance: state.profile?.balance ?? 0.0,
                     ),
                     const SizedBox(height: 24),
                     QuickActions(
