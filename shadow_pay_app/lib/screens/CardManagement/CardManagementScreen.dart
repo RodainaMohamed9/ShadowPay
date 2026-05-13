@@ -9,7 +9,8 @@ import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
 
 class CardManagementScreen extends StatefulWidget {
-  const CardManagementScreen({super.key});
+   final VoidCallback? onBack;
+  const CardManagementScreen({super.key ,this.onBack,});
 
   @override
   State<CardManagementScreen> createState() => _CardManagementScreenState();
@@ -277,9 +278,13 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                 ),
                               ),
                               iconSize: 25,
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
+onPressed: () {
+  if (widget.onBack != null) {
+    widget.onBack!();
+  } else {
+    Navigator.pop(context);
+  }
+},
                               icon: Icon(Icons.arrow_back,
                                   color: context.textSecondary),
                             ),
@@ -1198,7 +1203,7 @@ class _CardManagementScreenState extends State<CardManagementScreen>
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           colors: isCardFrozen
-              ? [const Color(0xFF800020), const Color(0xFF4A0020)]
+              ? [const Color(0xFF2A2F3E), const Color(0xFF2A2F3E)]
               : (isDarkMode
                   ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
                   : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)]),
@@ -1228,7 +1233,7 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: (isCardFrozen
-                          ? const Color(0xFF800020)
+                          ? const Color(0xFF2A2F3E)
                           : context.primaryColor)
                       .withOpacity(0.15),
                 ),

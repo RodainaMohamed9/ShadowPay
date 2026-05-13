@@ -1,4 +1,3 @@
-// lib/screens/main_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -43,13 +42,14 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _screens = [
       HomeScreen(onNavigate: _changeTab), // index 0
-      const CardManagementScreen(), // index 1
+      CardManagementScreen(onBack: _goBackHome), // index 1
       const ReportScreen(), // index 2
       const ProfileScreen(), // index 3
       AddTransactionScreen(
         onBack: _goBackHome,
         onAnalyze: _showRiskAnalysis,
       ), // index 4
+      
     ];
   }
 

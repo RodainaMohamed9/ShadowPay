@@ -186,7 +186,7 @@ class _RegisterPageTwoState extends State<RegisterPageTwo> {
 
                         const SizedBox(height: 16),
 
-                        // Back to Login Link - زي LoginScreen بالظبط
+                        // Back to Login 
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

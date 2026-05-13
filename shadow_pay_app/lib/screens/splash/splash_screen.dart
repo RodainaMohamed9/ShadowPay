@@ -50,11 +50,9 @@ class _SplashScreenState extends State<SplashScreen>
         return;
       }
 
-      // 2. إذا لم يكن مسجل دخول، تحقق من Onboarding
       final seenOnboarding = await SharedPrefService.hasSeenOnboarding();
       
       if (!seenOnboarding) {
-        // أول مرة يفتح التطبيق => Onboarding
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -78,7 +76,6 @@ class _SplashScreenState extends State<SplashScreen>
           );
         }
       } else {
-        // ليس أول مرة وغير مسجل دخول => Login
         if (mounted) {
           Navigator.pushReplacement(
             context,
@@ -104,7 +101,6 @@ class _SplashScreenState extends State<SplashScreen>
       }
     } catch (e) {
       print('Error in splash navigation: $e');
-      // في حالة الخطأ، نوجهه للـ Login كحل افتراضي
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -151,8 +147,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // ❌ تم إزالة الكود المكرر للتنقل من هنا
-    // لأننا استخدمناه مرة واحدة بس فوق
+
   }
 
   @override
@@ -332,8 +327,6 @@ class _SplashScreenState extends State<SplashScreen>
               ),
 
               const Spacer(flex: 1),
-
-              // SETTINGS and ENCRYPTED BY SHADOW PAY SECURELY - تحت خالص
               const Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [

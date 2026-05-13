@@ -160,38 +160,38 @@ class _RegisterScreenState extends State<RegisterScreen>
     if (currentStep != 1) return null;
     final loc = AppLocalizations.of(context)!;
 
-    if (value == null || value.isEmpty) {
-      fieldErrors['password'] = true;
-      return loc.requiredField;
-    }
+ if (value == null || value.isEmpty) {
+  fieldErrors['password'] = true;
+  return loc.requiredField;
+}
 
-    if (value.length < 8) {
-      fieldErrors['password'] = true;
-      return loc.passwordShort;
-    }
+if (value.length < 8) {
+  fieldErrors['password'] = true;
+  return loc.passwordShort;
+}
 
-    if (!RegExp(r'(?=.*[a-z])').hasMatch(value)) {
-      fieldErrors['password'] = true;
-      return loc.passwordLowercase;
-    }
+if (!RegExp(r'(?=.*[a-z])').hasMatch(value)) {
+  fieldErrors['password'] = true;
+  return loc.passwordLowercase;
+}
 
-    if (!RegExp(r'(?=.*[A-Z])').hasMatch(value)) {
-      fieldErrors['password'] = true;
-      return loc.passwordUppercase; 
-    }
+if (!RegExp(r'(?=.*[A-Z])').hasMatch(value)) {
+  fieldErrors['password'] = true;
+  return loc.passwordUppercase;
+}
 
-    if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
-      fieldErrors['password'] = true;
-      return loc.passwordNumber; 
-    }
+if (!RegExp(r'(?=.*\d)').hasMatch(value)) {
+  fieldErrors['password'] = true;
+  return loc.passwordNumber;
+}
 
-    if (!RegExp(r'(?=.*[@$!%*?&])').hasMatch(value)) {
-      fieldErrors['password'] = true;
-      return loc.passwordSpecialChar;
-    }
+if (!RegExp(r'(?=.*[@$!%*?&.])').hasMatch(value)) {
+  fieldErrors['password'] = true;
+  return loc.passwordSpecialChar;
+}
 
-    fieldErrors['password'] = false;
-    return null;
+fieldErrors['password'] = false;
+return null;
   }
 
   String? _validateConfirm(String? value) {
