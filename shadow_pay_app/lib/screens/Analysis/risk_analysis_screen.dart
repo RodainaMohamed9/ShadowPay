@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shadow_pay_app/core/enums/category.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
+import'package:shadow_pay_app/screens/TransactionScreens/add_transaction_screen.dart';
+import 'package:shadow_pay_app/screens/home/home_screen.dart';
+
 
 class RiskAnalysisScreen extends StatelessWidget {
   final VoidCallback? onBack;
@@ -33,13 +36,7 @@ class RiskAnalysisScreen extends StatelessWidget {
     return AppColors.success;
   }
 
-  void _navigateToHome(BuildContext context) {
-    if (onBack != null) {
-      onBack!();
-    } else {
-      Navigator.pop(context);
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +77,13 @@ class RiskAnalysisScreen extends StatelessWidget {
             ),
           ),
           iconSize: 25,
-          onPressed: () => _navigateToHome(context),
+          onPressed: () => {
+            Navigator.push(
+context, MaterialPageRoute(
+builder: (context) =>AddTransactionScreen(),
+),
+),
+          },
           icon: Transform.scale(
             scaleX: isRTL ? -1 : 1,
             child: Icon(Icons.arrow_back, color: textSecondaryColor),
@@ -297,7 +300,13 @@ class RiskAnalysisScreen extends StatelessWidget {
                   elevation: 8,
                   shadowColor: primaryColor.withOpacity(0.5),
                 ),
-                onPressed: () => _navigateToHome(context),
+onPressed: () {
+  if (onBack != null) {
+    onBack!();
+  } else {
+    Navigator.pop(context);
+  }
+},
                 icon: const Icon(Icons.home_outlined, color: Colors.white),
                 label: Text(
                   localizations.back_to_home,

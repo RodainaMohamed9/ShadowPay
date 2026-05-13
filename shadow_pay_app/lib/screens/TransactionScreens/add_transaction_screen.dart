@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/core/enums/category.dart';
 import 'package:shadow_pay_app/theme/colors.dart';
+import 'package:shadow_pay_app/screens/home/home_screen.dart';
 
 class AddTransactionScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -26,11 +27,6 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   int _hour = 12;
   Category? _selectedCategory;
 
-  void _handleBack() {
-    widget.onBack?.call();
-    Navigator.pop(context);
-  }
-
   void _analyzeAndNavigate() {
     if (_formKey.currentState!.validate()) {
       if (_selectedCategory == null) {
@@ -52,7 +48,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         'amount': double.parse(_amountController.text),
         'hour': _hour,
         'category': categoryToId(_selectedCategory!),
-        'zipCode': _zipController.text.isEmpty ? 0 : int.parse(_zipController.text),
+        'zipCode':
+            _zipController.text.isEmpty ? 0 : int.parse(_zipController.text),
       };
 
       if (widget.onAnalyze != null) {
@@ -70,10 +67,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    final primaryColor = isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary;
-    final backgroundColor = isDarkMode ? AppColors.darkBackground : AppColors.lightBackground;
-    final surfaceColor = isDarkMode ? AppColors.darkSurface : AppColors.lightSurface;
-    final inputColor = isDarkMode ? AppColors.darkProgressBg : AppColors.lightProgressBg;
+    final primaryColor =
+        isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary;
+    final backgroundColor =
+        isDarkMode ? AppColors.darkBackground : AppColors.lightBackground;
+    final surfaceColor =
+        isDarkMode ? AppColors.darkSurface : AppColors.lightSurface;
+    final inputColor =
+        isDarkMode ? AppColors.darkProgressBg : AppColors.lightProgressBg;
     final textColor = isDarkMode ? Colors.white : Colors.black87;
     final textSecondaryColor = isDarkMode ? Colors.white70 : Colors.grey[700];
     final hintColor = isDarkMode ? Colors.white38 : Colors.grey.shade500;
@@ -86,17 +87,26 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         leading: IconButton(
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all(
-              (isDarkMode ? const Color(0xff1D293D) : Colors.grey.shade200).withOpacity(0.4),
+              (isDarkMode ? const Color(0xff1D293D) : Colors.grey.shade200)
+                  .withOpacity(0.4),
             ),
             side: MaterialStateProperty.all(
               BorderSide(
-                color: textSecondaryColor?.withOpacity(0.5) ?? Colors.transparent,
+                color:
+                    textSecondaryColor?.withOpacity(0.5) ?? Colors.transparent,
                 width: 1,
               ),
             ),
           ),
           iconSize: 25,
-          onPressed: _handleBack,
+
+onPressed: () {
+  if (widget.onBack != null) {
+    widget.onBack!();
+  } else {
+    Navigator.pop(context);
+  }
+},
           icon: Transform.scale(
             scaleX: isRTL ? -1 : 1,
             child: Icon(Icons.arrow_back, color: textSecondaryColor),
@@ -157,7 +167,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _amountController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       style: TextStyle(color: textColor, fontSize: 16),
                       textDirection: TextDirection.ltr,
                       textAlign: TextAlign.left,
@@ -167,19 +178,24 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         inputColor,
                         primaryColor,
                       ).copyWith(
-                        prefixIcon: Icon(Icons.attach_money, color: primaryColor),
+                        prefixIcon:
+                            Icon(Icons.attach_money, color: primaryColor),
                         suffixIcon: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(width: 1, height: 30, color: hintColor),
                             IconButton(
-                              icon: Icon(Icons.remove, color: textSecondaryColor, size: 20),
+                              icon: Icon(Icons.remove,
+                                  color: textSecondaryColor, size: 20),
                               onPressed: () {
                                 if (_amountController.text.isNotEmpty) {
-                                  double currentValue = double.tryParse(_amountController.text) ?? 0;
+                                  double currentValue =
+                                      double.tryParse(_amountController.text) ??
+                                          0;
                                   double newValue = currentValue - 1;
                                   if (newValue > 0) {
-                                    _amountController.text = newValue.toStringAsFixed(2);
+                                    _amountController.text =
+                                        newValue.toStringAsFixed(2);
                                   } else {
                                     _amountController.text = "0.01";
                                   }
@@ -189,22 +205,30 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                               },
                             ),
                             IconButton(
-                              icon: Icon(Icons.add, color: textSecondaryColor, size: 20),
+                              icon: Icon(Icons.add,
+                                  color: textSecondaryColor, size: 20),
                               onPressed: () {
-                                double currentValue = double.tryParse(_amountController.text) ?? 0;
-                                _amountController.text = (currentValue + 1).toStringAsFixed(2);
+                                double currentValue =
+                                    double.tryParse(_amountController.text) ??
+                                        0;
+                                _amountController.text =
+                                    (currentValue + 1).toStringAsFixed(2);
                               },
                             ),
                           ],
                         ),
                       ),
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                       validator: (value) {
-                        if (value == null || value.isEmpty) return localizations.error_amount_empty;
-                        if (double.tryParse(value) == null) return localizations.error_amount_invalid;
-                        if (double.parse(value) <= 0) return localizations.error_amount_zero;
+                        if (value == null || value.isEmpty)
+                          return localizations.error_amount_empty;
+                        if (double.tryParse(value) == null)
+                          return localizations.error_amount_invalid;
+                        if (double.parse(value) <= 0)
+                          return localizations.error_amount_zero;
                         return null;
                       },
                     ),
@@ -213,7 +237,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     // Category Dropdown (from first version - using enum)
                     Text(
                       localizations.transaction_category,
-                      style: TextStyle(color: textSecondaryColor, fontSize: 14, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                          color: textSecondaryColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -233,14 +260,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                             inputColor,
                             primaryColor,
                           ).copyWith(
-                            prefixIcon: Icon(Icons.category, color: primaryColor),
+                            prefixIcon:
+                                Icon(Icons.category, color: primaryColor),
                           ),
                           items: Category.values.map((cat) {
                             return DropdownMenuItem(
                               value: cat,
                               child: Text(
                                 cat.displayName(localizations),
-                                style: TextStyle(fontSize: 14, color: textColor),
+                                style:
+                                    TextStyle(fontSize: 14, color: textColor),
                               ),
                             );
                           }).toList(),
@@ -262,17 +291,25 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     // Hour Slider (from first version - cleaner structure)
                     Text(
                       localizations.transaction_hour,
-                      style: TextStyle(color: textSecondaryColor, fontSize: 14, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                          color: textSecondaryColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("00", style: TextStyle(color: hintColor, fontSize: 12)),
-                        Text("06", style: TextStyle(color: hintColor, fontSize: 12)),
-                        Text("12", style: TextStyle(color: hintColor, fontSize: 12)),
-                        Text("18", style: TextStyle(color: hintColor, fontSize: 12)),
-                        Text("23", style: TextStyle(color: hintColor, fontSize: 12)),
+                        Text("00",
+                            style: TextStyle(color: hintColor, fontSize: 12)),
+                        Text("06",
+                            style: TextStyle(color: hintColor, fontSize: 12)),
+                        Text("12",
+                            style: TextStyle(color: hintColor, fontSize: 12)),
+                        Text("18",
+                            style: TextStyle(color: hintColor, fontSize: 12)),
+                        Text("23",
+                            style: TextStyle(color: hintColor, fontSize: 12)),
                       ],
                     ),
                     SliderTheme(
@@ -288,8 +325,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         thumbColor: primaryColor,
                         activeTrackColor: primaryColor,
                         inactiveTrackColor: hintColor,
-                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 14),
-                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 28),
+                        thumbShape:
+                            const RoundSliderThumbShape(enabledThumbRadius: 14),
+                        overlayShape:
+                            const RoundSliderOverlayShape(overlayRadius: 28),
                       ),
                       child: Slider(
                         value: _hour.toDouble(),
@@ -297,7 +336,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         max: 23,
                         divisions: 23,
                         label: _hour.toString(),
-                        onChanged: (value) => setState(() => _hour = value.toInt()),
+                        onChanged: (value) =>
+                            setState(() => _hour = value.toInt()),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -305,7 +345,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     // Zip Code Field
                     Text(
                       localizations.zip_code,
-                      style: TextStyle(color: textSecondaryColor, fontSize: 14, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                          color: textSecondaryColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
@@ -320,13 +363,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         inputColor,
                         primaryColor,
                       ).copyWith(
-                        prefixIcon: Icon(Icons.location_on, color: primaryColor),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        prefixIcon:
+                            Icon(Icons.location_on, color: primaryColor),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 14),
                       ),
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       validator: (value) {
                         if (value == null || value.isEmpty) return null;
-                        if (!RegExp(r'^\d+$').hasMatch(value)) return localizations.error_zip_invalid;
+                        if (!RegExp(r'^\d+$').hasMatch(value))
+                          return localizations.error_zip_invalid;
                         return null;
                       },
                     ),
@@ -339,7 +385,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primaryColor,
                           padding: const EdgeInsets.symmetric(vertical: 18),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
                           elevation: 8,
                           shadowColor: primaryColor.withOpacity(0.5),
                         ),
@@ -367,13 +414,15 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     );
   }
 
-  InputDecoration _inputDecoration(String hint, Color hintColor, Color fillColor, Color primaryColor) {
+  InputDecoration _inputDecoration(
+      String hint, Color hintColor, Color fillColor, Color primaryColor) {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(color: hintColor, fontSize: 14),
       filled: true,
       fillColor: fillColor,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+      border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: BorderSide(color: primaryColor, width: 1.5),
