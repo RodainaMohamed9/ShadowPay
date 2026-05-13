@@ -116,6 +116,14 @@ namespace shadowpay_api.Controllers
                             errors = new[] { "Phone number does not match bank records" }
                         });
                     }
+                    else if (checkCard.isFrozen) 
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            errors = new[] { "This card is currently frozen. Please unfreeze it from your bank app first." }
+                        });
+                    }
                     else if (!checkCard.isExpiryMatched)
                     {
                         return BadRequest(new
@@ -143,6 +151,7 @@ namespace shadowpay_api.Controllers
                     CardNumberHash = model.CardNumberHash,
                     CardHolderName = model.CardHolderName,
                     ExprDate = model.ExprDate,
+                    Balance = checkCard.balance,
                     Purpose = "register"
                 };
 
