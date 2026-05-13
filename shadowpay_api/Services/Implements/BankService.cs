@@ -17,14 +17,14 @@ namespace shadowpay_api.Services.Implements
                 phoneNumber = register.PhoneNumber
             };
 
-            var response = await client.PostAsJsonAsync("http://localhost:8080/api/validate", javaLoad);
+            var response = await client.PostAsJsonAsync("http://localhost:8081/api/validate", javaLoad);
 
             var rawJson = await response.Content.ReadAsStringAsync();
             Console.WriteLine(rawJson);
 
             if (!response.IsSuccessStatusCode)
             {
-                return new JavaResponse { isExist = false, isActive = false, isExpired = true, isBlocked = true, isPhoneMatched = false, isExpiryMatched = false };
+                return new JavaResponse { isExist = false, isActive = false, isExpired = true, isBlocked = true, isPhoneMatched = false, isExpiryMatched = false, isFrozen = true };
             }
 
             var jsonNode = JsonNode.Parse(rawJson);
@@ -35,8 +35,11 @@ namespace shadowpay_api.Services.Implements
                 isActive = jsonNode["active"]?.GetValue<bool>() ?? jsonNode["isActive"]?.GetValue<bool>() ?? false,
                 isExpired = jsonNode["expired"]?.GetValue<bool>() ?? jsonNode["isExpired"]?.GetValue<bool>() ?? true,
                 isBlocked = jsonNode["blocked"]?.GetValue<bool>() ?? jsonNode["isBlocked"]?.GetValue<bool>() ?? true,
+                isFrozen = jsonNode["frozen"]?.GetValue<bool>() ?? false,
                 isPhoneMatched = jsonNode["phoneMatched"]?.GetValue<bool>() ?? jsonNode["isPhoneMatched"]?.GetValue<bool>() ?? false,
-                isExpiryMatched = jsonNode["expiryMatched"]?.GetValue<bool>() ?? jsonNode["isExpiryMatched"]?.GetValue<bool>() ?? false
+                isExpiryMatched = jsonNode["expiryMatched"]?.GetValue<bool>() ?? jsonNode["isExpiryMatched"]?.GetValue<bool>() ?? false,
+                balance = jsonNode["balance"]?.GetValue<decimal>() ?? 0m,
+                cardType = jsonNode["cardType"]?.GetValue<string>() ?? "VISA"
             };
         }
     }

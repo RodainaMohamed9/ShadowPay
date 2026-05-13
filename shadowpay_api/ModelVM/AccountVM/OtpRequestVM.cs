@@ -12,6 +12,8 @@
         public string? CardNumberHash { get; set; }
         public string? CardHolderName { get; set; }
         public DateTime? ExprDate { get; set; }
+        public decimal? Balance { get; set; }
+        public string CardType { get; set; }
     }
 
     public class OtpVerifyVM

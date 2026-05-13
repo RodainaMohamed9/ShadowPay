@@ -16,11 +16,19 @@ namespace shadowpay_api.ModelVM
 
         [JsonPropertyName("blocked")]
         public bool isBlocked { get; set; }
+        [JsonPropertyName("frozen")]
+        public bool isFrozen { get; set; }
 
         [JsonPropertyName("phoneMatched")]
         public bool isPhoneMatched { get; set; }
 
         [JsonPropertyName("expiryMatched")]
         public bool isExpiryMatched { get; set; }
+
+        [JsonPropertyName("balance")]
+        public decimal balance { get; set; }
+
+        [JsonPropertyName("cardType")]
+        public string cardType { get; set; } = string.Empty;
     }
 }
