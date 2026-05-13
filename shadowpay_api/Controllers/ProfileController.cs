@@ -59,5 +59,30 @@ namespace shadowpay_api.Controllers
             };
             return Ok(profileData);
         }
+
+        [HttpPost("toggle-freeze")]
+        public async Task<IActionResult> ToggleFreeze()
+        {
+            var currentUserId = _currentUser.UserId;
+
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized();
+
+            var user = await _db.Users.FindAsync(currentUserId);
+
+            if (user == null)
+                return NotFound(new { message = "User not found" });
+
+            bool isSuccess = await _bankService.ToggleFreezeStatusInJava(user.CardNumberHash);
+
+            if (isSuccess)
+            {
+                return Ok(new { success = true, message = "Card freeze status updated successfully" });
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = "Failed to update card status in Bank" });
+            }
+        }
     }
 }

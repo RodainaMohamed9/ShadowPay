@@ -42,5 +42,24 @@ namespace shadowpay_api.Services.Implements
                 cardType = jsonNode["cardType"]?.GetValue<string>() ?? "VISA"
             };
         }
+
+        public async Task<bool> ToggleFreezeStatusInJava(string cardNumber)
+        {
+            using var client = new HttpClient();
+
+            var requestData = new { cardNumber = cardNumber };
+
+            var response = await client.PostAsJsonAsync("http://localhost:8081/api/toggle-freeze", requestData);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var rawJson = await response.Content.ReadAsStringAsync();
+                var jsonNode = JsonNode.Parse(rawJson);
+
+                return jsonNode["success"]?.GetValue<bool>() ?? false;
+            }
+
+            return false;
+        }
     }
 }
