@@ -5,6 +5,10 @@ class ProfileModel {
   DateTime exprDate;
   String email;
   String phoneNumber;
+  bool isFrozen; 
+  double balance; 
+  String cardType;
+
 
   ProfileModel({
     required this.fullName,
@@ -13,6 +17,9 @@ class ProfileModel {
     required this.exprDate,
     required this.email,
     required this.phoneNumber,
+    required this.isFrozen,
+    required this.balance,
+    required this.cardType,
   });
 
   String get formattedExpiry {
@@ -31,6 +38,9 @@ class ProfileModel {
           : DateTime.now(),
       email: json['email'] ?? '',
       phoneNumber: json['phoneNumber'] ?? '',
+      isFrozen: json['isFrozen'] ?? false,
+      balance: (json['balance'] ?? 0.0).toDouble(),
+      cardType: json['cardType'] ?? 'VISA',
     );
   }
 
@@ -41,5 +51,8 @@ class ProfileModel {
         "exprDate": exprDate.toIso8601String(),
         "email": email,
         "phoneNumber": phoneNumber,
+        "isFrozen": isFrozen,
+        "balance": balance,
+        "cardType": cardType,
       };
 }

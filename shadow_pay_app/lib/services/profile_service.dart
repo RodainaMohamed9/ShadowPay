@@ -18,4 +18,20 @@ class ProfileService {
       return null;
     }
   }
+
+  static Future<bool> toggleCardFreezeStatus() async {
+    try {
+      final dioClient = DioClient().dio;
+      final response = await dioClient.post('/Profile/toggle-freeze');
+
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print("Error toggling freeze status: $e");
+      return false;
+    }
+  }
 }
