@@ -4,7 +4,8 @@ import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/screens/main_screen.dart';
 
 class ReportScreen extends StatefulWidget {
-  const ReportScreen({super.key});
+   final VoidCallback? onBack;
+  const ReportScreen({super.key, this.onBack});
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();
@@ -89,7 +90,11 @@ class _ReportScreenState extends State<ReportScreen> {
       );
       await Future.delayed(const Duration(seconds: 1));
       if (mounted) {
-        Navigator.pop(context);
+       Navigator.pushAndRemoveUntil(
+  context,
+  MaterialPageRoute(builder: (context) => const MainScreen()),
+  (route) => false,
+);
       }
     }
   }
@@ -120,11 +125,11 @@ class _ReportScreenState extends State<ReportScreen> {
           ),
 iconSize: 25,
 onPressed: () {
-  Navigator.pushAndRemoveUntil(
-    context,
-    MaterialPageRoute(builder: (context) => const MainScreen()),
-    (route) => false,
-  );
+  if (widget.onBack != null) {
+    widget.onBack!();
+  } else {
+    Navigator.pop(context);
+  }
 },
 icon: Icon(Icons.arrow_back, color: context.textSecondary),
       ),

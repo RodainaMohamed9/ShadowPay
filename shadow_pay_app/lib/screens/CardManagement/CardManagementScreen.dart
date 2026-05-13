@@ -195,83 +195,6 @@ class _CardManagementScreenState extends State<CardManagementScreen>
     });
   }
 
-  Future<void> _showFreezeConfirmationDialog(AppLocalizations loc) async {
-    final isDarkMode = context.isDarkMode;
-    final isFreezing = !isCardFrozen; 
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, 
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          backgroundColor: isDarkMode ? const Color(0xff1D293D) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Row(
-            children: [
-              Icon(
-                isFreezing ? Icons.warning_amber_rounded : Icons.lock_open_rounded,
-                color: isFreezing ? Colors.orange : Colors.green,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                isFreezing ? "Freeze Card?" : "Unfreeze Card?", 
-                style: TextStyle(
-                  color: context.textPrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ],
-          ),
-          content: Text(
-            isFreezing 
-                ? "Are you sure you want to freeze this card? You won't be able to make any transactions."
-                : "Are you sure you want to unfreeze this card? It will be ready for transactions again.",
-            style: TextStyle(color: context.textSecondary, fontSize: 14),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(
-                "Cancel",
-                style: TextStyle(color: context.textSecondary),
-              ),
-              onPressed: () {
-                Navigator.of(dialogContext).pop(); 
-              },
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isFreezing ? Colors.red : Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(
-                "Yes, ${isFreezing ? 'Freeze' : 'Unfreeze'}",
-                style: const TextStyle(color: Colors.white),
-              ),
-              onPressed: () async {
-                Navigator.of(dialogContext).pop(); 
-                await _processFreezeAction(loc);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _processFreezeAction(AppLocalizations loc) async {
-    bool success = await context.read<ProfileCubit>().toggleFreezeStatus(); 
-
-    if (success) {
-      _isFromUserAction = true;
-      toggleFreeze(loc); 
-    } else {
-      _showSnackBar("Failed to connect to the server. Please try again.");
-    }
-  }
-
   void onCardTap() {
     _cardTapController.forward(from: 0);
     _flipController.forward(from: 0);
@@ -600,7 +523,15 @@ onPressed: () {
 
                                   if (state is ProfileSuccessState && state.profile != null) {
                                     cardHolder = state.profile!.cardHolderName.toUpperCase();
-                                    cardType = state.profile!.cardType.toUpperCase();
+                                    if (state.profile!.cardNumberHash.startsWith('4')) {
+                                      cardType = 'Visa';
+                                    } else if (state.profile!.cardNumberHash.startsWith('5')) {
+                                      cardType = 'MasterCard';
+                                    } else if (state.profile!.cardNumberHash.startsWith('3')) {
+                                      cardType = 'American Express';
+                                    } else {
+                                      cardType = 'Unknown';
+                                    }
                                     issueDate = "${state.profile!.exprDate.month.toString().padLeft(2, '0')}/${state.profile!.exprDate.year}";
                                     expiryDate = state.profile!.formattedExpiry;
                                   }
@@ -627,7 +558,9 @@ onPressed: () {
 
                       GestureDetector(
                         onTap: () {
-                          _showFreezeConfirmationDialog(loc);
+                          _isFromUserAction = true;
+                          _animationController.forward(from: 0);
+                          toggleFreeze(loc);
                         },
                         child: AnimatedBuilder(
                           animation: _animationController,
@@ -1074,9 +1007,7 @@ onPressed: () {
                                 ),
                                 const SizedBox(height: 5),
                                 Text(
-                                  state.profile != null
-                                      ? "\$${state.profile!.balance.toStringAsFixed(2)}"
-                                      : "\$0.00",
+                                  "\$12,847.50",
                                   style: TextStyle(
                                     color: context.textPrimary,
                                     fontSize: 28,
@@ -1272,7 +1203,7 @@ onPressed: () {
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           colors: isCardFrozen
-              ? [const Color(0xFF2A2F3E), const Color(0xFF2A2F3E)]
+              ? [const Color(0xFF800020), const Color(0xFF4A0020)]
               : (isDarkMode
                   ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
                   : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)]),
@@ -1302,7 +1233,7 @@ onPressed: () {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: (isCardFrozen
-                          ? const Color(0xFF2A2F3E)
+                          ? const Color(0xFF800020)
                           : context.primaryColor)
                       .withOpacity(0.15),
                 ),
@@ -1349,21 +1280,15 @@ onPressed: () {
                             ),
                           ],
                         ),
-                      Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text("CARD TYPE",
-                            style: TextStyle(
-                                color: context.textSecondary,
-                                fontSize: 10)),
-                        const SizedBox(height: 5),
-                        BlocBuilder<ProfileCubit, ProfileState>( // إضافة BlocBuilder هنا
-                          builder: (context, state) {
-                            String type = "PREMIUM";
-                            if (state is ProfileSuccessState && state.profile != null) {
-                              type = state.profile!.cardType.toUpperCase();
-                            }
-                            return Text(type,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text("CARD TYPE",
+                                style: TextStyle(
+                                    color: context.textSecondary,
+                                    fontSize: 10)),
+                            const SizedBox(height: 5),
+                            Text("PREMIUM",
                                 style: TextStyle(
                                     color: (isCardFrozen
                                             ? const Color(0xFF800020)
@@ -1371,11 +1296,9 @@ onPressed: () {
                                         .withOpacity(0.8),
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
-                                    letterSpacing: 1));
-                          },
+                                    letterSpacing: 1)),
+                          ],
                         ),
-                      ],
-                    ),
                       ],
                     ),
                     const Spacer(),

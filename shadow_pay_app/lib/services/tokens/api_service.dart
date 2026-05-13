@@ -7,8 +7,8 @@ class DioClient {
   DioClient() {
     dio = Dio(BaseOptions(
       baseUrl: 'https://jackeline-cibarious-supergallantly.ngrok-free.dev/api',
-      connectTimeout: const Duration(seconds: 5),
-      receiveTimeout: const Duration(seconds: 3),
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
       headers: {
         "ngrok-skip-browser-warning": "true",
       },

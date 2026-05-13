@@ -67,28 +67,6 @@ class RiskAnalysisScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(
-              (isDarkMode ? const Color(0xff1D293D) : Colors.grey.shade200).withOpacity(0.4),
-            ),
-            side: MaterialStateProperty.all(
-              BorderSide(color: textSecondaryColor.withOpacity(0.5), width: 1),
-            ),
-          ),
-          iconSize: 25,
-          onPressed: () => {
-            Navigator.push(
-context, MaterialPageRoute(
-builder: (context) =>AddTransactionScreen(),
-),
-),
-          },
-          icon: Transform.scale(
-            scaleX: isRTL ? -1 : 1,
-            child: Icon(Icons.arrow_back, color: textSecondaryColor),
-          ),
-        ),
         title: Text(
           localizations.risk_analysis_title,
           style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w600),
