@@ -354,7 +354,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recentActivity => 'النشاط الأخير';
 
   @override
-  String get safe => 'آمن';
+  String get safe => 'آمنة';
 
   @override
   String get risk => 'خطر';
@@ -633,7 +633,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get all => 'الكل';
 
   @override
-  String get warning => 'Warning';
+  String get warning => 'تحذير';
 
   @override
   String get fraud => 'احتيال';

@@ -10,8 +10,7 @@ import 'package:shadow_pay_app/screens/home/home_widgets/quick_actions.dart';
 import 'package:shadow_pay_app/screens/home/home_widgets/recent_activity.dart';
 
 class HomeScreen extends StatelessWidget {
-  final Function(int) onNavigate;
-
+final Future<void> Function(int) onNavigate;
   const HomeScreen({
     super.key,
     required this.onNavigate,
@@ -48,14 +47,20 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
-  void _handleFreeze() {
-    widget.onNavigate(1); // CardManagementScreen
-  }
+
 
   @override
   void initState() {
     super.initState();
     context.read<ProfileCubit>().getProfile();
+  }
+
+
+ Future<void> _goToCardManagement() async {
+  await widget.onNavigate(1);
+    if (mounted) {
+      context.read<ProfileCubit>().getProfile();
+    }
   }
 
   @override
@@ -74,12 +79,15 @@ class _HomeContentState extends State<HomeContent> {
           child: Text(state.errorMessage),
         );
       } else if (state is ProfileSuccessState) {
+        final isFrozen = state.profile?.isFrozen ?? false;
+
         return Column(
           children: [
             WelcomeHeader(
               userName: state.profile?.fullName ?? "User",
-              isFrozen: state.profile?.isFrozen ?? false,
-              onManageTap: state.profile?.isFrozen ?? false ? _handleFreeze : null,
+              isFrozen: isFrozen,
+              // FIX 1: onManageTap دايمًا شغال مش بس لما الكارت frozen
+              onManageTap: _goToCardManagement,
               isDarkMode: isDarkMode,
             ),
             Expanded(
@@ -95,22 +103,20 @@ class _HomeContentState extends State<HomeContent> {
                           "**** **** **** 1234",
                       cardHolder:
                           state.profile?.cardHolderName ?? "Card Holder",
-                      expiry:
-                          state.profile?.formattedExpiry ?? "12/24",                      // balance: cardBalance,
-                      isFrozen: state.profile?.isFrozen ?? false,
+                      expiry: state.profile?.formattedExpiry ?? "12/24",
+                      // FIX 2: isFrozen بييجي من الـ state مباشرة فبيتحدث تلقائي
+                      isFrozen: isFrozen,
                       isDarkMode: isDarkMode,
                       balance: state.profile?.balance ?? 0.0,
                     ),
                     const SizedBox(height: 24),
                     QuickActions(
-                      onAddTap: () =>
-                          widget.onNavigate(4), // AddTransactionScreen
-                      onReportTap: () => widget.onNavigate(2), // ReportScreen
-                      onDetailsTap: () =>
-                          widget.onNavigate(1), // CardDetailsScreen
-                      onFreezeTap: _handleFreeze, // CardManagementScreen
-                      onManageTap: _handleFreeze,
-                      // isCardFrozen: isCardFrozen,
+                      onAddTap: () => widget.onNavigate(4),
+                      onReportTap: () => widget.onNavigate(2),
+                      onDetailsTap: () => widget.onNavigate(5),
+                      // FIX 3: كل الأزرار المتعلقة بالكارت بتروح لـ _goToCardManagement
+                      onFreezeTap: _goToCardManagement,
+                      onManageTap: _goToCardManagement,
                       isDarkMode: isDarkMode,
                     ),
                     const SizedBox(height: 24),

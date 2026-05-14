@@ -13,6 +13,8 @@ import 'package:shadow_pay_app/screens/profile/profile_screen.dart';
 import 'package:shadow_pay_app/screens/TransactionScreens/add_transaction_screen.dart';
 import 'package:shadow_pay_app/screens/Analysis/risk_analysis_screen.dart';
 import 'package:shadow_pay_app/screens/home/home_widgets/bottom_nav_bar.dart';
+import 'package:shadow_pay_app/screens/Analysis/analytics_screen.dart';
+
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -43,21 +45,22 @@ class _MainScreenState extends State<MainScreen> {
     _screens = [
       HomeScreen(onNavigate: _changeTab), // index 0
       CardManagementScreen(onBack: _goBackHome), // index 1
-      const ReportScreen(), // index 2
+      ReportScreen(onBack: _goBackHome), // index 2
       const ProfileScreen(), // index 3
       AddTransactionScreen(
         onBack: _goBackHome,
         onAnalyze: _showRiskAnalysis,
       ), // index 4
+      AnalyticsScreen(onBack: _goBackHome),
       
     ];
   }
 
-  void _changeTab(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
+ Future<void> _changeTab(int index) async {
+  setState(() {
+    _currentIndex = index;
+  });
+}
 
   void _goBackHome() {
     setState(() {
@@ -76,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
 Widget build(BuildContext context) {
   final themeProvider = Provider.of<ThemeProvider>(context);
   final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
-  final showBottomNav = _currentIndex >= 0 && _currentIndex <= 4 && !_showRiskScreen;
+  final showBottomNav = _currentIndex >= 0 && _currentIndex <= 5 && !_showRiskScreen;
 
   return BlocConsumer<TransactionCubit, TransactionState>(
     listener: (context, state) {
@@ -107,7 +110,10 @@ Widget build(BuildContext context) {
                     isFraud: _analyzedTransaction!.isFraud,
                     detectionMode: 'AI Microservice', 
                   )
-                : _screens[_currentIndex],
+                : IndexedStack(
+    index: _currentIndex,
+    children: _screens,
+  ),
 
             if (state is TransactionLoadingState)
               Container(

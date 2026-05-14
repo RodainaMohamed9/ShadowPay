@@ -270,6 +270,11 @@
 "transaction_distribution": "توزيع المعاملات",
 "risk_trend": "اتجاه المخاطر",
 "safe": "آمن"
+,
+  "unknown": "غير معرف"
+,"warning": "تحذير",
+"safe": "آمنة",  
+"fraud": "احتيال"
 
 
 }

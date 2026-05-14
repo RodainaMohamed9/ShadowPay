@@ -86,6 +86,9 @@ class _TransactionListState extends State<TransactionList> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = themeProvider.themeMode == ThemeMode.dark;
 
+    // FIX 3: Detect RTL for alignment fixes
+    final isRTL = Localizations.localeOf(context).languageCode == 'ar';
+
     final backgroundColor =
         isDarkMode ? const Color(0xFF0a1729) : const Color(0xFFF5F7FA);
     final textColor = isDarkMode ? Colors.white : Colors.black87;
@@ -93,464 +96,384 @@ class _TransactionListState extends State<TransactionList> {
     final primaryColor =
         isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: backgroundColor,
-      body: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: BlocBuilder<TransactionCubit, TransactionState>(
-                builder: (context, state) {
-                  if (state is TransactionLoadingState) {
-                    return Center(
-                      child: CircularProgressIndicator(color: primaryColor),
-                    );
-                  } else if (state is TransactionFailureState) {
-                    return Center(
-                      child: Text(state.errorMessage,
-                          style: TextStyle(color: textColor)),
-                    );
-                  } else if (state is TransactionSuccessState) {
-                    final allTransactions =
-                        state.transactions.reversed.toList();
+    return Directionality(
+      // FIX 3: Wrap with Directionality so everything flips correctly in Arabic
+      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: backgroundColor,
+        body: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: BlocBuilder<TransactionCubit, TransactionState>(
+                  builder: (context, state) {
+                    if (state is TransactionLoadingState) {
+                      return Center(
+                        child: CircularProgressIndicator(color: primaryColor),
+                      );
+                    } else if (state is TransactionFailureState) {
+                      return Center(
+                        child: Text(state.errorMessage,
+                            style: TextStyle(color: textColor)),
+                      );
+                    } else if (state is TransactionSuccessState) {
+                      final allTransactions =
+                          state.transactions.reversed.toList();
 
-                    final filteredTransactions = allTransactions.where((t) {
-                      if (_selectedFilter != 'All' &&
-                          t.riskLevel != _selectedFilter) {
-                        return false;
-                      }
-                      if (_searchQuery.isNotEmpty) {
-                        final categoryName =
-                            t.merchantCategory.name.toLowerCase();
-                        if (!categoryName
-                            .contains(_searchQuery.toLowerCase())) {
+                      final filteredTransactions = allTransactions.where((t) {
+                        if (_selectedFilter != 'All' &&
+                            t.riskLevel != _selectedFilter) {
                           return false;
                         }
-                      }
-                      return true;
-                    }).toList();
+                        if (_searchQuery.isNotEmpty) {
+                          final categoryName =
+                              t.merchantCategory.name.toLowerCase();
+                          if (!categoryName
+                              .contains(_searchQuery.toLowerCase())) {
+                            return false;
+                          }
+                        }
+                        return true;
+                      }).toList();
 
-                    int safeCount = allTransactions
-                        .where((t) => t.riskLevel == "Low Risk")
-                        .length;
-                    int warningCount = allTransactions
-                        .where((t) => t.riskLevel == "Medium Risk")
-                        .length;
-                    int fraudCount = allTransactions
-                        .where((t) => t.riskLevel == "High Risk")
-                        .length;
-                    double totalAmount =
-                        allTransactions.fold(0.0, (sum, t) => sum + t.amount);
+                      int safeCount = allTransactions
+                          .where((t) => t.riskLevel == "Low Risk")
+                          .length;
+                      int warningCount = allTransactions
+                          .where((t) => t.riskLevel == "Medium Risk")
+                          .length;
+                      int fraudCount = allTransactions
+                          .where((t) => t.riskLevel == "High Risk")
+                          .length;
+                      double totalAmount =
+                          allTransactions.fold(0.0, (sum, t) => sum + t.amount);
 
-                    return Column(
-                      children: [
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            IconButton(
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
-                                  (isDarkMode
-                                          ? const Color(0xff1D293D)
-                                          : Colors.grey.shade200)
-                                      .withOpacity(0.4),
-                                ),
-                                side: MaterialStateProperty.all(
-                                  BorderSide(
-                                    color:
-                                        textSecondaryColor!.withOpacity(0.4),
-                                    width: 1,
+                      return Column(
+                        // FIX 3: crossAxisAlignment يتغير حسب الاتجاه
+                        crossAxisAlignment: isRTL
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              IconButton(
+                                style: ButtonStyle(
+                                  backgroundColor: WidgetStateProperty.all(
+                                    (isDarkMode
+                                            ? const Color(0xff1D293D)
+                                            : Colors.grey.shade200)
+                                        .withOpacity(0.4),
                                   ),
+                                  side: WidgetStateProperty.all(
+                                    BorderSide(
+                                      color:
+                                          textSecondaryColor!.withOpacity(0.4),
+                                      width: 1,
+                                    ),
+                                  ),
+                                ),
+                                iconSize: 25,
+                                onPressed: () {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const MainScreen()),
+                                    (route) => false,
+                                  );
+                                },
+                                // FIX 3: أيقونة السهم تتغير حسب الاتجاه
+                                icon: Icon(
+                                  isRTL
+                                      ? Icons.arrow_forward
+                                      : Icons.arrow_back,
+                                  color: textSecondaryColor,
                                 ),
                               ),
-                              iconSize: 25,
-                              onPressed: () {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const MainScreen()),
-                                  (route) => false,
-                                );
-                              },
-                              icon: Icon(Icons.arrow_back,
-                                  color: textSecondaryColor),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              left: isRTL ? 0 : 8,
+                              right: isRTL ? 8 : 0,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 15),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  loc.allTransactions,
-                                  style: TextStyle(
-                                    color: textColor,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 25,
+                            child: Align(
+                              alignment: isRTL
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Column(
+                                crossAxisAlignment: isRTL
+                                    ? CrossAxisAlignment.end
+                                    : CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    loc.allTransactions,
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 25,
+                                    ),
                                   ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "${allTransactions.length} ${loc.numTransactions}",
+                                    style: TextStyle(
+                                        color: textSecondaryColor,
+                                        fontSize: 15),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.all(25),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                width: 2,
+                                color: primaryColor.withOpacity(0.1),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: primaryColor.withOpacity(0.1),
+                                  spreadRadius: 5,
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(loc.totalAmount,
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(color: primaryColor)),
+                                    Text(loc.transactions,
+                                        textAlign: TextAlign.right,
+                                        style: TextStyle(color: primaryColor)),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                        "\$${totalAmount.toStringAsFixed(2)}",
+                                        style: TextStyle(
+                                            color: textColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 25)),
+                                    Text("${allTransactions.length}",
+                                        style: TextStyle(
+                                            color: textColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 25)),
+                                  ],
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  "${allTransactions.length} ${loc.numTransactions}",
-                                  style: TextStyle(
-                                      color: textSecondaryColor, fontSize: 15),
+                                Wrap(
+                                  spacing: 10,
+                                  runSpacing: 4,
+                                  children: [
+                                    Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                              width: 10,
+                                              height: 10,
+                                              decoration: const BoxDecoration(
+                                                  color: Color(0xff00BC7D),
+                                                  shape: BoxShape.circle)),
+                                          const SizedBox(width: 3),
+                                          // FIX 1: "safe" label only, no count here redundant text
+                                          Text("$safeCount ${loc.safe}",
+                                              style: TextStyle(
+                                                  color: textSecondaryColor)),
+                                        ]),
+                                    Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                              width: 10,
+                                              height: 10,
+                                              decoration: const BoxDecoration(
+                                                  color: Color(0xffFE9A00),
+                                                  shape: BoxShape.circle)),
+                                          const SizedBox(width: 3),
+                                          Text("$warningCount ${loc.warning}",
+                                              style: TextStyle(
+                                                  color: textSecondaryColor)),
+                                        ]),
+                                    Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                              width: 10,
+                                              height: 10,
+                                              decoration: const BoxDecoration(
+                                                  color: Color(0xffFB2C36),
+                                                  shape: BoxShape.circle)),
+                                          const SizedBox(width: 3),
+                                          Text("$fraudCount ${loc.fraud}",
+                                              style: TextStyle(
+                                                  color: textSecondaryColor)),
+                                        ]),
+                                  ],
                                 ),
                               ],
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        Container(
-                          padding: const EdgeInsets.all(25),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              width: 2,
-                              color: primaryColor.withOpacity(0.1),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: primaryColor.withOpacity(0.1),
-                                spreadRadius: 5,
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
+                          const SizedBox(height: 20),
+                          TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                            },
+                            textAlign: isRTL ? TextAlign.right : TextAlign.left,
+                            keyboardType: TextInputType.text,
+                            cursorColor: textSecondaryColor,
+                            decoration: InputDecoration(
+                              hintText: loc.searchHint,
+                              hintStyle: TextStyle(
+                                  color: textSecondaryColor.withOpacity(0.3)),
+                              fillColor: (isDarkMode
+                                      ? const Color(0xff1D293D)
+                                      : Colors.grey.shade200)
+                                  .withOpacity(0.3),
+                              filled: true,
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: textSecondaryColor.withOpacity(0.1),
+                                    width: 1),
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(loc.totalAmount,
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(color: primaryColor)),
-                                  Text(loc.transactions,
-                                      textAlign: TextAlign.right,
-                                      style: TextStyle(color: primaryColor)),
-                                ],
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: primaryColor.withOpacity(0.3),
+                                    width: 1),
+                                borderRadius: BorderRadius.circular(20),
                               ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("\$${totalAmount.toStringAsFixed(2)}",
-                                      style: TextStyle(
-                                          color: textColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 25)),
-                                  Text("${allTransactions.length}",
-                                      style: TextStyle(
-                                          color: textColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 25)),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Wrap(
-                                spacing: 10,
-                                runSpacing: 4,
-                                children: [
-                                  Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                            width: 10,
-                                            height: 10,
-                                            decoration: const BoxDecoration(
-                                                color: Color(0xff00BC7D),
-                                                shape: BoxShape.circle)),
-                                        const SizedBox(width: 3),
-                                        Text("$safeCount ${loc.safe}",
-                                            style: TextStyle(
-                                                color: textSecondaryColor)),
-                                      ]),
-                                  Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                            width: 10,
-                                            height: 10,
-                                            decoration: const BoxDecoration(
-                                                color: Color(0xffFE9A00),
-                                                shape: BoxShape.circle)),
-                                        const SizedBox(width: 3),
-                                        Text("$warningCount ${loc.warning}",
-                                            style: TextStyle(
-                                                color: textSecondaryColor)),
-                                      ]),
-                                  Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Container(
-                                            width: 10,
-                                            height: 10,
-                                            decoration: const BoxDecoration(
-                                                color: Color(0xffFB2C36),
-                                                shape: BoxShape.circle)),
-                                        const SizedBox(width: 3),
-                                        Text("$fraudCount ${loc.fraud}",
-                                            style: TextStyle(
-                                                color: textSecondaryColor)),
-                                      ]),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        TextField(
-                          onChanged: (value) {
-                            setState(() {
-                              _searchQuery = value;
-                            });
-                          },
-                          keyboardType: TextInputType.text,
-                          cursorColor: textSecondaryColor,
-                          decoration: InputDecoration(
-                            hintText: loc.searchHint,
-                            hintStyle: TextStyle(
-                                color: textSecondaryColor.withOpacity(0.3)),
-                            fillColor: (isDarkMode
-                                    ? const Color(0xff1D293D)
-                                    : Colors.grey.shade200)
-                                .withOpacity(0.3),
-                            filled: true,
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: textSecondaryColor.withOpacity(0.1),
-                                  width: 1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: primaryColor.withOpacity(0.3),
-                                  width: 1),
-                              borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              ElevatedButton(
-                                onPressed: () =>
-                                    setState(() => _selectedFilter = "All"),
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.resolveWith<Color>(
-                                    (states) => _selectedFilter == "All"
-                                        ? primaryColor.withOpacity(0.1)
-                                        : (isDarkMode
-                                            ? const Color(0xff1D293D)
-                                                .withOpacity(0.3)
-                                            : Colors.grey.shade200),
-                                  ),
-                                  side: MaterialStateProperty
-                                      .resolveWith<BorderSide>(
-                                    (states) => BorderSide(
-                                      color: _selectedFilter == "All"
-                                          ? primaryColor
-                                          : (isDarkMode
-                                              ? const Color(0xff1D293D)
-                                                  .withOpacity(0.7)
-                                              : Colors.grey.shade400),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  shape: MaterialStateProperty.all(
-                                      RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20))),
-                                  minimumSize: MaterialStateProperty.all(
-                                      const Size(80, 40)),
+                          const SizedBox(height: 10),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                _filterButton(
+                                  label:
+                                      "${loc.all} (${allTransactions.length})",
+                                  filterKey: "All",
+                                  primaryColor: primaryColor,
+                                  isDarkMode: isDarkMode,
                                 ),
-                                child: Text(
-                                  "${loc.all} (${allTransactions.length})",
-                                  style: TextStyle(
-                                    color: _selectedFilter == "All"
-                                        ? primaryColor
-                                        : (isDarkMode
-                                            ? Colors.grey.withOpacity(0.7)
-                                            : Colors.grey[700]),
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                const SizedBox(width: 15),
+                                _filterButton(
+                                  // FIX 1: safe filter button يعرض loc.safe بس
+                                  label: "${loc.safe} ($safeCount)",
+                                  filterKey: "Low Risk",
+                                  primaryColor: primaryColor,
+                                  isDarkMode: isDarkMode,
                                 ),
-                              ),
-                              const SizedBox(width: 15),
-                              ElevatedButton(
-                                onPressed: () => setState(
-                                    () => _selectedFilter = "Low Risk"),
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.resolveWith<Color>(
-                                    (states) => _selectedFilter == "Low Risk"
-                                        ? primaryColor.withOpacity(0.1)
-                                        : (isDarkMode
-                                            ? const Color(0xff1D293D)
-                                                .withOpacity(0.3)
-                                            : Colors.grey.shade200),
-                                  ),
-                                  side: MaterialStateProperty
-                                      .resolveWith<BorderSide>(
-                                    (states) => BorderSide(
-                                      color: _selectedFilter == "Low Risk"
-                                          ? primaryColor
-                                          : (isDarkMode
-                                              ? const Color(0xff1D293D)
-                                                  .withOpacity(0.7)
-                                              : Colors.grey.shade400),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  shape: MaterialStateProperty.all(
-                                      RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20))),
-                                  minimumSize: MaterialStateProperty.all(
-                                      const Size(80, 40)),
+                                const SizedBox(width: 15),
+                                _filterButton(
+                                  // FIX 2: warning بيجي من loc عشان يتترجم صح
+                                  label: "${loc.warning} ($warningCount)",
+                                  filterKey: "Medium Risk",
+                                  primaryColor: primaryColor,
+                                  isDarkMode: isDarkMode,
                                 ),
-                                child: Text(
-                                  "${loc.safe} ($safeCount)",
-                                  style: TextStyle(
-                                    color: _selectedFilter == "Low Risk"
-                                        ? primaryColor
-                                        : (isDarkMode
-                                            ? Colors.grey.withOpacity(0.7)
-                                            : Colors.grey[700]),
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                const SizedBox(width: 15),
+                                _filterButton(
+                                  label: "${loc.fraud} ($fraudCount)",
+                                  filterKey: "High Risk",
+                                  primaryColor: primaryColor,
+                                  isDarkMode: isDarkMode,
                                 ),
-                              ),
-                              const SizedBox(width: 15),
-                              ElevatedButton(
-                                onPressed: () => setState(
-                                    () => _selectedFilter = "Medium Risk"),
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.resolveWith<Color>(
-                                    (states) => _selectedFilter == "Medium Risk"
-                                        ? primaryColor.withOpacity(0.1)
-                                        : (isDarkMode
-                                            ? const Color(0xff1D293D)
-                                                .withOpacity(0.3)
-                                            : Colors.grey.shade200),
-                                  ),
-                                  side: MaterialStateProperty
-                                      .resolveWith<BorderSide>(
-                                    (states) => BorderSide(
-                                      color: _selectedFilter == "Medium Risk"
-                                          ? primaryColor
-                                          : (isDarkMode
-                                              ? const Color(0xff1D293D)
-                                                  .withOpacity(0.7)
-                                              : Colors.grey.shade400),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  shape: MaterialStateProperty.all(
-                                      RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20))),
-                                  minimumSize: MaterialStateProperty.all(
-                                      const Size(80, 40)),
-                                ),
-                                child: Text(
-                                  "${loc.warning} ($warningCount)",
-                                  style: TextStyle(
-                                    color: _selectedFilter == "Medium Risk"
-                                        ? primaryColor
-                                        : (isDarkMode
-                                            ? Colors.grey.withOpacity(0.7)
-                                            : Colors.grey[700]),
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 15),
-                              ElevatedButton(
-                                onPressed: () => setState(
-                                    () => _selectedFilter = "High Risk"),
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.resolveWith<Color>(
-                                    (states) => _selectedFilter == "High Risk"
-                                        ? primaryColor.withOpacity(0.1)
-                                        : (isDarkMode
-                                            ? const Color(0xff1D293D)
-                                                .withOpacity(0.3)
-                                            : Colors.grey.shade200),
-                                  ),
-                                  side: MaterialStateProperty
-                                      .resolveWith<BorderSide>(
-                                    (states) => BorderSide(
-                                      color: _selectedFilter == "High Risk"
-                                          ? primaryColor
-                                          : (isDarkMode
-                                              ? const Color(0xff1D293D)
-                                                  .withOpacity(0.7)
-                                              : Colors.grey.shade400),
-                                      width: 2,
-                                    ),
-                                  ),
-                                  shape: MaterialStateProperty.all(
-                                      RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20))),
-                                  minimumSize: MaterialStateProperty.all(
-                                      const Size(80, 40)),
-                                ),
-                                child: Text(
-                                  "${loc.fraud} ($fraudCount)",
-                                  style: TextStyle(
-                                    color: _selectedFilter == "High Risk"
-                                        ? primaryColor
-                                        : (isDarkMode
-                                            ? Colors.grey.withOpacity(0.7)
-                                            : Colors.grey[700]),
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 15),
-                        Expanded(
-                          child: filteredTransactions.isEmpty
-                              ? _buildEmptyState(
-                                  loc, primaryColor, isDarkMode, context)
-                              : ListView.builder(
-                                  itemCount: filteredTransactions.length,
-                                  itemBuilder: (context, index) {
-                                    return _buildTransactionDetails(
-                                      filteredTransactions[index],
-                                      loc,
-                                      primaryColor,
-                                      isDarkMode,
-                                    );
-                                  },
-                                ),
-                        ),
-                      ],
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
+                          const SizedBox(height: 15),
+                          Expanded(
+                            child: filteredTransactions.isEmpty
+                                ? _buildEmptyState(
+                                    loc, primaryColor, isDarkMode, context)
+                                : ListView.builder(
+                                    itemCount: filteredTransactions.length,
+                                    itemBuilder: (context, index) {
+                                      return _buildTransactionDetails(
+                                        filteredTransactions[index],
+                                        loc,
+                                        primaryColor,
+                                        isDarkMode,
+                                        isRTL,
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ],
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // FIX: extracted filter button widget to avoid repetition
+  Widget _filterButton({
+    required String label,
+    required String filterKey,
+    required Color primaryColor,
+    required bool isDarkMode,
+  }) {
+    final isSelected = _selectedFilter == filterKey;
+    return ElevatedButton(
+      onPressed: () => setState(() => _selectedFilter = filterKey),
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith<Color>(
+          (states) => isSelected
+              ? primaryColor.withOpacity(0.1)
+              : (isDarkMode
+                  ? const Color(0xff1D293D).withOpacity(0.3)
+                  : Colors.grey.shade200),
+        ),
+        side: WidgetStateProperty.resolveWith<BorderSide>(
+          (states) => BorderSide(
+            color: isSelected
+                ? primaryColor
+                : (isDarkMode
+                    ? const Color(0xff1D293D).withOpacity(0.7)
+                    : Colors.grey.shade400),
+            width: 2,
           ),
-        ],
+        ),
+        shape: WidgetStateProperty.all(RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20))),
+        minimumSize: WidgetStateProperty.all(const Size(80, 40)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: isSelected
+              ? primaryColor
+              : (isDarkMode ? Colors.grey.withOpacity(0.7) : Colors.grey[700]),
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -608,8 +531,13 @@ class _TransactionListState extends State<TransactionList> {
     );
   }
 
-  Widget _buildTransactionDetails(TransactionModel transaction,
-      AppLocalizations loc, Color primaryColor, bool isDarkMode) {
+  Widget _buildTransactionDetails(
+    TransactionModel transaction,
+    AppLocalizations loc,
+    Color primaryColor,
+    bool isDarkMode,
+    bool isRTL, // FIX 3: pass isRTL
+  ) {
     final riskEnum = RiskLevel.fromString(transaction.riskLevel);
     final statusColor = riskEnum.color;
     final categoryIcon = transaction.merchantCategory.icon;
@@ -627,6 +555,8 @@ class _TransactionListState extends State<TransactionList> {
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Row(
+          // FIX 3: reverse row in RTL so icon appears on the correct side
+          textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
           children: [
             Container(
               height: 40,
@@ -640,13 +570,18 @@ class _TransactionListState extends State<TransactionList> {
             const SizedBox(width: 15),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: isRTL
+                    ? CrossAxisAlignment.end
+                    : CrossAxisAlignment.start,
                 children: [
                   Row(
+                    textDirection:
+                        isRTL ? TextDirection.rtl : TextDirection.ltr,
                     children: [
                       Text("\$${transaction.amount.toStringAsFixed(2)}",
                           style: TextStyle(
-                              color: isDarkMode ? Colors.white : Colors.black87,
+                              color:
+                                  isDarkMode ? Colors.white : Colors.black87,
                               fontWeight: FontWeight.bold)),
                       const Spacer(),
                       Text("${transaction.riskScore.toStringAsFixed(1)}%",
@@ -657,6 +592,8 @@ class _TransactionListState extends State<TransactionList> {
                     ],
                   ),
                   Row(
+                    textDirection:
+                        isRTL ? TextDirection.rtl : TextDirection.ltr,
                     children: [
                       Text(categoryName,
                           style: TextStyle(
@@ -664,6 +601,7 @@ class _TransactionListState extends State<TransactionList> {
                                   ? Colors.grey.withOpacity(0.7)
                                   : Colors.grey[600])),
                       const Spacer(),
+                      // FIX 2: _getStatusTranslation بيستخدم loc فعلاً، بس التأكد إن loc.warning موجود في arb
                       Text(_getStatusTranslation(riskEnum, loc),
                           style: TextStyle(
                               color: isDarkMode
@@ -687,6 +625,8 @@ class _TransactionListState extends State<TransactionList> {
     );
   }
 
+  // FIX 1: lowRisk returns loc.safe only (no "Low Risk" text)
+  // FIX 2: mediumRisk returns loc.warning (translated from arb file)
   String _getStatusTranslation(RiskLevel riskEnum, AppLocalizations loc) {
     switch (riskEnum) {
       case RiskLevel.lowRisk:

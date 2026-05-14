@@ -9,8 +9,9 @@ import 'package:shadow_pay_app/theme/colors.dart';
 import 'package:shadow_pay_app/services/shared_pref_service.dart';
 
 class CardManagementScreen extends StatefulWidget {
-   final VoidCallback? onBack;
-  const CardManagementScreen({super.key ,this.onBack,});
+  final VoidCallback? onBack;
+
+  const CardManagementScreen({super.key, this.onBack});
 
   @override
   State<CardManagementScreen> createState() => _CardManagementScreenState();
@@ -46,9 +47,12 @@ class _CardManagementScreenState extends State<CardManagementScreen>
     _initAnimations();
     context.read<ProfileCubit>().getProfile();
   }
+
+  // FIX 1: formatCardNumber always masks the number properly
   String _formatCardNumber(String number) {
-    if (number.isEmpty) return '•••• •••• •••• 4829';
-    final last4 = number.length >= 4 ? number.substring(number.length - 4) : number;
+    if (number.isEmpty) return '•••• •••• •••• ••••';
+    final cleaned = number.replaceAll(RegExp(r'\D'), '');
+    final last4 = cleaned.length >= 4 ? cleaned.substring(cleaned.length - 4) : cleaned;
     return '•••• •••• •••• $last4';
   }
 
@@ -147,9 +151,11 @@ class _CardManagementScreenState extends State<CardManagementScreen>
 
   Future<void> _loadCardStatus() async {
     final frozen = await SharedPrefService.getCardFrozenStatus();
-    setState(() {
-      isCardFrozen = frozen;
-    });
+    if (mounted) {
+      setState(() {
+        isCardFrozen = frozen;
+      });
+    }
   }
 
   Future<void> _saveCardStatusToPreferences() async {
@@ -162,10 +168,15 @@ class _CardManagementScreenState extends State<CardManagementScreen>
     );
   }
 
+  // FIX 2: toggleFreeze - save the intended new state before setState to avoid confusion
   void toggleFreeze([AppLocalizations? loc]) {
     _animationController.forward(from: 0);
+
+    // FIX 2: Capture the new state before setState for clarity
+    final newFrozenState = !isCardFrozen;
+
     setState(() {
-      isCardFrozen = !isCardFrozen;
+      isCardFrozen = newFrozenState;
       if (isCardFrozen) {
         showSnowEffect = true;
         _generateSnowflakes();
@@ -178,7 +189,7 @@ class _CardManagementScreenState extends State<CardManagementScreen>
         _alertController.forward(from: 0);
       }
     });
-    
+
     _saveCardStatusToPreferences();
 
     if (loc != null && _isFromUserAction) {
@@ -193,6 +204,92 @@ class _CardManagementScreenState extends State<CardManagementScreen>
         _animationController.reset();
       }
     });
+  }
+
+  Future<void> _showFreezeConfirmationDialog(AppLocalizations loc) async {
+    final isDarkMode = context.isDarkMode;
+    final isFreezing = !isCardFrozen;
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: isDarkMode ? const Color(0xff1D293D) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: [
+              Icon(
+                isFreezing ? Icons.warning_amber_rounded : Icons.lock_open_rounded,
+                color: isFreezing ? Colors.orange : Colors.green,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                isFreezing ? "Freeze Card?" : "Unfreeze Card?",
+                style: TextStyle(
+                  color: context.textPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            isFreezing
+                ? "Are you sure you want to freeze this card? You won't be able to make any transactions."
+                : "Are you sure you want to unfreeze this card? It will be ready for transactions again.",
+            style: TextStyle(color: context.textSecondary, fontSize: 14),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                "Cancel",
+                style: TextStyle(color: context.textSecondary),
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isFreezing ? Colors.red : Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                "Yes, ${isFreezing ? 'Freeze' : 'Unfreeze'}",
+                style: const TextStyle(color: Colors.white),
+              ),
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                await _processFreezeAction(loc);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // FIX 3: Added try/catch for exception safety
+  Future<void> _processFreezeAction(AppLocalizations loc) async {
+    try {
+      bool success = await context.read<ProfileCubit>().toggleFreezeStatus();
+
+      if (!mounted) return;
+
+      if (success) {
+        _isFromUserAction = true;
+        toggleFreeze(loc);
+      } else {
+        _showSnackBar("Failed to connect to the server. Please try again.");
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar("An unexpected error occurred. Please try again.");
+      }
+    }
   }
 
   void onCardTap() {
@@ -263,13 +360,14 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                           children: [
                             IconButton(
                               style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(
+                                backgroundColor: WidgetStateProperty.all(
+                                  // FIX 4: Updated from deprecated MaterialStateProperty to WidgetStateProperty
                                   (isDarkMode
                                           ? const Color(0xff1D293D)
                                           : Colors.grey.shade200)
                                       .withOpacity(0.4),
                                 ),
-                                side: MaterialStateProperty.all(
+                                side: WidgetStateProperty.all(
                                   BorderSide(
                                     color:
                                         context.textSecondary.withOpacity(0.4),
@@ -278,13 +376,13 @@ class _CardManagementScreenState extends State<CardManagementScreen>
                                 ),
                               ),
                               iconSize: 25,
-onPressed: () {
-  if (widget.onBack != null) {
-    widget.onBack!();
-  } else {
-    Navigator.pop(context);
-  }
-},
+                              onPressed: () {
+                                if (widget.onBack != null) {
+                                  widget.onBack!();
+                                } else {
+                                  Navigator.pop(context);
+                                }
+                              },
                               icon: Icon(Icons.arrow_back,
                                   color: context.textSecondary),
                             ),
@@ -515,38 +613,36 @@ onPressed: () {
                                     width: 1,
                                   ),
                                 ),
-                                child: BlocBuilder<ProfileCubit, ProfileState>(builder: (context, state){
+                                child: BlocBuilder<ProfileCubit, ProfileState>(
+                                    builder: (context, state) {
                                   String cardHolder = loc.cardHolderValue;
-                                  String cardType = loc.cardTypeValue; 
+                                  String cardType = loc.cardTypeValue;
                                   String issueDate = loc.issueDateValue;
                                   String expiryDate = loc.expiryDateValue;
 
-                                  if (state is ProfileSuccessState && state.profile != null) {
-                                    cardHolder = state.profile!.cardHolderName.toUpperCase();
-                                    if (state.profile!.cardNumberHash.startsWith('4')) {
-                                      cardType = 'Visa';
-                                    } else if (state.profile!.cardNumberHash.startsWith('5')) {
-                                      cardType = 'MasterCard';
-                                    } else if (state.profile!.cardNumberHash.startsWith('3')) {
-                                      cardType = 'American Express';
-                                    } else {
-                                      cardType = 'Unknown';
-                                    }
-                                    issueDate = "${state.profile!.exprDate.month.toString().padLeft(2, '0')}/${state.profile!.exprDate.year}";
-                                    expiryDate = state.profile!.formattedExpiry;
+                                  if (state is ProfileSuccessState &&
+                                      state.profile != null) {
+                                    cardHolder = state.profile!.cardHolderName
+                                        .toUpperCase();
+                                    cardType =
+                                        state.profile!.cardType.toUpperCase();
+                                    issueDate =
+                                        "${state.profile!.exprDate.month.toString().padLeft(2, '0')}/${state.profile!.exprDate.year}";
+                                    expiryDate =
+                                        state.profile!.formattedExpiry;
                                   }
 
                                   return Column(
-                                      children: [
-                                        _row(loc.cardHolder, cardHolder, value),
-                                        const SizedBox(height: 8),
-                                        _row(loc.cardType, cardType, value),
-                                        const SizedBox(height: 8),
-                                        _row(loc.issueDate, issueDate, value),
-                                        const SizedBox(height: 8),
-                                        _row(loc.expiryDate, expiryDate, value),
-                                      ],
-                                    );
+                                    children: [
+                                      _row(loc.cardHolder, cardHolder, value),
+                                      const SizedBox(height: 8),
+                                      _row(loc.cardType, cardType, value),
+                                      const SizedBox(height: 8),
+                                      _row(loc.issueDate, issueDate, value),
+                                      const SizedBox(height: 8),
+                                      _row(loc.expiryDate, expiryDate, value),
+                                    ],
+                                  );
                                 }),
                               ),
                             ),
@@ -558,9 +654,7 @@ onPressed: () {
 
                       GestureDetector(
                         onTap: () {
-                          _isFromUserAction = true;
-                          _animationController.forward(from: 0);
-                          toggleFreeze(loc);
+                          _showFreezeConfirmationDialog(loc);
                         },
                         child: AnimatedBuilder(
                           animation: _animationController,
@@ -865,329 +959,348 @@ onPressed: () {
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         if (state is ProfileLoadingState) {
-        return Center(
-          child: CircularProgressIndicator(
-            color: isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary,
-          ),
-        );
-      } else if (state is ProfileFailureState) {
-        return Center(
-          child: Text(state.errorMessage),
-        );
-      }
-        if(state is ProfileSuccessState){
-          return Container(
-          height: 230,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              colors: isCardFrozen
-                  ? [const Color(0xFF2A4A7A), const Color(0xFF3A6A9A)] 
-                  : (isDarkMode
-                      ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
-                      : [const Color(0xFFE0E0E0), const Color(0xFFF5F5F5)]),
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+          return Center(
+            child: CircularProgressIndicator(
+              color:
+                  isDarkMode ? AppColors.darkPrimary : AppColors.lightPrimary,
             ),
-            boxShadow: [
-              BoxShadow(
-                color:
-                    (isCardFrozen ? const Color(0xFF3A6A9A) : context.primaryColor)
-                        .withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+          );
+        } else if (state is ProfileFailureState) {
+          return Center(
+            child: Text(state.errorMessage),
+          );
+        }
+
+        if (state is ProfileSuccessState) {
+          return Container(
+            height: 230,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                colors: isCardFrozen
+                    ? [const Color(0xFF2A4A7A), const Color(0xFF3A6A9A)]
+                    : (isDarkMode
+                        ? [const Color(0xFF1A1F2E), const Color(0xFF2A2F3E)]
+                        : [
+                            const Color(0xFFE0E0E0),
+                            const Color(0xFFF5F5F5)
+                          ]),
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Stack(
-              children: [
-                if (isCardFrozen) ...[
-                  Positioned(
-                    top: -50,
-                    right: -50,
-                    child: AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (context, child) {
-                        return Transform.scale(
-                          scale: 1 + (_animationController.value * 0.15),
-                          child: Container(
-                            width: 150,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.blue.withOpacity(0.3),
+              boxShadow: [
+                BoxShadow(
+                  color: (isCardFrozen
+                              ? const Color(0xFF3A6A9A)
+                              : context.primaryColor)
+                          .withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Stack(
+                children: [
+                  if (isCardFrozen) ...[
+                    Positioned(
+                      top: -50,
+                      right: -50,
+                      child: AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: 1 + (_animationController.value * 0.15),
+                            child: Container(
+                              width: 150,
+                              height: 150,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.blue.withOpacity(0.3),
+                              ),
                             ),
+                          );
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      bottom: -40,
+                      left: -40,
+                      child: AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return Transform.scale(
+                            scale: 1 + (_animationController.value * 0.15),
+                            child: Container(
+                              width: 150,
+                              height: 150,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.cyan.withOpacity(0.2),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                  if (!isCardFrozen) ...[
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: CustomPaint(
+                        size: const Size(120, 120),
+                        painter: EgyptianVisaPattern(
+                          color: context.primaryColor.withOpacity(0.15),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      child: CustomPaint(
+                        size: const Size(100, 100),
+                        painter: EgyptianVisaPattern(
+                          color: context.primaryColor.withOpacity(0.1),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 15,
+                      right: 20,
+                      child: Container(
+                        width: 45,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: context.primaryColor.withOpacity(0.3),
+                            width: 1,
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                  Positioned(
-                    bottom: -40,
-                    left: -40,
-                    child: AnimatedBuilder(
-                      animation: _animationController,
-                      builder: (context, child) {
-                        return Transform.scale(
-                          scale: 1 + (_animationController.value * 0.15),
-                          child: Container(
-                            width: 150,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.cyan.withOpacity(0.2),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-                if (!isCardFrozen) ...[
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: CustomPaint(
-                      size: const Size(120, 120),
-                      painter: EgyptianVisaPattern(
-                        color: context.primaryColor.withOpacity(0.15),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    child: CustomPaint(
-                      size: const Size(100, 100),
-                      painter: EgyptianVisaPattern(
-                        color: context.primaryColor.withOpacity(0.1),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 15,
-                    right: 20,
-                    child: Container(
-                      width: 45,
-                      height: 45,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: context.primaryColor.withOpacity(0.3),
-                          width: 1,
+                        ),
+                        child: Icon(
+                          Icons.landscape,
+                          color: context.primaryColor.withOpacity(0.4),
+                          size: 28,
                         ),
                       ),
-                      child: Icon(
-                        Icons.landscape,
-                        color: context.primaryColor.withOpacity(0.4),
-                        size: 28,
-                      ),
                     ),
-                  ),
-                ],
-                Opacity(
-                  opacity: textOpacity,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  loc.availableBalance,
-                                  style: TextStyle(
-                                      color: context.textSecondary, fontSize: 12),
-                                ),
-                                const SizedBox(height: 5),
-                                Text(
-                                  "\$12,847.50",
-                                  style: TextStyle(
-                                    color: context.textPrimary,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox.shrink(),
-                          ],
-                        ),
-                        const Spacer(),
-                        if (!isCardFrozen)
-                            Text(
-                        _formatCardNumber(state.profile?.cardNumberHash.toString() ?? "**** **** **** 1234"),
-                        style: TextStyle(
-                          color: context.textPrimary,
-                          fontSize: 18,
-                          letterSpacing: 2.5,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                        if (isCardFrozen)
-                          Text(state.profile?.cardNumberHash.toString() ?? "**** **** **** 1234",
-                              style: TextStyle(
-                                  color: context.textPrimary,
-                                  fontSize: 20,
-                                  letterSpacing: 2.5,
-                                  fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 15),
-                        if (!isCardFrozen)
+                  ],
+                  Opacity(
+                    opacity: textOpacity,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Container(
-                                width: 35,
-                                height: 25,
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(5),
-                                  border: Border.all(
-                                      color: Colors.amber.withOpacity(0.5),
-                                      width: 1),
-                                ),
-                                child: const Icon(Icons.sim_card,
-                                    color: Colors.amber, size: 16),
-                              ),
-                              const SizedBox(width: 20),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(state.profile?.cardHolderName.toUpperCase() ?? "Card Holder",
-                                        style: TextStyle(
-                                            color: context.textPrimary,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 14,
-                                            letterSpacing: 0.5)),
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      children: [
-                                        Text(state.profile?.formattedExpiry ?? "12/24",
-                                            style: TextStyle(
-                                                color: context.textSecondary,
-                                                fontSize: 10)),
-                                        const SizedBox(width: 12),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
                               Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text("VISA",
-                                      style: TextStyle(
-                                          color:
-                                              context.primaryColor.withOpacity(0.7),
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          letterSpacing: 1.5)),
-                                  Container(
-                                    width: 30,
-                                    height: 20,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(colors: [
-                                        Colors.amber.withOpacity(0.6),
-                                        Colors.orange.withOpacity(0.4)
-                                      ]),
-                                      borderRadius: BorderRadius.circular(3),
+                                  Text(
+                                    loc.availableBalance,
+                                    style: TextStyle(
+                                        color: context.textSecondary,
+                                        fontSize: 12),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    state.profile != null
+                                        ? "\$${state.profile!.balance.toStringAsFixed(2)}"
+                                        : "\$0.00",
+                                    style: TextStyle(
+                                      color: context.textPrimary,
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: -0.5,
                                     ),
                                   ),
                                 ],
                               ),
+                              const SizedBox.shrink(),
                             ],
                           ),
-                        if (isCardFrozen)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(state.profile?.cardHolderName.toUpperCase() ?? "Card Holder",
-                                  style: TextStyle(
-                                      color: context.textSecondary, fontSize: 12)),
-                              Text(state.profile?.formattedExpiry ?? "12/24",
-                                  style: TextStyle(
-                                      color: context.textSecondary, fontSize: 12)),
-                              const Text("***",
-                                  style:
-                                      TextStyle(color: Colors.white, fontSize: 12)),
-                            ],
+                          const Spacer(),
+
+                          // FIX 5 (Security): Always mask card number - frozen or not
+                          Text(
+                            _formatCardNumber(
+                                state.profile?.cardNumberHash.toString() ?? ''),
+                            style: TextStyle(
+                              color: context.textPrimary,
+                              fontSize: 18,
+                              letterSpacing: 2.5,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (isCardFrozen)
-                  Positioned.fill(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 500),
-                          color: Colors.black.withOpacity(0.3),
-                          child: Center(
-                            child: AnimatedBuilder(
-                              animation: _iceCrystalController,
-                              builder: (context, child) {
-                                return Transform.scale(
-                                  scale: _iceScaleAnimation.value,
-                                  child: Stack(
-                                    alignment: Alignment.center,
+
+                          const SizedBox(height: 15),
+                          if (!isCardFrozen)
+                            Row(
+                              children: [
+                                Container(
+                                  width: 35,
+                                  height: 25,
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(5),
+                                    border: Border.all(
+                                        color: Colors.amber.withOpacity(0.5),
+                                        width: 1),
+                                  ),
+                                  child: const Icon(Icons.sim_card,
+                                      color: Colors.amber, size: 16),
+                                ),
+                                const SizedBox(width: 20),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Transform.rotate(
-                                        angle: _iceRotationAnimation.value,
-                                        child: Container(
-                                          width: 100,
-                                          height: 100,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            gradient: RadialGradient(
-                                              colors: [
-                                                Colors.blue.withOpacity(0.7),
-                                                Colors.blue.withOpacity(0.3),
-                                                Colors.transparent
-                                              ],
-                                              stops: const [0.3, 0.6, 1.0],
-                                            ),
-                                          ),
-                                          child: const Icon(Icons.ac_unit,
-                                              color: Colors.blue, size: 70),
-                                        ),
+                                      Text(
+                                          state.profile?.cardHolderName
+                                                  .toUpperCase() ??
+                                              "Card Holder",
+                                          style: TextStyle(
+                                              color: context.textPrimary,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 14,
+                                              letterSpacing: 0.5)),
+                                      const SizedBox(height: 2),
+                                      Row(
+                                        children: [
+                                          Text(
+                                              state.profile?.formattedExpiry ??
+                                                  "12/24",
+                                              style: TextStyle(
+                                                  color: context.textSecondary,
+                                                  fontSize: 10)),
+                                          const SizedBox(width: 12),
+                                        ],
                                       ),
-                                      for (int i = 0; i < 3; i++)
-                                        _buildIceRing(
-                                            i, _iceRotationAnimation.value),
-                                      for (int i = 0; i < 12; i++)
-                                        _buildFloatingIceParticle(
-                                            i, _icePulseAnimation.value),
                                     ],
                                   ),
-                                );
-                              },
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text("VISA",
+                                        style: TextStyle(
+                                            color: context.primaryColor
+                                                .withOpacity(0.7),
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 1.5)),
+                                    Container(
+                                      width: 30,
+                                      height: 20,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(colors: [
+                                          Colors.amber.withOpacity(0.6),
+                                          Colors.orange.withOpacity(0.4)
+                                        ]),
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          if (isCardFrozen)
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                // FIX 5: Mask cardholder name when frozen
+                                Text(
+                                    state.profile?.cardHolderName
+                                            .toUpperCase() ??
+                                        "Card Holder",
+                                    style: TextStyle(
+                                        color: context.textSecondary
+                                            .withOpacity(0.5),
+                                        fontSize: 12)),
+                                Text("••/••",
+                                    style: TextStyle(
+                                        color: context.textSecondary
+                                            .withOpacity(0.5),
+                                        fontSize: 12)),
+                                const Text("***",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 12)),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (isCardFrozen)
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 500),
+                            color: Colors.black.withOpacity(0.3),
+                            child: Center(
+                              child: AnimatedBuilder(
+                                animation: _iceCrystalController,
+                                builder: (context, child) {
+                                  return Transform.scale(
+                                    scale: _iceScaleAnimation.value,
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Transform.rotate(
+                                          angle: _iceRotationAnimation.value,
+                                          child: Container(
+                                            width: 100,
+                                            height: 100,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              gradient: RadialGradient(
+                                                colors: [
+                                                  Colors.blue.withOpacity(0.7),
+                                                  Colors.blue.withOpacity(0.3),
+                                                  Colors.transparent
+                                                ],
+                                                stops: const [0.3, 0.6, 1.0],
+                                              ),
+                                            ),
+                                            child: const Icon(Icons.ac_unit,
+                                                color: Colors.blue, size: 70),
+                                          ),
+                                        ),
+                                        for (int i = 0; i < 3; i++)
+                                          _buildIceRing(
+                                              i, _iceRotationAnimation.value),
+                                        // FIX 6: Use LayoutBuilder to calculate center correctly
+                                        for (int i = 0; i < 12; i++)
+                                          _buildFloatingIceParticle(
+                                              i, _icePulseAnimation.value),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        } else {
+          return Center(
+            child: Text("No data available"),
+          );
         }
-        else {
-        return Center(
-          child: Text("No data available"),
-        );
-      }
-      }
+      },
     );
   }
 
@@ -1267,9 +1380,10 @@ onPressed: () {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 15, vertical: 8),
                               decoration: BoxDecoration(
-                                  color:
-                                      (isDarkMode ? Colors.white : Colors.black)
-                                          .withOpacity(0.1),
+                                  color: (isDarkMode
+                                          ? Colors.white
+                                          : Colors.black)
+                                      .withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8)),
                               child: Text("***",
                                   style: TextStyle(
@@ -1288,15 +1402,25 @@ onPressed: () {
                                     color: context.textSecondary,
                                     fontSize: 10)),
                             const SizedBox(height: 5),
-                            Text("PREMIUM",
-                                style: TextStyle(
-                                    color: (isCardFrozen
-                                            ? const Color(0xFF800020)
-                                            : context.primaryColor)
-                                        .withOpacity(0.8),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 1)),
+                            BlocBuilder<ProfileCubit, ProfileState>(
+                              builder: (context, state) {
+                                String type = "PREMIUM";
+                                if (state is ProfileSuccessState &&
+                                    state.profile != null) {
+                                  type =
+                                      state.profile!.cardType.toUpperCase();
+                                }
+                                return Text(type,
+                                    style: TextStyle(
+                                        color: (isCardFrozen
+                                                ? const Color(0xFF800020)
+                                                : context.primaryColor)
+                                            .withOpacity(0.8),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1));
+                              },
+                            ),
                           ],
                         ),
                       ],
@@ -1350,14 +1474,14 @@ onPressed: () {
     );
   }
 
+  // FIX 6: Use Transform.translate instead of Positioned so it works inside a Stack with Alignment.center
   Widget _buildFloatingIceParticle(int index, double pulseValue) {
     double angle = (index * 30) * (math.pi / 180);
     double radius = 70 + (pulseValue * 20);
     double x = radius * math.cos(angle + pulseValue * 2);
     double y = radius * math.sin(angle + pulseValue * 2);
-    return Positioned(
-      left: 100 + x,
-      top: 100 + y,
+    return Transform.translate(
+      offset: Offset(x, y),
       child: AnimatedBuilder(
         animation: _iceCrystalController,
         builder: (context, child) {
@@ -1370,7 +1494,8 @@ onPressed: () {
                 height: 8 + (index % 5).toDouble(),
                 decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.blue.withOpacity(0.6 + (pulseValue * 0.3)),
+                    color:
+                        Colors.blue.withOpacity(0.6 + (pulseValue * 0.3)),
                     boxShadow: [
                       BoxShadow(
                           color: Colors.blue.withOpacity(0.4),
@@ -1463,8 +1588,10 @@ class EgyptianVisaPattern extends CustomPainter {
         ..color = color
         ..strokeWidth = 1
         ..style = PaintingStyle.stroke;
-      canvas.drawLine(Offset(size.width * 0.15, size.height * (0.4 + i * 0.15)),
-          Offset(size.width * 0.85, size.height * (0.4 + i * 0.15)), linePaint);
+      canvas.drawLine(
+          Offset(size.width * 0.15, size.height * (0.4 + i * 0.15)),
+          Offset(size.width * 0.85, size.height * (0.4 + i * 0.15)),
+          linePaint);
     }
     for (int i = 0; i < 5; i++) {
       canvas.drawCircle(

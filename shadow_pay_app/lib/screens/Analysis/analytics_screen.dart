@@ -20,18 +20,23 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // جلب البيانات عند فتح الشاشة
-    context.read<TransactionCubit>().getTransactions();
-  }
 
   Color _getRiskColor(double averageRiskScore) {
     if (averageRiskScore > 70) return AppColors.error;
     if (averageRiskScore > 30) return AppColors.warning;
     return AppColors.success;
   }
+
+bool _initialized = false;
+
+@override
+void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+        _initialized = true;
+        context.read<TransactionCubit>().getTransactions();
+    }
+}
 
   @override
   Widget build(BuildContext context) {

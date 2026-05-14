@@ -232,7 +232,6 @@
   "medium_risk": "Medium Risk",
   "low_risk": "Low Risk",
   "fraudulent": "Fraudulent Transaction",
-  "safe": "Safe Transaction",
     "passwordLowercase": "Password must contain at least one lowercase letter",
   "passwordUppercase": "Password must contain at least one uppercase letter",
   "passwordNumber": "Password must contain at least one number",
