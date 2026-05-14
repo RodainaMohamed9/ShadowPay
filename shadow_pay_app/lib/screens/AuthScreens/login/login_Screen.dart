@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shadow_pay_app/l10n/app_localizations.dart';
 import 'package:shadow_pay_app/widgets/language_dialog.dart';
-import 'package:shadow_pay_app/services/shared_pref_service.dart';
+import 'package:shadow_pay_app/services/tokens/token_storage.dart';
 import 'package:shadow_pay_app/screens/main_screen.dart';
 import '../ForgetPassword/forget_password_screen.dart';
 import 'package:shadow_pay_app/services/auth_service.dart';
@@ -109,8 +109,12 @@ class _LoginScreenState extends State<LoginScreen>
 
         if (result['success'] == true) {
           final token = result['token'];
-          await SharedPrefService.saveToken(token);
-          await SharedPrefService.setLoggedIn(true);
+          
+await TokenStorage.saveAccessToken(token);
+          final refreshToken = result['refreshToken'];
+if (refreshToken != null) {
+  await TokenStorage.saveRefreshToken(refreshToken);
+}
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
