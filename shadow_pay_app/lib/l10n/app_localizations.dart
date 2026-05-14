@@ -788,7 +788,7 @@ abstract class AppLocalizations {
   /// No description provided for @safe.
   ///
   /// In en, this message translates to:
-  /// **'Safe Transaction'**
+  /// **'Safe'**
   String get safe;
 
   /// No description provided for @risk.
@@ -1642,6 +1642,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'unknown'**
   String get unknown;
+
+  /// No description provided for @analytics_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get analytics_title;
+
+  /// No description provided for @safe_transactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe Transactions'**
+  String get safe_transactions;
+
+  /// No description provided for @total_transactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Transactions'**
+  String get total_transactions;
+
+  /// No description provided for @potential_fraud.
+  ///
+  /// In en, this message translates to:
+  /// **'Potential Fraud'**
+  String get potential_fraud;
+
+  /// No description provided for @warnings_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Warnings'**
+  String get warnings_label;
+
+  /// No description provided for @average_risk_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Risk Analysis'**
+  String get average_risk_title;
+
+  /// No description provided for @average_risk.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Risk'**
+  String get average_risk;
+
+  /// No description provided for @risk_level.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk Level'**
+  String get risk_level;
+
+  /// No description provided for @total_amount_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Amount'**
+  String get total_amount_label;
+
+  /// No description provided for @transaction_distribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Distribution'**
+  String get transaction_distribution;
+
+  /// No description provided for @risk_trend.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk Trend'**
+  String get risk_trend;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -354,7 +354,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recentActivity => 'Recent Activity';
 
   @override
-  String get safe => 'Safe Transaction';
+  String get safe => 'Safe';
 
   @override
   String get risk => 'Risk';
@@ -781,4 +781,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unknown => 'unknown';
+
+  @override
+  String get analytics_title => 'Analytics';
+
+  @override
+  String get safe_transactions => 'Safe Transactions';
+
+  @override
+  String get total_transactions => 'Total Transactions';
+
+  @override
+  String get potential_fraud => 'Potential Fraud';
+
+  @override
+  String get warnings_label => 'Warnings';
+
+  @override
+  String get average_risk_title => 'Average Risk Analysis';
+
+  @override
+  String get average_risk => 'Average Risk';
+
+  @override
+  String get risk_level => 'Risk Level';
+
+  @override
+  String get total_amount_label => 'Total Amount';
+
+  @override
+  String get transaction_distribution => 'Transaction Distribution';
+
+  @override
+  String get risk_trend => 'Risk Trend';
 }

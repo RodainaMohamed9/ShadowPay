@@ -354,7 +354,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recentActivity => 'النشاط الأخير';
 
   @override
-  String get safe => 'معاملة آمنة';
+  String get safe => 'آمن';
 
   @override
   String get risk => 'خطر';
@@ -781,4 +781,37 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get unknown => 'غير معرف';
+
+  @override
+  String get analytics_title => 'التحليلات';
+
+  @override
+  String get safe_transactions => 'معاملات آمنة';
+
+  @override
+  String get total_transactions => 'إجمالي المعاملات';
+
+  @override
+  String get potential_fraud => 'احتيال محتمل';
+
+  @override
+  String get warnings_label => 'تحذيرات';
+
+  @override
+  String get average_risk_title => 'تحليل متوسط المخاطر';
+
+  @override
+  String get average_risk => 'متوسط المخاطر';
+
+  @override
+  String get risk_level => 'مستوى المخاطر';
+
+  @override
+  String get total_amount_label => 'إجمالي المبالغ';
+
+  @override
+  String get transaction_distribution => 'توزيع المعاملات';
+
+  @override
+  String get risk_trend => 'اتجاه المخاطر';
 }

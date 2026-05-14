@@ -258,7 +258,18 @@
   "travel": "سفر",
   "retry": "إعادة المحاولة",
   "noTransactionsFound": "لا توجد معاملات",
-  "unknown": "غير معرف"
+  "unknown": "غير معرف","analytics_title": "التحليلات",
+"safe_transactions": "معاملات آمنة",
+"total_transactions": "إجمالي المعاملات",
+"potential_fraud": "احتيال محتمل",
+"warnings_label": "تحذيرات",
+"average_risk_title": "تحليل متوسط المخاطر",
+"average_risk": "متوسط المخاطر",
+"risk_level": "مستوى المخاطر",
+"total_amount_label": "إجمالي المبالغ",
+"transaction_distribution": "توزيع المعاملات",
+"risk_trend": "اتجاه المخاطر",
+"safe": "آمن"
 
 
 }

@@ -259,5 +259,16 @@
   "travel": "Travel",
   "retry": "Retry",
   "noTransactionsFound": "No transactions found",
-  "unknown": "unknown"
+  "unknown": "unknown","analytics_title": "Analytics",
+"safe_transactions": "Safe Transactions",
+"total_transactions": "Total Transactions",
+"potential_fraud": "Potential Fraud",
+"warnings_label": "Warnings",
+"average_risk_title": "Average Risk Analysis",
+"average_risk": "Average Risk",
+"risk_level": "Risk Level",
+"total_amount_label": "Total Amount",
+"transaction_distribution": "Transaction Distribution",
+"risk_trend": "Risk Trend",
+"safe": "Safe"
 }
